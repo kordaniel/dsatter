@@ -4,3 +4,5 @@
 ```
 npm run start
 ```
+
+Distributed Systems course project
