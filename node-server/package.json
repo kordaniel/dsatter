@@ -4,9 +4,16 @@
   "description": "Node in a network of nodes",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "cross-env NODE_ENV=production node index.js",
+    "dev": "cross-env NODE_ENV=development nodemon index.js",
+    "test": "cross-env NODE_ENV=test echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint ."
   },
   "author": "dsatter group",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "eslint": "^8.26.0",
+    "nodemon": "^2.0.20"
+  }
 }
