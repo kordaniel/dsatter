@@ -4,6 +4,8 @@
   "description": "Node in a network of nodes",
   "main": "index.js",
   "scripts": {
+    "discovery": "cross-env NODE_ENV=development nodemon node-discovery.js",
+    "client": "node client.js",
     "start": "cross-env NODE_ENV=production node index.js",
     "dev": "cross-env NODE_ENV=development nodemon index.js",
     "test": "cross-env NODE_ENV=test echo \"Error: no test specified\" && exit 1",
@@ -12,7 +14,8 @@
   "author": "dsatter group",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "ws": "^8.10.0"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
