@@ -1,10 +1,13 @@
-// add and use dotenv
+// Lots of garbage in here for now (git is tricky).
+// TODO: cleanup when websocket is implemented.
 
 const DEV_ENV = process.env.NODE_ENV === 'development'
 
 const CONFIG_TEST_MSG = DEV_ENV
   ? 'Hello developers (running in dev environment)'
   : 'Hello world (running in production environment)'
+
+const NODE_DISCOVERY_PORT = 8080
 
 const PORTS = {
   listen: undefined,
@@ -56,6 +59,7 @@ const parseArgs = (args) => {
 module.exports = {
   DEV_ENV,
   CONFIG_TEST_MSG,
+  NODE_DISCOVERY_PORT,
   setPort,
   getPort,
   parseArgs
