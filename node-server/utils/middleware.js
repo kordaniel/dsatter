@@ -6,7 +6,6 @@ const unknownEndpoint = (req, res) => {
 
 const requestLogger = (req, res, next) => {
   logger.info('Method:', req.method)
-  logger.info('Token: ', req.token)
   logger.info('Path:  ', req.path)
   logger.info('Body:  ', req.body)
   logger.info('---')

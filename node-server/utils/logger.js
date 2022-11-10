@@ -1,14 +1,16 @@
 /* eslint-disable no-console */
 
+const getFormattedTime = () => `[${new Date().toISOString()}]`
+
 const info = (...params) => {
   if (process.env.NODE_ENV !== 'test') {
-    console.log(...params)
+    console.log(`${getFormattedTime()}:`, ...params)
   }
 }
 
 const error = (...params) => {
   if (process.env.NODE_ENV !== 'test') {
-    console.error('[ERROR]:', ...params)
+    console.error(getFormattedTime(), '[ERROR]:', ...params)
   }
 }
 
