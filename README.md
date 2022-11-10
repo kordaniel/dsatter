@@ -17,4 +17,11 @@ npm run start
 npm run start
 ```
 
+## Setting up dockerized server
+```
+cd node-server
+docker build -t dsatter-server .
+docker run -p 10101:10101 -d --rm dsatter-server
+```
+
 Distributed Systems course project
