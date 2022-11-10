@@ -17,5 +17,5 @@ app.use('/api/nodes', nodeDiscoveryRouter)
 app.use(middleware.unknownEndpoint)
 
 app.listen(config.NODE_DISCOVERY_PORT, () => {
-  logger.info(`Node discovery REST api running on part ${config.NODE_DISCOVERY_PORT}`)
+  logger.info(`Node discovery REST api running on port ${config.NODE_DISCOVERY_PORT}`)
 })

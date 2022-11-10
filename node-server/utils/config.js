@@ -7,7 +7,10 @@ const CONFIG_TEST_MSG = DEV_ENV
   ? 'Hello developers (running in dev environment)'
   : 'Hello world (running in production environment)'
 
+const NODE_DISCOVERY_URL = 'http://localhost'
 const NODE_DISCOVERY_PORT = 8080
+
+const NODE_DEFAULT_PORT = 49152
 
 const PORTS = {
   listen: undefined,
@@ -59,7 +62,9 @@ const parseArgs = (args) => {
 module.exports = {
   DEV_ENV,
   CONFIG_TEST_MSG,
+  NODE_DISCOVERY_URL,
   NODE_DISCOVERY_PORT,
+  NODE_DEFAULT_PORT,
   setPort,
   getPort,
   parseArgs
