@@ -6,6 +6,7 @@ const express    = require('express')
 const app        = express()
 
 const nodeDiscoveryRouter = require('./controllers/nodes')
+const clientsRouter       = require('./controllers/clients')
 
 logger.info('Node-discovery service starting up')
 
@@ -13,6 +14,7 @@ app.use(express.json())
 app.use(middleware.requestLogger)
 
 app.use('/api/nodes', nodeDiscoveryRouter)
+app.use('/api/clients', clientsRouter)
 
 app.use(middleware.unknownEndpoint)
 
