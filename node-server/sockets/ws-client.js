@@ -1,11 +1,24 @@
 const logger    = require('../utils/logger')
+const config    = require('../utils/config')
 const nodeState = require('../state/node')
 
 const {
   WebSocket
-}            = require('ws')
+}               = require('ws')
 
 const connections = {}
+
+const heartbeat = (ws) => {
+  clearTimeout(ws.pingTimeout)
+
+  ws.pingTimeout = setTimeout(() => {
+    // TODO: Update otheractive nodes, report to discovery service
+    ws.terminate()
+  }, config.WS_PING_INTERVAL + config.MAX_EXPECTED_LATENCY)
+}
+
+const getRemoteAddress = (ws) => ws._url
+const getConnections = () => Object.keys(connections)
 
 const connect = (port) => {
   if(Object.hasOwn(connections, port)) {
@@ -13,20 +26,53 @@ const connect = (port) => {
     return
   }
 
-  logger.info('Connecting to:', port)
-  const ws = new WebSocket(`ws://localhost:${port}`)
+  const endpointUrl = `ws://localhost:${port}`
+
+  logger.info('Initializing WS connection to:', endpointUrl)
+
+  const ws = new WebSocket(endpointUrl)
+
+  // TODO: - State/info about running nodes should come directly from discovery service
+  //         instead of updating it manually inside each node
+  //       - When updating "anything", use the url/ip in the ws object(?)
+
+  ws.on('error', (err) => {
+    logger.info('WS client ERROR event:', err)
+    nodeState.removeFromOtherActiveNodes(port)
+  })
 
   ws.on('open', () => {
-    ws.send(`Hello from ${nodeState.getListenPort()}`)
+    connections[port] = ws
+    heartbeat(ws)
+    logger.info('OPENED outbound WS connection to:', endpointUrl)
+    ws.send(`HELLO. I'm listening for WS connections on port: ${nodeState.getListenPort()}`)
+  })
+
+  ws.on('ping', () => {
+    heartbeat(ws)
   })
 
   ws.on('message', (data, isBinary) => {
-    const message = isBinary ? data : `${nodeState.getListenPort()} received ${data.toString()}`
-    logger.info(message)
-    //logger.info(`${nodeState.getListenPort()} received ${message}`)
+    const message = isBinary ? data : data.toString()
+    if (isBinary) {
+      logger.info(`RECEIVED message from ${getRemoteAddress(ws)} -> [[BINARY data not printed]]`)
+    } else {
+      logger.info(`RECEIVED message from ${getRemoteAddress(ws)} -> [[${message}]]`)
+    }
   })
 
-  connections[port] = ws
+  ws.on('close', () => {
+    // This event is fired even if there is an error before succesfull connection
+    if (!Object.hasOwn(connections, port)) {
+      return
+    }
+
+    clearTimeout(ws.pingTimeout)
+    const endpoint = getRemoteAddress(connections[port])
+    delete connections[port]
+    nodeState.removeFromOtherActiveNodes(port)
+    logger.info('CLOSED outbound WS connection to:', endpoint)
+  })
 }
 
 const disconnect = (port) => {
@@ -35,28 +81,31 @@ const disconnect = (port) => {
     return
   }
 
-  logger.info('Closing connection to:'. port)
+  logger.info('CLOSING outbound WS connection to:', getRemoteAddress(connections[port]))
   connections[port].close()
-  delete connections[port]
 }
 
 const connectToAll = (ports) => {
-  logger.info('Client connectToAll')
   ports.forEach(p => {
     connect(p)
   })
-  logger.info('Client done connecting to all')
 }
 
-const getConnections = () => Object.keys(connections)
-
 const disconnectFromAll = () => {
-  logger.info('Client terminating all connections')
-  Object.keys(connections).forEach(conn => {
-    logger.info(`Terminating ${conn}`)
+  getConnections().forEach(conn => {
     disconnect(conn)
   })
-  logger.info('Client done terminating all connections')
+}
+
+const openConnections = () =>
+  getConnections()
+    .map(c => getRemoteAddress(connections[c]))
+
+const broadcastToAll = (message) => {
+  getConnections().forEach(conn => {
+    //if (conn.readyState === WebSocket.OPEN) {}
+    connections[conn].send(message)
+  })
 }
 
 module.exports = {
@@ -64,5 +113,6 @@ module.exports = {
   disconnect,
   connectToAll,
   disconnectFromAll,
-  getConnections
+  openConnections,
+  broadcastToAll
 }

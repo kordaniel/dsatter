@@ -1,12 +1,10 @@
 
-// TODO: Terminate connections properly from both ends and update connection "lists" at exit
+// TODO: update connection "lists" at exit
 
-// const config = require('./utils/config')
-const logger = require('./utils/logger')
-
+const logger    = require('./utils/logger')
 const nodeState = require('./state/node')
-const wsServer  = require('./sockets/ws-serv')
-const wsClient  = require('./sockets/ws-client')
+
+const websocketService = require('./services/websockets')
 
 // readline only for now for testing the connection
 const readline = require('readline')
@@ -22,15 +20,15 @@ logger.info('------------------------')
 const init = async () => {
   try {
     await nodeState.initialize()
-    wsServer.init(nodeState.getListenPort())
-    wsClient.connectToAll(nodeState.getOtherActiveNodes())
+    websocketService.initialize(
+      nodeState.getListenPort(),
+      nodeState.getOtherActiveNodes()
+    )
 
     logger.info('Node initialized')
     logger.info('----------------')
     logger.info(`Listening for WS connection on PORT ${nodeState.getListenPort()}`)
     logger.info(`Other nodes online: ${nodeState.getOtherActiveNodes()}`)
-    logger.info(`Outbound connections: ${wsClient.getConnections()}`)
-    logger.info(`Inbound connections:  ${wsServer.getConnections()}`)
     logger.info('----------------')
   } catch (err) {
     logger.error('initializing:', err)
@@ -39,8 +37,7 @@ const init = async () => {
 }
 
 const terminate = async () => {
-  wsClient.disconnectFromAll()
-  wsServer.terminate()
+  websocketService.terminate()
   try {
     await nodeState.close()
     logger.info()
@@ -60,12 +57,13 @@ const run = () => {
         await terminate()
         break
       case 'broadcast':
-        // TODO: Send message to all connected nodes
+        websocketService.broadcastMessageToAll(`MESSAGE to all nodes: I'm listening on port: ${nodeState.getListenPort()}`)
+        run()
         break
       case 'peers':
         logger.info('Peers:')
-        logger.info(`\tOutbound: ${wsClient.getConnections()}`)
-        logger.info(`\tInbound:  ${JSON.stringify(wsServer.getConnections())}`)
+        logger.info('\tOutbound:', websocketService.openOutboundConnections())
+        logger.info('\tInbound:', websocketService.openInboundConnections())
         run()
         break
       case 'nodes':

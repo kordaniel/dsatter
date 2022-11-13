@@ -1,7 +1,8 @@
+const assert = require('assert')
 const config = require('../utils/config')
 const logger = require('../utils/logger')
 const {
-  isNonEmptyArray
+  isNonEmptyArray, sleep
 }            = require('../utils/helpers')
 
 const discoveryService = require('../services/discovery')
@@ -9,19 +10,16 @@ const discoveryService = require('../services/discovery')
 let listenPort = -1
 let otherNodes = []
 
-const setup = (activeNodes) => {
+const getPortCandidate = (activeNodes) => {
   let proposedPort = config.NODE_DEFAULT_PORT
 
   if (isNonEmptyArray(activeNodes)) {
     while (activeNodes.includes(proposedPort)) {
       proposedPort += 1
     }
-    otherNodes = [ ...activeNodes ]
-  } else {
-    otherNodes = []
   }
 
-  listenPort = proposedPort
+  return proposedPort
 }
 
 const cleanup = (activeNodes) => {
@@ -31,30 +29,59 @@ const cleanup = (activeNodes) => {
     : []
 }
 
+const setListenPort = (port) => {
+  listenPort = port
+}
+
+const setOtherNodes = (activeNodes) => {
+  otherNodes = isNonEmptyArray(activeNodes)
+    ? [ ...activeNodes ]
+    : []
+}
+
+const removeFromOtherActiveNodes = (port) => {
+  otherNodes = otherNodes.filter(p => p !== port)
+  // TODO: Inform discovery service node at port is unreachable
+}
+
 const initialize = async () => {
-  // TODO: Add error handling for discovery service unreachable (ECONNREFUSED error)
+  assert(listenPort === -1, 'Attempted to reinitialize state/node')
+
+  const sleepTimeMaxMs = 4 * 1000
+  let sleepTimeMs = 500
   let wasRegistered = false
 
-  try {
-    while (!wasRegistered) {
+  do {
+    try {
       const activeNodesArr = await discoveryService.getActiveNodes()
-      setup(activeNodesArr)
+      const proposedPort   = getPortCandidate(activeNodesArr)
+      const regRes         = await discoveryService.registerAsActive(proposedPort)
 
-      const regRes = await discoveryService.registerAsActive(listenPort)
-      wasRegistered = regRes.data.wasRegistered !== false // false or integer
+      if (regRes.wasRegistered === proposedPort) {
+        setListenPort(proposedPort)
+        setOtherNodes(regRes.activeNodes)
+        wasRegistered = true
+      } else {
+        logger.info(`Registration failed, sleeping for ${sleepTimeMs}ms before trying again`)
+        await sleep(sleepTimeMs)
+        sleepTimeMs = Math.min(sleepTimeMs + sleepTimeMs, sleepTimeMaxMs)
+      }
 
-      // TODO: assert regRes.data.activeNodes === otherNodes
+    } catch (err) {
+      logger.error('state/node initialize():', err)
+      logger.info(`Registration failed with error, sleeping for ${sleepTimeMs}ms before trying again`)
+      await sleep(sleepTimeMs)
+      sleepTimeMs = Math.min(sleepTimeMs + sleepTimeMs, sleepTimeMaxMs)
     }
-  } catch (err) {
-    logger.error('state/node initialize():', err)
-  }
+
+  } while (!wasRegistered)
 }
 
 const close = async () => {
   try {
     const unregRes = await discoveryService.unregisterAsActive(listenPort)
-    cleanup(unregRes.data.activeNodes)
-    return unregRes.data.wasUnregistered
+    cleanup(unregRes.activeNodes)
+    return unregRes.wasUnregistered
   } catch (err) {
     logger.error('node/state, close():', err)
   }
@@ -64,6 +91,7 @@ const getListenPort = () => listenPort
 const getOtherActiveNodes = () => [ ...otherNodes ]
 
 module.exports = {
+  removeFromOtherActiveNodes,
   initialize,
   close,
   getListenPort,

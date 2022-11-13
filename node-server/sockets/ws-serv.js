@@ -1,34 +1,66 @@
+const assert = require('assert')
 const logger = require('../utils/logger')
+const config = require('../utils/config')
 
 const {
   WebSocketServer
 }            = require('ws')
 
 let wss = null
+let interval = null
+
+const heartbeat = (ws) => {
+  ws.isAlive = true
+}
+
+const getRemoteAddress = (req) => `${req.socket.remoteAddress}:${req.socket.remotePort}`
 
 const init = (port) => {
-  if (wss !== null) {
-    throw Error('ws-serv init(): wss is not null')
-  }
+  assert(wss === null, 'ws-serv init(): wss is not null')
 
   wss = new WebSocketServer({ port })
+  interval = setInterval(() => {
+    wss.clients.forEach(ws => {
+      if (ws.isAlive === false) {
+        // TODO: Update otheractive nodes, report to discovery service
+        return ws.terminate()
+      }
+
+      ws.isAlive = false
+      ws.ping()
+    })
+  }, config.WS_PING_INTERVAL)
+
   wss.on('connection', (ws, req) => {
-    logger.info(`Connected to ${req.socket.remoteAddress}:${req.socket.remotePort}`)
+    logger.info(`OPENED inbound WS connection to: ${getRemoteAddress(req)}`)
+
+    ws.on('error', (err) => {
+      logger.info(`WS server ERROR event on WS connection to ${getRemoteAddress(req)}`, err)
+    })
+
+    ws.isAlive = true
+    ws.on('pong', () =>{
+      heartbeat(ws)
+    })
 
     ws.on('message', (data, isBinary) => {
-      const message = isBinary ? data : `-> ${req.socket.remoteAddress}:${req.socket.remotePort}: ${data.toString()}`
-      logger.info(message)
-      ws.send('ACK')
+      const message = isBinary ? data : data.toString()
+      if (isBinary) {
+        logger.info(`RECEIVED message from ${getRemoteAddress(req)} -> [[BINARY data not printed]]`)
+      } else {
+        logger.info(`RECEIVED message from ${getRemoteAddress(req)} -> [[${message}]]`)
+      }
     })
 
     ws.on('close', () => {
-      logger.info(`Disconnect from ${req.socket.remoteAddress}:${req.socket.remotePort}`)
+      logger.info(`CLOSED inbound connection to ${getRemoteAddress(req)}`)
     })
   })
 
   wss.on('close', () => {
+    clearInterval(interval)
     logger.info('WebSocket server closed')
-    // set wss = null ??
+    wss = null
   })
 }
 
@@ -44,17 +76,24 @@ const terminate = () => {
   wss.close()
 }
 
-const getConnections = () => {
+const openConnections = () => {
   // TODO: Read ws API docs to get rid of this hack
   return wss === null
     ? []
-    : [ ...wss.clients ]
-      .map(ws => `${ws._socket.remoteAddress}:${ws._socket.remotePort}`)
+    : [ ...wss.clients ].map(ws => `${ws._socket.remoteAddress}:${ws._socket.remotePort}`)
+}
+
+const broadcastToAll = (message) => {
+  wss.clients.forEach(client => {
+    //if (client.readyState === WebSocket.OPEN) {}
+    client.send(message)
+  })
 }
 
 
 module.exports = {
   init,
   terminate,
-  getConnections
+  openConnections,
+  broadcastToAll
 }

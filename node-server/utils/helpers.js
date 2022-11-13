@@ -8,7 +8,12 @@ const getRandomElementFromArr = (obj) => {
     : obj[Math.floor(Math.random() * obj.length)]
 }
 
+const sleep = (ms) => {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
 module.exports = {
   isNonEmptyArray,
-  getRandomElementFromArr
+  getRandomElementFromArr,
+  sleep
 }
