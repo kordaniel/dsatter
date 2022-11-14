@@ -1,5 +1,5 @@
-const logger     = require('./utils/logger')
-const config     = require('./utils/config')
+const config     = require('../common/utils/config')
+const logger     = require('../common/utils/logger')
 const middleware = require('./utils/middleware')
 
 const express    = require('express')

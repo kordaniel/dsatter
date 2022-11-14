@@ -1,4 +1,3 @@
-const logger   = require('../utils/logger')
 const wsServer = require('../sockets/ws-serv')
 const wsClient = require('../sockets/ws-client')
 

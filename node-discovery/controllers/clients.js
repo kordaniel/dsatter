@@ -3,7 +3,7 @@ const nodesRegister = require('../services/nodes')
 
 const {
   getRandomElementFromArr
-}                   = require('../utils/helpers')
+}                   = require('../../common/utils/helpers')
 
 clientsRouter.get('/', (req, res) => {
   const activeNodes = nodesRegister.getNodes()

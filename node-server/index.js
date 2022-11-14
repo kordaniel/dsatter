@@ -1,57 +1,85 @@
-const config = require('./utils/config')
-const logger = require('./utils/logger')
 
-const express    = require('express')
-const app        = express()
-const front_port = 10101
+// TODO: update connection "lists" at exit
 
-app.get('/hello', (req, res) => {
-  res.send(`${config.CONFIG_TEST_MSG}\n`)
+const logger    = require('../common/utils/logger')
+const nodeState = require('./state/node')
+
+const websocketService = require('./services/websockets')
+
+// readline only for now for testing the connection
+const readline = require('readline')
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+  terminal: false
 })
 
-app.listen(front_port, () => {
-  logger.info(`DSatter server started, listening to port ${front_port}`)
-})
+logger.info('CHATSERVER node starting')
+logger.info('------------------------')
 
+const init = async () => {
+  try {
+    await nodeState.initialize()
+    websocketService.initialize(
+      nodeState.getListenPort(),
+      nodeState.getOtherActiveNodes()
+    )
 
-
-//const wss = require('./ws/server')
-
-
-const { WebSocketServer } = require('ws')
-
-const wss = new WebSocketServer({ port: 8080 })
-
-wss.on('connection', function connection(ws, req) {
-  logger.info(`Connected to ${req.socket.remoteAddress}:${req.socket.remotePort}`)
-
-  ws.on('message', function message(data) {
-    logger.info(`-> ${req.socket.remoteAddress}:${req.socket.remotePort}: %s`, data)
-    //console.log('received: %s', data, 'from ip: ', req.socket.remoteAddress, ':', req.socket.remotePort)
-    ws.send('acknowledge')
-  })
-
-  ws.send('something')
-})
-
-wss.on('close', function close() {
-  logger.info('disconnected')
-})
-
-
-/*
-if (!config.parseArgs(process.argv)) {
-  logger.error('Bad arguments')
-  logger.error('Usage: NODE_ENV=<production|development|test> node index.js --listen=<port> --connect=<port>')
-  logger.error('Exiting..')
-  process.exit(64) // sysexits.h EX_USAGE
+    logger.info('Node initialized')
+    logger.info('----------------')
+    logger.info(`Listening for WS connection on PORT ${nodeState.getListenPort()}`)
+    logger.info(`Other nodes online: ${nodeState.getOtherActiveNodes()}`)
+    logger.info('----------------')
+  } catch (err) {
+    logger.error('initializing:', err)
+    process.exit(70) // sysexits.h EX_SOFTWARE (internal software error)
+  }
 }
 
-logger.info('chatserver node starting')
-logger.info('------------------------')
-logger.info(`listening for websocket connections on port: ${config.getPort('listen')}`)
-logger.info(`attempting to connect to other node on port: ${config.getPort('connect')}`)
-logger.info('------------------------')
-*/
+const terminate = async () => {
+  websocketService.terminate()
+  try {
+    await nodeState.close()
+    logger.info()
+    logger.info('------------------')
+    logger.info('CHATSERVER node is terminating')
+    logger.info(`Other nodes running: ${nodeState.getOtherActiveNodes()}`)
+  } catch (err) {
+    logger.error('terminating:', err)
+  }
+}
 
-logger.info(config.CONFIG_TEST_MSG)
+const run = () => {
+  rl.question('input: ', async (input) => {
+    switch (input) {
+      case 'quit':
+        rl.close()
+        await terminate()
+        break
+      case 'broadcast':
+        websocketService.broadcastMessageToAll(`MESSAGE to all nodes: I'm listening on port: ${nodeState.getListenPort()}`)
+        run()
+        break
+      case 'peers':
+        logger.info('Peers:')
+        logger.info('\tOutbound:', websocketService.openOutboundConnections())
+        logger.info('\tInbound:', websocketService.openInboundConnections())
+        run()
+        break
+      case 'nodes':
+        // The ones that were running when this node instance registered
+        logger.info('nodes online:', nodeState.getOtherActiveNodes())
+        // falls through
+      default:
+        run()
+        break
+    }
+  })
+}
+
+const initialize = async () => {
+  await init()
+  run()
+}
+
+initialize()

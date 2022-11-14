@@ -1,5 +1,5 @@
 const assert = require('assert')
-const logger = require('../utils/logger')
+const logger = require('../../common/utils/logger')
 const config = require('../utils/config')
 
 const {
@@ -39,7 +39,7 @@ const init = (port) => {
     })
 
     ws.isAlive = true
-    ws.on('pong', () =>{
+    ws.on('pong', () => {
       heartbeat(ws)
     })
 

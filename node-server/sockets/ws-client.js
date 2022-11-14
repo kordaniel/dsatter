@@ -1,4 +1,4 @@
-const logger    = require('../utils/logger')
+const logger    = require('../../common/utils/logger')
 const config    = require('../utils/config')
 const nodeState = require('../state/node')
 
