@@ -1,0 +1,19 @@
+GET http://localhost:8080/api/nodes/active
+
+###
+
+POST http://localhost:8080/api/nodes/active/register
+Content-Type: application/json
+
+{
+  "port": 113
+}
+
+###
+
+POST http://localhost:8080/api/nodes/active/unregister
+Content-Type: application/json
+
+{
+  "port": 113
+}

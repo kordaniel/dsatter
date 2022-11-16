@@ -1,12 +1,18 @@
-// add and use dotenv
+const commonConfig = require('../../common/utils/config')
 
-const DEV_ENV = process.env.NODE_ENV === 'development'
+const NODE_DISCOVERY_URL  = commonConfig.NODE_DISCOVERY_URL
+const NODE_DISCOVERY_PORT = commonConfig.NODE_DISCOVERY_PORT
 
-const CONFIG_TEST_MSG = DEV_ENV
-  ? 'Hello developers (running in dev environment)'
-  : 'Hello world (running in production environment)'
+const NODE_DEFAULT_PORT    = commonConfig.NODE_DEFAULT_PORT
+const WS_PING_INTERVAL     = commonConfig.WS_PING_INTERVAL // ms
+const MAX_EXPECTED_LATENCY = commonConfig.MAX_EXPECTED_LATENCY // timeout
+
+
 
 module.exports = {
-  DEV_ENV,
-  CONFIG_TEST_MSG
+  NODE_DISCOVERY_URL,
+  NODE_DISCOVERY_PORT,
+  NODE_DEFAULT_PORT,
+  WS_PING_INTERVAL,
+  MAX_EXPECTED_LATENCY
 }
