@@ -15,7 +15,7 @@ const getRemoteAddress = (req) => `${req.socket.remoteAddress}:${req.socket.remo
 
 /**
  * Opens websocket and handles all its traffic
- * @param {number} port 
+ * @param {number} port
  */
 const init = (port) => {
   assert(wss === null, 'ws-serv init(): wss is not null')

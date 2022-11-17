@@ -1,9 +1,10 @@
 const sqlite3 = require('sqlite3').verbose()
-const Dao = require("../database/dao")
-let databaseHandler 
+const logger    = require('../../../common/utils/logger')
+const Dao = require('../database/dao')
+let databaseHandler
 let db
 
-export default class DatabaseService {
+class DatabaseService {
 
   /**
    * Opens connection to local sqlite3 database
@@ -21,23 +22,23 @@ export default class DatabaseService {
   /**
    * Adds message with given data to the database
    * Returns promise of the messageId
-   * @param {*} data 
+   * @param {*} data
    * @returns {Promise<*>}
    */
   addMessageToDatabase = async (data) => {
-    const data = {
-      text = data.text,
-      time = data.time, 
-      sender = data.sender, 
-      chat_id = data.chatId
+    const message = {
+      text: data.text,
+      time: data.time,
+      sender: data.sender,
+      chat_id: data.chatId
     }
-    return databaseHandler.addNewMessage(data)
+    return databaseHandler.addNewMessage(message)
   }
 
   /**
    * Adds chat with given data to the database
    * Returns promise of the chatId
-   * @param {*} data 
+   * @param {*} data
    * @returns {Promise<*>}
    */
   addChatToDatabase = async (data) => {
@@ -74,5 +75,6 @@ export default class DatabaseService {
       else logger.info('Database connection closed')
     })
   }
-
 }
+
+module.exports = DatabaseService

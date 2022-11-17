@@ -2,8 +2,10 @@ const wsServer = require('../sockets/ws-serv')
 const wsClient = require('../sockets/ws-client')
 const databaseService = require('./database')
 let db
+let openInboundConnections
+let openOutboundConnections
 
-export default class WebsocketService {
+class WebsocketService {
 
   /**
    * Initializes the websocket server to listen for WS connections on the
@@ -21,7 +23,7 @@ export default class WebsocketService {
 
   /**
    * Makes database querys and returns promises
-   * @param {*} message 
+   * @param {*} message
    * @returns {Promise<*>}
    */
   makeDatabaseQuery = async (message) => {
@@ -60,3 +62,5 @@ export default class WebsocketService {
     wsClient.broadcastToAll(message)
   }
 }
+
+module.exports = WebsocketService

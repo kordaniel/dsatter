@@ -1,5 +1,5 @@
-const logger    = require('../../../../common/utils/logger')
-const config    = require('../../utils/config')
+const logger    = require('../../../common/utils/logger')
+const config    = require('../utils/config')
 const nodeState = require('../state/node')
 
 const { WebSocket } = require('ws')
