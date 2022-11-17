@@ -2,7 +2,7 @@ const assert = require('assert')
 const config = require('../utils/config')
 const logger = require('../../common/utils/logger')
 const {
-  isNonEmptyArray, sleep
+  isNonEmptyArray, sleep, randomInt
 }            = require('../../common/utils/helpers')
 
 const discoveryService = require('../services/discovery')
@@ -10,16 +10,8 @@ const discoveryService = require('../services/discovery')
 let listenPort = -1
 let otherNodes = []
 
-const getPortCandidate = (activeNodes) => {
-  let proposedPort = config.NODE_DEFAULT_PORT
-
-  if (isNonEmptyArray(activeNodes)) {
-    while (activeNodes.includes(proposedPort)) {
-      proposedPort += 1
-    }
-  }
-
-  return proposedPort
+const getPortCandidate = (currentCandidate) => {
+  return config.NODE_DEFAULT_PORT + randomInt(0, 1000)
 }
 
 const cleanup = (activeNodes) => {
@@ -54,10 +46,10 @@ const initialize = async () => {
   do {
     try {
       const activeNodesArr = await discoveryService.getActiveNodes()
-      const proposedPort   = getPortCandidate(activeNodesArr)
+      const proposedPort   = getPortCandidate()
       const regRes         = await discoveryService.registerAsActive(proposedPort)
 
-      if (regRes.wasRegistered === proposedPort) {
+      if (regRes.wasRegistered) {
         setListenPort(proposedPort)
         setOtherNodes(regRes.activeNodes)
         wasRegistered = true

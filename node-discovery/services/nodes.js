@@ -1,18 +1,19 @@
 // Module containing the state of the registered running nodes
-// - only ports for now..
 
 let activeNodes = [ ]
 
 /**
  * Register a new node
+ * @param {*} ip the port of the node
  * @param {*} port the listening port of the node
  * @returns true, if node was not already registered. false otherwise
  */
-const registerNode = (port) => {
-  if (activeNodes.includes(port)) return false
+const registerNode = (ip, port) => {
+  const socket = `${ip}:${port}`
+  if (activeNodes.includes(socket)) return false
 
   activeNodes = activeNodes
-    .concat(port)
+    .concat(socket)
     .sort((a,b) => a-b)
 
   return true
@@ -20,13 +21,15 @@ const registerNode = (port) => {
 
 /**
  * Remove a node from the running nodes array
+ * @param {*} ip the ip of the node
  * @param {*} port the listening port of the node
  * @returns true, if node was running and thus removed. false otherwise.
  */
-const unregisterNode = (port) => {
-  if (!activeNodes.includes(port)) return false
+const unregisterNode = (ip, port) => {
+  const socket = `${ip}:${port}`
+  if (!activeNodes.includes(socket)) return false
 
-  activeNodes = activeNodes.filter(n => n !== port)
+  activeNodes = activeNodes.filter(n => n !== socket)
   return true
 }
 

@@ -8,6 +8,17 @@ const {
 
 const connections = {}
 
+const parseSocket = (socket) => {
+  const re = new RegExp('^(.+):([0-9]+)$')
+  const match = socket.match(re)
+  return { addr: match[1], port: match[2] }
+}
+
+// If address contains colon, assume IPv6
+const isIPv6 = (addr) => {
+  return addr.indexOf(':') > -1
+}
+
 const heartbeat = (ws) => {
   clearTimeout(ws.pingTimeout)
 
@@ -20,13 +31,15 @@ const heartbeat = (ws) => {
 const getRemoteAddress = (ws) => ws._url
 const getConnections = () => Object.keys(connections)
 
-const connect = (port) => {
-  if(Object.hasOwn(connections, port)) {
-    logger.error('Connection already in map:', port)
+const connect = (socket) => {
+  if(Object.hasOwn(connections, socket)) {
+    logger.error('Connection already in map:', socket)
     return
   }
 
-  const endpointUrl = `ws://localhost:${port}`
+  const { addr, port } = parseSocket(socket)
+
+  const endpointUrl = isIPv6(addr) ? `ws://[${addr}]:${port}` : `ws://${addr}:${port}`
 
   logger.info('Initializing WS connection to:', endpointUrl)
 
@@ -38,11 +51,11 @@ const connect = (port) => {
 
   ws.on('error', (err) => {
     logger.info('WS client ERROR event:', err)
-    nodeState.removeFromOtherActiveNodes(port)
+    nodeState.removeFromOtherActiveNodes(socket)
   })
 
   ws.on('open', () => {
-    connections[port] = ws
+    connections[socket] = ws
     heartbeat(ws)
     logger.info('OPENED outbound WS connection to:', endpointUrl)
     ws.send(`HELLO. I'm listening for WS connections on port: ${nodeState.getListenPort()}`)
@@ -63,14 +76,14 @@ const connect = (port) => {
 
   ws.on('close', () => {
     // This event is fired even if there is an error before succesfull connection
-    if (!Object.hasOwn(connections, port)) {
+    if (!Object.hasOwn(connections, socket)) {
       return
     }
 
     clearTimeout(ws.pingTimeout)
-    const endpoint = getRemoteAddress(connections[port])
-    delete connections[port]
-    nodeState.removeFromOtherActiveNodes(port)
+    const endpoint = getRemoteAddress(connections[socket])
+    delete connections[socket]
+    nodeState.removeFromOtherActiveNodes(socket)
     logger.info('CLOSED outbound WS connection to:', endpoint)
   })
 }
@@ -81,15 +94,11 @@ const disconnect = (port) => {
     return
   }
 
-  logger.info('CLOSING outbound WS connection to:', getRemoteAddress(connections[port]))
-  connections[port].close()
+  logger.info('CLOSING outbound WS connection to:', getRemoteAddress(connections[socket]))
+  connections[socket].close()
 }
 
-const connectToAll = (ports) => {
-  ports.forEach(p => {
-    connect(p)
-  })
-}
+const connectToAll = (sockets) => sockets.forEach(s => connect(s))
 
 const disconnectFromAll = () => {
   getConnections().forEach(conn => {

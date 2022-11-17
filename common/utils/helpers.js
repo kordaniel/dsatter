@@ -12,6 +12,12 @@ const sleep = (ms) => {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
+const randomInt = (lower, upper) => {
+  const low_int = Math.ceil(lower)
+  const upper_int = Math.floor(upper)
+  return Math.floor(Math.random() * (upper_int - low_int + 1)) + low_int
+}
+
 ///**
 // * Parses command line arguments array into a map holding the key val pairs.
 // * @param {string[]} args array containing the command line argument strings.
@@ -43,5 +49,6 @@ const sleep = (ms) => {
 module.exports = {
   isNonEmptyArray,
   getRandomElementFromArr,
-  sleep
+  sleep,
+  randomInt
 }
