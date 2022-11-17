@@ -1,0 +1,10 @@
+{
+  "watch": [
+    ".",
+    "../common/"
+  ],
+  "events": {
+    "restart": "echo 'App restarted due to changes in:\n > '$FILENAME''"
+  },
+  "ext": "js, json"
+}
