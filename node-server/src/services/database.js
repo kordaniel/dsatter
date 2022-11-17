@@ -10,14 +10,20 @@ export default class DatabaseService {
    */
   openDatabaseConnection = async () => {
     db = new sqlite3.Database('./db/dsatter.db', (err) => {
-      if (err) console.log('Error in connecting to the database: ', err)
-      else console.log('Connected to dsatter database')
+      if (err) logger.error('Error in connecting to the database: ', err)
+      else logger.info('Connected to dsatter database')
     })
     databaseHandler = new Dao(db)
     databaseHandler.createTableChats()
-    databaseHandler.createTabledatas()
+    databaseHandler.createTableMessages()
   }
 
+  /**
+   * Adds message with given data to the database
+   * Returns promise of the messageId
+   * @param {*} data 
+   * @returns {Promise<*>}
+   */
   addMessageToDatabase = async (data) => {
     const data = {
       text = data.text,
@@ -28,15 +34,33 @@ export default class DatabaseService {
     return databaseHandler.addNewMessage(data)
   }
 
+  /**
+   * Adds chat with given data to the database
+   * Returns promise of the chatId
+   * @param {*} data 
+   * @returns {Promise<*>}
+   */
   addChatToDatabase = async (data) => {
     const chat = data.chatName
     return databaseHandler.addNewChat(chat)
   }
 
+  /**
+   * Searches message database with given chatId
+   * Returns promise of the list of messages
+   * @param {number} chatId
+   * @returns {Promise<*>}
+   */
   searchMessageDatabase = async (chatId) => {
     return databaseHandler.getMessages(chatId)
   }
 
+  /**
+   * Searches chat database with given chatId
+   * Returns promise of the chat information
+   * @param {number} chatId
+   * @returns {Promise<*>}
+   */
   searchChatDatabase = async (chatId) => {
     return databaseHandler.getChat(chatId)
   }
@@ -46,8 +70,8 @@ export default class DatabaseService {
    */
   closeDataBaseConnection = () => {
     db.close((err) => {
-      if (err) console.log('Error in closing database connection: ', err)
-      else console.log('Database connection closed')
+      if (err) logger.error('Error in closing database connection: ', err)
+      else logger.info('Database connection closed')
     })
   }
 

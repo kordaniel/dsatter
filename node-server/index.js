@@ -5,7 +5,6 @@ const logger    = require('../common/utils/logger')
 const nodeState = require('./src/state/node')
 
 const websocketService = require('./src/services/websockets')
-const databaseService = require('./src/services/database')
 
 // readline only for now for testing the connection
 const readline = require('readline')

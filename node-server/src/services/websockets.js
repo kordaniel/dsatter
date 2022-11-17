@@ -1,50 +1,62 @@
 const wsServer = require('../sockets/ws-serv')
 const wsClient = require('../sockets/ws-client')
 const databaseService = require('./database')
-const db = require(databaseService)
+let db
 
-/**
- * Initializes the websocket server to listen for WS connections on the
- * port passed as argument and attempts to open a websocket client connection
- * to all servers specified in the array passed as the argument remoteEnpoints.
- * @param {Number} listenPort The port to listen for incoming websocket connections.
- * @param {Number[]} remoteEndpoints Array containing all remote endpoints.
- */
-const initialize = (listenPort, remoteEndpoints = []) => {
-  // TODO: Get adress&port from config module
-  wsServer.init(listenPort)
-  wsClient.connectToAll(remoteEndpoints)
-  db = new databaseService()
-}
+export default class WebsocketService {
 
-/**
- * Closes all open websocket connections and shuts down the websocket server.
- */
-const terminate = () => {
-  wsClient.disconnectFromAll()
-  wsServer.terminate()
-}
+  /**
+   * Initializes the websocket server to listen for WS connections on the
+   * port passed as argument and attempts to open a websocket client connection
+   * to all servers specified in the array passed as the argument remoteEnpoints.
+   * @param {Number} listenPort The port to listen for incoming websocket connections.
+   * @param {Number[]} remoteEndpoints Array containing all remote endpoints.
+   */
+  initialize = (listenPort, remoteEndpoints = []) => {
+    // TODO: Get adress&port from config module
+    wsServer.init(listenPort)
+    wsClient.connectToAll(remoteEndpoints)
+    db = new databaseService()
+  }
 
-const openInboundConnections = ()  => wsServer.openConnections()
-const openOutboundConnections = () => wsClient.openConnections()
+  /**
+   * Makes database querys and returns promises
+   * @param {*} message 
+   * @returns {Promise<*>}
+   */
+  makeDatabaseQuery = async (message) => {
+    switch (message.query) {
+      case 'addMessage':
+        return db.addMessageToDatabase(message.data)
+      case 'addChat':
+        return db.addChatToDatabase(message.data)
+      case 'searchMessages':
+        return db.searchMessageDatabase(message.data)
+      case 'searchChats':
+        return db.searchChatDatabase(message.data)
+    }
+  }
 
-const openConnections = () => [
-  ...openInboundConnections(),
-  ...openOutboundConnections()
-]
+  /**
+   * Closes all open websocket connections and shuts down the websocket server.
+   */
+  terminate = () => {
+    wsClient.disconnectFromAll()
+    wsServer.terminate()
+  }
 
-//const sendMessageToOne = () => {}
+  openInboundConnections = ()  => wsServer.openConnections()
+  openOutboundConnections = () => wsClient.openConnections()
 
-const broadcastMessageToAll = (message) => {
-  wsServer.broadcastToAll(message)
-  wsClient.broadcastToAll(message)
-}
+  openConnections = () => [
+    ...openInboundConnections(),
+    ...openOutboundConnections()
+  ]
 
-module.exports = {
-  initialize,
-  terminate,
-  openInboundConnections,
-  openOutboundConnections,
-  openConnections,
-  broadcastMessageToAll
+  //const sendMessageToOne = () => {}
+
+  broadcastMessageToAll = (message) => {
+    wsServer.broadcastToAll(message)
+    wsClient.broadcastToAll(message)
+  }
 }
