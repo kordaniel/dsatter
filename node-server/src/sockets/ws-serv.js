@@ -1,10 +1,8 @@
 const assert = require('assert')
-const logger = require('../../common/utils/logger')
+const logger = require('../../../common/utils/logger')
 const config = require('../utils/config')
 
-const {
-  WebSocketServer
-}            = require('ws')
+const { WebSocketServer } = require('ws')
 
 let wss = null
 let interval = null
@@ -15,6 +13,10 @@ const heartbeat = (ws) => {
 
 const getRemoteAddress = (req) => `${req.socket.remoteAddress}:${req.socket.remotePort}`
 
+/**
+ * Opens websocket and handles all its traffic
+ * @param {number} port 
+ */
 const init = (port) => {
   assert(wss === null, 'ws-serv init(): wss is not null')
 
@@ -49,6 +51,7 @@ const init = (port) => {
         logger.info(`RECEIVED message from ${getRemoteAddress(req)} -> [[BINARY data not printed]]`)
       } else {
         logger.info(`RECEIVED message from ${getRemoteAddress(req)} -> [[${message}]]`)
+
       }
     })
 
@@ -64,15 +67,16 @@ const init = (port) => {
   })
 }
 
+/**
+ * Closes this websocket and terminates all connections to clients
+ */
 const terminate = () => {
   if (wss === null) {
     return
   }
-
   wss.clients.forEach(ws => {
     ws.close()
   })
-
   wss.close()
 }
 

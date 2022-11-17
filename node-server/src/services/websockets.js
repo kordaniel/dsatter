@@ -1,5 +1,7 @@
 const wsServer = require('../sockets/ws-serv')
 const wsClient = require('../sockets/ws-client')
+const databaseService = require('./database')
+const db = require(databaseService)
 
 /**
  * Initializes the websocket server to listen for WS connections on the
@@ -12,6 +14,7 @@ const initialize = (listenPort, remoteEndpoints = []) => {
   // TODO: Get adress&port from config module
   wsServer.init(listenPort)
   wsClient.connectToAll(remoteEndpoints)
+  db = new databaseService()
 }
 
 /**

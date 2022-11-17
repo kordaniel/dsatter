@@ -1,5 +1,3 @@
-const sqlite = require('sqlite3')
-
 /**
  * Makes querys to dsatter database
  */
