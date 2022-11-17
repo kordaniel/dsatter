@@ -10,7 +10,10 @@ const discoveryService = require('../services/discovery')
 let listenPort = -1
 let otherNodes = []
 
-const getPortCandidate = (currentCandidate) => {
+const getPortCandidate = () => {
+  if(config.DISABLE_PORT_DANCING) {
+    return config.NODE_DEFAULT_PORT
+  }
   return config.NODE_DEFAULT_PORT + randomInt(0, 1000)
 }
 
@@ -36,7 +39,7 @@ const removeFromOtherActiveNodes = (port) => {
   // TODO: Inform discovery service node at port is unreachable
 }
 
-const initialize = async () => {
+const initialize = async (ownPort) => {
   assert(listenPort === -1, 'Attempted to reinitialize state/node')
 
   const sleepTimeMaxMs = 4 * 1000
@@ -46,7 +49,7 @@ const initialize = async () => {
   do {
     try {
       const activeNodesArr = await discoveryService.getActiveNodes()
-      const proposedPort   = getPortCandidate()
+      const proposedPort   = ownPort > -1 ? ownPort : getPortCandidate()
       const regRes         = await discoveryService.registerAsActive(proposedPort)
 
       if (regRes.wasRegistered) {
