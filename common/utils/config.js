@@ -8,6 +8,7 @@
 
 const NODE_DISCOVERY_URL  = 'http://localhost'
 const NODE_DISCOVERY_PORT = 8080
+const NODE_DISCOVERY_PATH_CLIENT = 'api/clients'
 
 const NODE_DEFAULT_PORT    = 49152
 const WS_PING_INTERVAL     = 5000 // ms

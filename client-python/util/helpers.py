@@ -1,5 +1,7 @@
 import logging
+import os
 from time import sleep
+
 
 def catch_exception_sleep(timeout, retry = 100):
     def decorator(function):
@@ -19,3 +21,26 @@ def catch_exception_sleep(timeout, retry = 100):
                     sleep(timeout)
         return wrapper
     return decorator
+
+
+def maptextfile(filepath: str, sep='\n') -> list:
+    with open(filepath, 'r') as file:
+        return file.read().strip().split(sep)
+
+
+def get_parent_directory(filepath: str, levels: int = 0) -> str:
+    '''
+    Returns the real absolute path that is levels up from the filepath passed in.
+
+        Parameters:
+            filepath (str): The absolute or relative filepath for which to query the parent directory.
+            levels (int): How many levels to discard from the returned path.
+
+        Returns:
+            dirname (str): The absolute path
+    '''
+
+    if levels == 0:
+        return os.path.dirname(os.path.realpath(filepath))
+
+    return get_parent_directory(os.path.dirname(os.path.realpath(filepath)), levels-1)
