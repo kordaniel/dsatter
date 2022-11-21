@@ -14,7 +14,6 @@ const registerNode = (ip, port) => {
 
   activeNodes = activeNodes
     .concat(socket)
-    .sort((a,b) => a-b)
 
   return true
 }
