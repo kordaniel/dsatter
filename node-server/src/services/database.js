@@ -4,6 +4,11 @@ const Dao = require('../database/dao')
 let databaseHandler
 let db
 
+/**
+ * @typedef {import('../../../common/utils/types/datatypes).Message} Message
+ * @typedef {import('../../../common/utils/types/datatypes).Chat} Chat
+ */
+
 class DatabaseService {
 
   /**
@@ -22,28 +27,31 @@ class DatabaseService {
   /**
    * Adds message with given data to the database
    * Returns promise of the messageId
-   * @param {*} data
+   * @param {Message} data
    * @returns {Promise<*>}
    */
   addMessageToDatabase = async (data) => {
-    const message = {
-      text: data.text,
-      time: data.time,
-      sender: data.sender,
-      chat_id: data.chatId
-    }
-    return databaseHandler.addNewMessage(message)
+    if (data.id)
+      return databaseHandler.addNewMessage(data)
+    else {
+      const message = {...data, id: createNewMessageId()}
+      return databaseHandler.addNewMessage(message)
+    }    
   }
 
   /**
    * Adds chat with given data to the database
    * Returns promise of the chatId
-   * @param {*} data
+   * @param {Chat} data
    * @returns {Promise<*>}
    */
   addChatToDatabase = async (data) => {
-    const chat = data.chatName
-    return databaseHandler.addNewChat(chat)
+    if (data.id)
+      return databaseHandler.addNewChat(data)
+    else {
+      const chat = {...data, id: createNewChatId()}
+      return databaseHandler.addNewChat(chat)
+    }
   }
 
   /**
@@ -74,6 +82,14 @@ class DatabaseService {
       if (err) logger.error('Error in closing database connection: ', err)
       else logger.info('Database connection closed')
     })
+  }
+
+  createNewChatId() {
+    return databaseHandler.getLastChatId() + 1
+  }
+
+  createNewMessageId() {
+    return databaseHandler.getLastMessageId() + 1
   }
 }
 

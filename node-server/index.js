@@ -3,8 +3,8 @@
 
 const logger    = require('../common/utils/logger')
 const nodeState = require('./src/state/node')
-
-const websocketService = require('./src/services/websockets')
+const WebsocketService = require('./src/services/websockets')
+let websocketService
 
 // readline only for now for testing the connection
 const readline = require('readline')
@@ -18,8 +18,10 @@ logger.info('CHATSERVER node starting')
 logger.info('------------------------')
 
 const init = async () => {
+  websocketService = new WebsocketService()
   try {
     await nodeState.initialize()
+    
     websocketService.initialize(
       nodeState.getListenPort(),
       nodeState.getOtherActiveNodes()
@@ -70,6 +72,14 @@ const run = () => {
         // The ones that were running when this node instance registered
         logger.info('nodes online:', nodeState.getOtherActiveNodes())
         // falls through
+      case 'send':
+        const message = {
+          text: "moi",
+          sender: "me",
+          time: "10:30", 
+          chat_id: 1
+        }
+        websocketService.broadcastMessageToAll(message)
       default:
         run()
         break
