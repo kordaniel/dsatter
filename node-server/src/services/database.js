@@ -8,20 +8,26 @@ let db
  * @typedef {import('../../../common/utils/types/datatypes).Message} Message
  * @typedef {import('../../../common/utils/types/datatypes).Chat} Chat
  */
-
 class DatabaseService {
 
   /**
    * Opens connection to local sqlite3 database
    */
   openDatabaseConnection = async () => {
-    db = new sqlite3.Database('./db/dsatter.db', (err) => {
+    db = new sqlite3.Database('./dsatter.db', (err) => {
       if (err) logger.error('Error in connecting to the database: ', err)
       else logger.info('Connected to dsatter database')
     })
     databaseHandler = new Dao(db)
     databaseHandler.createTableChats()
     databaseHandler.createTableMessages()
+    // databaseHandler.addNewMessage({
+    //   node_id: 1,
+    //   id: 1,
+    //   text: 'moi',
+    //   chat_id: 1
+    // })
+    // console.log('db', databaseHandler.getMessages(1))
   }
 
   /**

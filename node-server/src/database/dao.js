@@ -1,5 +1,8 @@
 /**
  * Makes querys to dsatter database
+ * 
+ * @typedef {import('../../../common/utils/types/datatypes).Message} Message
+ * @typedef {import('../../../common/utils/types/datatypes).Chat} Chat
  */
 class Dao {
 
@@ -38,11 +41,13 @@ class Dao {
      */
   createTableMessages() {
     return this.executeQuery('run', `CREATE TABLE IF NOT EXISTS messages (
-            id INTEGER AUTOINCREMENT PRIMARY KEY,
+            node_id INTEGER,
+            id INTEGER,
             chat_id INTEGER REFERENCES chats,
             messageText TEXT,
             messageDateTime TEXT,
-            messageSender TEXT)`)
+            messageSender TEXT,
+            PRIMARY KEY (node_id, id))`)
   }
 
   /**
@@ -51,7 +56,7 @@ class Dao {
      */
   createTableChats() {
     return this.executeQuery('run', `CREATE TABLE IF NOT EXISTS chats (
-            id INTEGER AUTOINCREMENT PRIMARY KEY,
+            id INTEGER PRIMARY KEY,
             chatName TEXT)`)
   }
 

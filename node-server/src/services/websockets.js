@@ -1,9 +1,5 @@
 const wsServer = require('../sockets/ws-serv')
 const wsClient = require('../sockets/ws-client')
-const databaseService = require('./database')
-let db
-let openInboundConnections
-let openOutboundConnections
 
 class WebsocketService {
 
@@ -18,25 +14,6 @@ class WebsocketService {
     // TODO: Get adress&port from config module
     wsServer.init(listenPort)
     wsClient.connectToAll(remoteEndpoints)
-    db = new databaseService()
-  }
-
-  /**
-   * Makes database querys and returns promises
-   * @param {*} message
-   * @returns {Promise<*>}
-   */
-  makeDatabaseQuery = async (message) => {
-    switch (message.query) {
-      case 'addMessage':
-        return db.addMessageToDatabase(message.data)
-      case 'addChat':
-        return db.addChatToDatabase(message.data)
-      case 'searchMessages':
-        return db.searchMessageDatabase(message.data)
-      case 'searchChats':
-        return db.searchChatDatabase(message.data)
-    }
   }
 
   /**
@@ -47,13 +24,20 @@ class WebsocketService {
     wsServer.terminate()
   }
 
-  openInboundConnections = ()  => wsServer.openConnections()
-  openOutboundConnections = () => wsClient.openConnections()
+  openInboundConnections = ()  => {
+    return wsServer.openConnections()
+  }
 
-  openConnections = () => [
-    ...openInboundConnections(),
-    ...openOutboundConnections()
-  ]
+  openOutboundConnections = () => {
+    return wsClient.openConnections()
+  }
+
+  openConnections = () => {
+    return [
+      ...this.openInboundConnections(),
+      ...this.openOutboundConnections()
+    ]
+  }
 
   //const sendMessageToOne = () => {}
 

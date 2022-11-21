@@ -1,10 +1,8 @@
-
-// TODO: update connection "lists" at exit
-
 const logger    = require('../common/utils/logger')
 const nodeState = require('./src/state/node')
-const WebsocketService = require('./src/services/websockets')
-let websocketService
+const app = require('./src/app')
+
+app.initialize().then(() => {run()})
 
 // readline only for now for testing the connection
 const readline = require('readline')
@@ -16,40 +14,6 @@ const rl = readline.createInterface({
 
 logger.info('CHATSERVER node starting')
 logger.info('------------------------')
-
-const init = async () => {
-  websocketService = new WebsocketService()
-  try {
-    await nodeState.initialize()
-    
-    websocketService.initialize(
-      nodeState.getListenPort(),
-      nodeState.getOtherActiveNodes()
-    )
-
-    logger.info('Node initialized')
-    logger.info('----------------')
-    logger.info(`Listening for WS connection on PORT ${nodeState.getListenPort()}`)
-    logger.info(`Other nodes online: ${nodeState.getOtherActiveNodes()}`)
-    logger.info('----------------')
-  } catch (err) {
-    logger.error('initializing:', err)
-    process.exit(70) // sysexits.h EX_SOFTWARE (internal software error)
-  }
-}
-
-const terminate = async () => {
-  websocketService.terminate()
-  try {
-    await nodeState.close()
-    logger.info()
-    logger.info('------------------')
-    logger.info('CHATSERVER node is terminating')
-    logger.info(`Other nodes running: ${nodeState.getOtherActiveNodes()}`)
-  } catch (err) {
-    logger.error('terminating:', err)
-  }
-}
 
 const run = () => {
   rl.question('input: ', async (input) => {
@@ -64,8 +28,7 @@ const run = () => {
         break
       case 'peers':
         logger.info('Peers:')
-        logger.info('\tOutbound:', websocketService.openOutboundConnections())
-        logger.info('\tInbound:', websocketService.openInboundConnections())
+        logger.info('\tConnections:', app.returnConnections())
         run()
         break
       case 'nodes':
@@ -73,12 +36,6 @@ const run = () => {
         logger.info('nodes online:', nodeState.getOtherActiveNodes())
         // falls through
       case 'send':
-        const message = {
-          text: "moi",
-          sender: "me",
-          time: "10:30", 
-          chat_id: 1
-        }
         websocketService.broadcastMessageToAll(message)
       default:
         run()
@@ -86,10 +43,3 @@ const run = () => {
     }
   })
 }
-
-const initialize = async () => {
-  await init()
-  run()
-}
-
-initialize()
