@@ -16,5 +16,6 @@ npm run lint
 ```
 ### Production environment
 ```
-npm run start
+npm run start -- --port 10101
 ```
+The port number can be freely selected and does not need to be 10101.
