@@ -6,7 +6,7 @@
  * this module.
  */
 
-const NODE_DISCOVERY_URL  = 'http://localhost'
+const NODE_DISCOVERY_URL  = 'http://dsatter-discovery'
 const NODE_DISCOVERY_PORT = 8080
 
 const NODE_DEFAULT_PORT    = 49152

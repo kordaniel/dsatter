@@ -8,7 +8,7 @@ nodeDiscRouter.get('/active', (req, res) => {
 nodeDiscRouter.post('/active/register', (req, res) => {
   const { port }    = req.body
   const activeNodes = nodesRegister.getNodes()
-  const success     = nodesRegister.registerNode(port)
+  const success     = nodesRegister.registerNode(req.ip, port)
 
   const responseObj = {
     'wasRegistered': success ? port : false,
@@ -20,7 +20,7 @@ nodeDiscRouter.post('/active/register', (req, res) => {
 
 nodeDiscRouter.post('/active/unregister', (req, res) => {
   const { port } = req.body
-  const success  = nodesRegister.unregisterNode(port)
+  const success  = nodesRegister.unregisterNode(req.ip, port)
 
   const responseObj = {
     'wasUnregistered': success,

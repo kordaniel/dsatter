@@ -14,12 +14,23 @@ const rl = readline.createInterface({
   terminal: false
 })
 
+const getPortArg = () => {
+  const args = process.argv
+  const portIx = args.indexOf('--port') + 1
+  if(portIx > 0) {
+    return args[portIx]
+  }
+
+  return -1
+}
+
 logger.info('CHATSERVER node starting')
 logger.info('------------------------')
 
 const init = async () => {
   try {
-    await nodeState.initialize()
+    const portArg = getPortArg()
+    await nodeState.initialize(portArg)
     websocketService.initialize(
       nodeState.getListenPort(),
       nodeState.getOtherActiveNodes()
@@ -48,7 +59,8 @@ const terminate = async () => {
     logger.error('terminating:', err)
   }
 }
-
+//temporarily comment this because it breaks something
+/*
 const run = () => {
   rl.question('input: ', async (input) => {
     switch (input) {
@@ -77,9 +89,11 @@ const run = () => {
   })
 }
 
+*/
+
 const initialize = async () => {
   await init()
-  run()
+  //run()
 }
 
 initialize()
