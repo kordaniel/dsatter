@@ -1,0 +1,8 @@
+docker network create dsatter
+docker run -p 8080:8080 --mount type=volume,source=ds-vol-dvry,target=/db --net dsatter --name dsatter-discovery -d --rm dsatter-discovery
+sleep 2
+docker run -p 10101:10101 --mount type=volume,source=ds-vol-1,target=/db --net dsatter --expose 10101 --name dsatter-server-1 -d --rm dsatter-server 10101
+sleep 2
+docker run -p 10102:10102 --mount type=volume,source=ds-vol-2,target=/db --net dsatter --expose 10102 --name dsatter-server-2 -d --rm dsatter-server 10102
+sleep 2
+docker run -p 10103:10103 --mount type=volume,source=ds-vol-3,target=/db --net dsatter --expose 10103 --name dsatter-server-3 -d --rm dsatter-server 10103

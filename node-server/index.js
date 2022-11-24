@@ -12,6 +12,16 @@ const rl = readline.createInterface({
   terminal: false
 })
 
+const getPortArg = () => {
+  const args = process.argv
+  const portIx = args.indexOf('--port') + 1
+  if(portIx > 0) {
+    return args[portIx]
+  }
+
+  return -1
+}
+
 logger.info('CHATSERVER node starting')
 logger.info('------------------------')
 
