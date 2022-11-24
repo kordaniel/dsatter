@@ -25,6 +25,17 @@ const getPortArg = () => {
 }
 
 logger.info('CHATSERVER node starting')
+switch (process.env.NODE_ENV) {
+  case 'development':
+    logger.info('Running in development environment (localhost)')
+    break
+  case 'production':
+    logger.info('Running in production mode')
+    break
+  default:
+    logger.info('Running in unknown environment')
+    break
+}
 logger.info('------------------------')
 
 const init = async () => {
@@ -59,8 +70,10 @@ const terminate = async () => {
     logger.error('terminating:', err)
   }
 }
-//temporarily comment this because it breaks something
-/*
+
+/**
+ * Runs only in development environment, outside containers
+ */
 const run = () => {
   rl.question('input: ', async (input) => {
     switch (input) {
@@ -89,11 +102,11 @@ const run = () => {
   })
 }
 
-*/
-
 const initialize = async () => {
   await init()
-  //run()
+  if (process.env.NODE_ENV === 'development') {
+    run()
+  }
 }
 
 initialize()

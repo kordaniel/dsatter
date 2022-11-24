@@ -6,7 +6,7 @@ const NODE_DISCOVERY_PORT = commonConfig.NODE_DISCOVERY_PORT
 const NODE_DEFAULT_PORT    = commonConfig.NODE_DEFAULT_PORT
 const WS_PING_INTERVAL     = commonConfig.WS_PING_INTERVAL // ms
 const MAX_EXPECTED_LATENCY = commonConfig.MAX_EXPECTED_LATENCY // timeout
-const DISABLE_PORT_DANCING = true
+const DISABLE_PORT_DANCING = process.env.NODE_ENV !== 'development' // use port dancing when running in development environment
 
 
 

@@ -6,7 +6,9 @@
  * this module.
  */
 
-const NODE_DISCOVERY_URL  = 'http://dsatter-discovery'
+const NODE_DISCOVERY_URL  = process.env.NODE_ENV === 'development'
+  ? 'http://localhost'
+  : 'http://dsatter-discovery'
 const NODE_DISCOVERY_PORT = 8080
 
 const NODE_DEFAULT_PORT    = 49152
