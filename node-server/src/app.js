@@ -41,6 +41,7 @@ const run = () => {
  * Makes database querys and returns promises
  * @param {*} message
  * @returns {Promise<*>}
+ * @private
  */
 makeDatabaseQuery = async (message) => {
   switch (message.query) {
@@ -76,6 +77,7 @@ const initialize = async () => {
 
 module.exports = {
     initialize,
+    run,
     returnConnections,
     terminate
 }
