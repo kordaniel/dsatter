@@ -39,21 +39,21 @@ const run = () => {
 
 /**
  * Makes database querys and returns promises
- * @param {*} message
+ * @param {ClientMessage} message
  * @returns {Promise<*>}
  * @private
  */
 makeDatabaseQuery = async (message) => {
   switch (message.query) {
     case 'addMessage':
-    return db.addMessageToDatabase(message.data)
+      return db.addMessageToDatabase(message.data) 
     case 'addChat':
-    return db.addChatToDatabase(message.data)
+      return db.addChatToDatabase(message.data)
     case 'searchMessages':
-    return db.searchMessageDatabase(message.data)
+      return db.searchMessageDatabase(message.data)
     case 'searchChats':
-    return db.searchChatDatabase(message.data)
-}
+      return db.searchChatDatabase(message.data)
+  }
 }
 
 const terminate = async () => {

@@ -14,7 +14,7 @@ class DatabaseService {
    * Opens connection to local sqlite3 database
    */
   openDatabaseConnection = async () => {
-    db = new sqlite3.Database('../database/dsatter.db', (err) => {
+    db = new sqlite3.Database('./dsatter.db', (err) => {
       if (err) logger.error('Error in connecting to the database: ', err)
       else logger.info('Connected to dsatter database')
     })
@@ -27,7 +27,7 @@ class DatabaseService {
       id: 2,
       text: 'moi',
       sender: "Julia",
-      time: current.toLocaleString(),
+      time: current.toLocaleString([], {hour12: false}),
       chat_id: 1
     })
     console.log('db', databaseHandler.getMessages(1))

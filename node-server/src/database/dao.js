@@ -36,74 +36,76 @@ class Dao {
   }
 
   /**
-     * Creates table Messages if that does not exist.
-     * @returns {Promise}
-     */
+   * Creates table Messages if that does not exist.
+   * @returns {Promise}
+   */
   createTableMessages() {
     return this.executeQuery('run', `CREATE TABLE IF NOT EXISTS messages (
-            node_id INTEGER,
-            id INTEGER,
-            chat_id INTEGER REFERENCES chats,
-            messageText TEXT,
-            messageDateTime TEXT,
-            messageSender TEXT,
-            PRIMARY KEY (node_id, id))`)
+      node_id INTEGER,
+      id INTEGER,
+      chat_id INTEGER REFERENCES chats,
+      messageText TEXT,
+      messageDateTime TEXT,
+      messageSender TEXT,
+      PRIMARY KEY (node_id, id))`)
   }
 
   /**
-     * Creates table Messages if that does not exist.
-     * @returns {Promise}
-     */
+   * Creates table Messages if that does not exist.
+   * @returns {Promise}
+   */
   createTableChats() {
     return this.executeQuery('run', `CREATE TABLE IF NOT EXISTS chats (
-            id INTEGER PRIMARY KEY,
-            chatName TEXT)`)
+      node_id INTEGER,
+      id INTEGER,
+      chat_id INTEGER PRIMARY KEY,
+      chatName TEXT)`)
   }
 
   /**
-     * Returns chat with given chatID
-     * @param {number} chatId
-     * @returns {Promise}
-     */
+   * Returns chat with given chatID
+   * @param {number} chatId
+   * @returns {Promise}
+   */
   getChat(chatId) {
     return this.executeQuery('get', `SELECT chatName AS 'name'
-            FROM chats WHERE chat_id = :chatId`, [chatId])
+      FROM chats WHERE chat_id = :chatId`, [chatId])
   }
 
   /**
-     * Returns messages with given chatID
-     * @param {number} chatId
-     * @returns {Promise}
-     */
+   * Returns messages with given chatID
+   * @param {number} chatId
+   * @returns {Promise}
+   */
   getMessages(chatId) {
     return this.executeQuery('get', `SELECT messageText AS 'text',
-            messageDateTime AS 'time',
-            messageSender AS 'sender'
-            FROM messages WHERE chat_id = :chatId`, [chatId])
+      messageDateTime AS 'time',
+      messageSender AS 'sender'
+      FROM messages WHERE chat_id = :chatId`, [chatId])
   }
 
   /**
      * Adds new chat to table chats
-     * @param {string} chatName
+     * @param {Chat} chat
      * @returns {Promise}
      */
-  addNewChat(chatName) {
+  addNewChat(chat) {
     return this.executeQuery('run', `INSERT INTO chats
-            (chatName) VALUES (?)`, [chatName])
+      (node_id, id, chat_id, chatName) VALUES (?, ?, ?, ?)`,
+      [chat.nodeId, chat.id, chat.chatId, chat.chatName])
   }
 
   /**
      * Adds new message to table messages
-     * @param {text: string, time: string, sender: string, chat_id: integer} message
+     * @param {Message} message
      * @returns {Promise}
      */
   addNewMessage(message) {
-    const { text, time, sender, chat_id } = message
     return this.executeQuery('run', `INSERT INTO messages
-            (messageText, messageDateTime, messageSender, chat_id) 
-            VALUES (?, ?, ?, ?)`, [text, time, sender, chat_id])
+            (node_id, id, messageText, messageDateTime, messageSender, chat_id) 
+            VALUES (?, ?, ?, ?, ?, ?)`,
+            [message.nodeId, message.id, message.text, message.time, message.sender, message.chat_id])
   }
-
 }
 
 module.exports = Dao
