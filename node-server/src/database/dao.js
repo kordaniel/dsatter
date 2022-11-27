@@ -1,6 +1,8 @@
+const Querier = require('./querier')
+
 /**
  * Makes querys to dsatter database
- * 
+ *
  * @typedef {import('../../../common/utils/types/datatypes).Message} Message
  * @typedef {import('../../../common/utils/types/datatypes).Chat} Chat
  */
@@ -8,46 +10,26 @@ class Dao {
 
   /**
      * Constructor
-     * @param {*} database
+     * @param {Querier} querier
      */
-  constructor(database) {
-    this.db = database
+  constructor(querier) {
+    this.db = querier
   }
 
-  /**
-     * Executes database queries
-     * @param {string} methodName
-     * @param {string} query
-     * @param {string[]} params
-     * @returns {Promise}
-     */
-  executeQuery = async (methodName, query, params = []) => {
-    return new Promise((resolve, reject) => {
-      this.db[methodName](query, params, function(err, data) {
-        console.log(data)
-        if (err) {
-          console.log('Error running sql: ' + query)
-          console.log(err)
-          reject(err)
-        } else
-          resolve(data)
-      })
-    })
-  }
 
   /**
    * Creates table Messages if that does not exist.
    * @returns {Promise}
    */
   createTableMessages() {
-    return this.executeQuery('run', `CREATE TABLE IF NOT EXISTS messages (
+    return this.db.executeQuery('run', `CREATE TABLE IF NOT EXISTS messages (
       node_id INTEGER,
       id INTEGER,
+      messageId INTEGER PRIMARY KEY,
       chat_id INTEGER REFERENCES chats,
       messageText TEXT,
       messageDateTime TEXT,
-      messageSender TEXT,
-      PRIMARY KEY (node_id, id))`)
+      messageSender TEXT)`)
   }
 
   /**
@@ -55,11 +37,27 @@ class Dao {
    * @returns {Promise}
    */
   createTableChats() {
-    return this.executeQuery('run', `CREATE TABLE IF NOT EXISTS chats (
+    return this.db.executeQuery('run', `CREATE TABLE IF NOT EXISTS chats (
       node_id INTEGER,
       id INTEGER,
-      chat_id INTEGER PRIMARY KEY,
+      chatId INTEGER PRIMARY KEY,
       chatName TEXT)`)
+  }
+
+  /**
+   * Returns all chats
+   * @returns {Promise}
+   */
+  getAllChats() {
+    return this.db.executeQuery('all', 'SELECT * FROM chats')
+  }
+
+  /**
+   * Returns all messages
+   * @returns {Promise}
+   */
+  getAllMessages() {
+    return this.db.executeQuery('all', 'SELECT * FROM messages')
   }
 
   /**
@@ -68,8 +66,8 @@ class Dao {
    * @returns {Promise}
    */
   getChat(chatId) {
-    return this.executeQuery('get', `SELECT chatName AS 'name'
-      FROM chats WHERE chat_id = :chatId`, [chatId])
+    return this.db.executeQuery('get', `SELECT chatName AS 'name'
+      FROM chats WHERE chatId = :chatId`, [chatId])
   }
 
   /**
@@ -78,7 +76,7 @@ class Dao {
    * @returns {Promise}
    */
   getMessages(chatId) {
-    return this.executeQuery('get', `SELECT messageText AS 'text',
+    return this.db.executeQuery('all', `SELECT messageText AS 'text',
       messageDateTime AS 'time',
       messageSender AS 'sender'
       FROM messages WHERE chat_id = :chatId`, [chatId])
@@ -90,9 +88,9 @@ class Dao {
      * @returns {Promise}
      */
   addNewChat(chat) {
-    return this.executeQuery('run', `INSERT INTO chats
-      (node_id, id, chat_id, chatName) VALUES (?, ?, ?, ?)`,
-      [chat.nodeId, chat.id, chat.chatId, chat.chatName])
+    return this.db.executeQuery('run', `INSERT INTO chats
+      (node_id, id, chatId, chatName) VALUES (?, ?, ?, ?)`,
+    [chat.nodeId, chat.id, chat.chatId, chat.name])
   }
 
   /**
@@ -101,10 +99,10 @@ class Dao {
      * @returns {Promise}
      */
   addNewMessage(message) {
-    return this.executeQuery('run', `INSERT INTO messages
-            (node_id, id, messageText, messageDateTime, messageSender, chat_id) 
-            VALUES (?, ?, ?, ?, ?, ?)`,
-            [message.nodeId, message.id, message.text, message.time, message.sender, message.chat_id])
+    return this.db.executeQuery('run', `INSERT INTO messages
+      (node_id, id, messageId, messageText, messageDateTime, messageSender, chat_id) 
+      VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [message.nodeId, message.id, message.messageId, message.text, message.dateTime, message.sender, message.chat_id])
   }
 }
 

@@ -1,8 +1,8 @@
-const sqlite3 = require('sqlite3').verbose()
 const logger    = require('../../../common/utils/logger')
+const testData = require('../utils/test-data')
+const querier = require('../database/querier')
 const Dao = require('../database/dao')
-let databaseHandler
-let db
+let dao = new Dao(querier)
 
 /**
  * @typedef {import('../../../common/utils/types/datatypes).Message} Message
@@ -11,26 +11,20 @@ let db
 class DatabaseService {
 
   /**
-   * Opens connection to local sqlite3 database
+   * Initiates database
    */
-  openDatabaseConnection = async () => {
-    db = new sqlite3.Database('./dsatter.db', (err) => {
-      if (err) logger.error('Error in connecting to the database: ', err)
-      else logger.info('Connected to dsatter database')
-    })
-    databaseHandler = new Dao(db)
-    databaseHandler.createTableChats()
-    databaseHandler.createTableMessages()
-    const current = new Date()
-    databaseHandler.addNewMessage({
-      node_id: 1,
-      id: 2,
-      text: 'moi',
-      sender: "Julia",
-      time: current.toLocaleString([], {hour12: false}),
-      chat_id: 1
-    })
-    console.log('db', databaseHandler.getMessages(1))
+  initiateDatabase = async () => {
+    querier.initiateDatabase()
+  }
+
+  /**
+   * Opens connection and initiates tables
+   * @param {Querier} q
+   */
+  openDatabaseConnection = async (d = dao) => {
+    dao = d
+    await dao.createTableChats()
+    await dao.createTableMessages()
   }
 
   /**
@@ -41,11 +35,11 @@ class DatabaseService {
    */
   addMessageToDatabase = async (data) => {
     if (data.id)
-      return databaseHandler.addNewMessage(data)
+      return dao.addNewMessage(data)
     else {
-      const message = {...data, id: createNewMessageId()}
-      return databaseHandler.addNewMessage(message)
-    }    
+      const message = { ...data, id: this.createNewMessageId() }
+      return dao.addNewMessage(message)
+    }
   }
 
   /**
@@ -56,12 +50,29 @@ class DatabaseService {
    */
   addChatToDatabase = async (data) => {
     if (data.id)
-      return databaseHandler.addNewChat(data)
+      return dao.addNewChat(data)
     else {
-      const chat = {...data, id: createNewChatId()}
-      return databaseHandler.addNewChat(chat)
+      const chat = { ...data, id: this.createNewChatId() }
+      return dao.addNewChat(chat)
     }
   }
+
+  /**
+   * Returns all messages in message database
+   * @returns {Promise<*>}
+   */
+  getAllMessages = async () => {
+    return dao.getAllMessages()
+  }
+
+  /**
+   * Returns all chats in chat database
+   * @returns {Promise<*>}
+   */
+  getAllChats = async () => {
+    return dao.getAllChats()
+  }
+
 
   /**
    * Searches message database with given chatId
@@ -70,7 +81,7 @@ class DatabaseService {
    * @returns {Promise<*>}
    */
   searchMessageDatabase = async (chatId) => {
-    return databaseHandler.getMessages(chatId)
+    return dao.getMessages(chatId)
   }
 
   /**
@@ -80,25 +91,31 @@ class DatabaseService {
    * @returns {Promise<*>}
    */
   searchChatDatabase = async (chatId) => {
-    return databaseHandler.getChat(chatId)
+    return dao.getChat(chatId)
   }
 
   /**
    * Closes connection to local sqlite3 database
    */
   closeDataBaseConnection = () => {
-    db.close((err) => {
-      if (err) logger.error('Error in closing database connection: ', err)
-      else logger.info('Database connection closed')
-    })
+    querier.closeDatabaseConnection()
   }
 
   createNewChatId() {
-    return databaseHandler.getLastChatId() + 1
+    return 102   // dao.getLastChatId() + 1
   }
 
   createNewMessageId() {
-    return databaseHandler.getLastMessageId() + 1
+    return 286   // dao.getLastMessageId() + 1
+  }
+
+  readTestData = async () => {
+    for (let c of testData.chats)
+      this.addChatToDatabase(c)
+    for (let m of testData.messages)
+      this.addMessageToDatabase(m)
+    logger.info(await this.getAllChats())
+    logger.info(await this.getAllMessages())
   }
 }
 

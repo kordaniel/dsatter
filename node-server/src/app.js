@@ -8,7 +8,9 @@ let db
 const init = async () => {
   websocketService = new WebsocketService()
   db = new DatabaseService()
-  db.openDatabaseConnection()
+  await db.initiateDatabase()
+  await db.openDatabaseConnection()
+
   try {
     await nodeState.initialize()
     websocketService.initialize(
@@ -34,7 +36,7 @@ const returnConnections = () => {
  * Listen to Websocket messages and react
  */
 const run = () => {
-  
+
 }
 
 /**
@@ -43,10 +45,10 @@ const run = () => {
  * @returns {Promise<*>}
  * @private
  */
-makeDatabaseQuery = async (message) => {
+const makeDatabaseQuery = async (message) => {
   switch (message.query) {
     case 'addMessage':
-      return db.addMessageToDatabase(message.data) 
+      return db.addMessageToDatabase(message.data)
     case 'addChat':
       return db.addChatToDatabase(message.data)
     case 'searchMessages':
@@ -76,8 +78,8 @@ const initialize = async () => {
 }
 
 module.exports = {
-    initialize,
-    run,
-    returnConnections,
-    terminate
+  initialize,
+  run,
+  returnConnections,
+  terminate
 }
