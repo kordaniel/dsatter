@@ -2,7 +2,6 @@ const logger    = require('../../../common/utils/logger')
 const testData = require('../utils/test-data')
 const querier = require('../database/querier')
 const Dao = require('../database/dao')
-let dao = new Dao(querier)
 
 /**
  * @typedef {import('../../../common/utils/types/datatypes).Message} Message
