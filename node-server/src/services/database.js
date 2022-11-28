@@ -22,7 +22,8 @@ class DatabaseService {
    * @param {Querier} q
    */
   openDatabaseConnection = async (d = dao) => {
-    dao = d
+openDatabaseConnection = async (d = Dao(querier)) => {
+
     await dao.createTableChats()
     await dao.createTableMessages()
   }
