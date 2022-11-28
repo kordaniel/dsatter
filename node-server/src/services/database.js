@@ -2,6 +2,7 @@ const logger    = require('../../../common/utils/logger')
 const testData = require('../utils/test-data')
 const querier = require('../database/querier')
 const Dao = require('../database/dao')
+let dao = new Dao(querier)
 
 /**
  * @typedef {import('../../../common/utils/types/datatypes).Message} Message
@@ -18,11 +19,10 @@ class DatabaseService {
 
   /**
    * Opens connection and initiates tables
-   * @param {Querier} q
+   * @param {Dao} d
    */
   openDatabaseConnection = async (d = dao) => {
-openDatabaseConnection = async (d = Dao(querier)) => {
-
+    dao = d
     await dao.createTableChats()
     await dao.createTableMessages()
   }
