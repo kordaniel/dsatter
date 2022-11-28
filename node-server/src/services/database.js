@@ -102,11 +102,11 @@ class DatabaseService {
   }
 
   createNewChatId() {
-    return 102   // dao.getLastChatId() + 1
+    return dao.getLastChatId() + 1
   }
 
   createNewMessageId() {
-    return 286   // dao.getLastMessageId() + 1
+    return dao.getLastMessageId() + 1
   }
 
   readTestData = async () => {

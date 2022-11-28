@@ -108,6 +108,16 @@ class Dao {
       VALUES (?, ?, ?, ?, ?, ?, ?)`,
     [message.nodeId, message.id, message.messageId, message.text, message.dateTime, message.sender, message.chat_id])
   }
+
+  getLastChatId(nodeId) {
+    return this.db.executeQuery('get', `SELECT MAX(id)
+      FROM chats WHERE node_id = :nodeId`, [nodeId])
+  }
+
+  getLastMessageId(nodeId) {
+    return this.db.executeQuery('get', `SELECT MAX(id)
+      FROM messages WHERE node_id = :nodeId`, [nodeId])
+  }
 }
 
 module.exports = Dao
