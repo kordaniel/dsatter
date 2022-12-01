@@ -1,5 +1,39 @@
+const isEmptyArray = (obj) => {
+  return Array.isArray(obj) && obj.length === 0
+}
+
 const isNonEmptyArray = (obj) => {
   return Array.isArray(obj) && obj.length
+}
+
+const shallowEqual = (obj1, obj2) => {
+  const keys1 = Object.keys(obj1)
+  const keys2 = Object.keys(obj2)
+
+  if (keys1.length !== keys2.length) {
+    return false
+  }
+
+  for (let key of keys1) {
+    if (obj1[key] !== obj2[key]) {
+      return false
+    }
+  }
+
+  return true
+}
+
+/**
+ * Shuffles the array in place. Mutates the arr passed as argument, does NOT return a new array.
+ * @param {Object[]} arr Array object to shuffle
+ */
+const shuffleArray = (arr) => {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    const temp = arr[i]
+    arr[i] = arr[j]
+    arr[j] = temp
+  }
 }
 
 const getRandomElementFromArr = (obj) => {
@@ -17,6 +51,7 @@ const randomInt = (lower, upper) => {
   const upper_int = Math.floor(upper)
   return Math.floor(Math.random() * (upper_int - low_int + 1)) + low_int
 }
+
 
 ///**
 // * Parses command line arguments array into a map holding the key val pairs.
@@ -47,7 +82,10 @@ const randomInt = (lower, upper) => {
 //}
 
 module.exports = {
+  isEmptyArray,
   isNonEmptyArray,
+  shallowEqual,
+  shuffleArray,
   getRandomElementFromArr,
   sleep,
   randomInt
