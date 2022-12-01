@@ -1,4 +1,4 @@
-const commonConfig = require('../../common/utils/config')
+const commonConfig = require('../../../common/utils/config')
 
 const NODE_DISCOVERY_URL  = commonConfig.NODE_DISCOVERY_URL
 const NODE_DISCOVERY_PORT = commonConfig.NODE_DISCOVERY_PORT
