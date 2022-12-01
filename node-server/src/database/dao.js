@@ -104,7 +104,7 @@ class Dao {
      */
   addNewMessage(message) {
     return this.db.executeQuery('run', `INSERT INTO messages
-      (node_id, id, messageId, messageText, messageDateTime, messageSender, chat_id) 
+      (node_id, id, messageId, messageText, messageDateTime, messageSender, chat_id)
       VALUES (?, ?, ?, ?, ?, ?, ?)`,
     [message.nodeId, message.id, message.messageId, message.text, message.dateTime, message.sender, message.chat_id])
   }

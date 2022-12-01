@@ -5,6 +5,16 @@ const DatabaseService = require('./services/database')
 let websocketService
 let db
 
+const getPortArg = () => {
+  const args = process.argv
+  const portIx = args.indexOf('--port') + 1
+  if(portIx > 0) {
+    return args[portIx]
+  }
+
+  return -1
+}
+
 const initialize = async () => {
   websocketService = new WebsocketService()
   db = new DatabaseService()
@@ -12,7 +22,8 @@ const initialize = async () => {
   await db.openDatabaseConnection()
 
   try {
-    await nodeState.initialize()
+    const ownPort = getPortArg()
+    await nodeState.initialize(ownPort)
     websocketService.initialize(
       nodeState.getListenPort(),
       nodeState.getOtherActiveNodes()

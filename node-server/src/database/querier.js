@@ -1,5 +1,6 @@
 const sqlite3 = require('sqlite3').verbose()
 const logger  = require('../../../common/utils/logger')
+const config = require('../utils/config.js')
 
 let db
 
@@ -7,7 +8,7 @@ let db
  * Opens or creates local sqlite3 database
  */
 const initiateDatabase = async () => {
-  db = new sqlite3.Database('./dsatter.db', (err) => {
+  db = new sqlite3.Database(config.DB_PATH, (err) => {
     if (err) logger.error('Error in connecting to the database: ', err)
     else logger.info('Connected to dsatter database')
   })
