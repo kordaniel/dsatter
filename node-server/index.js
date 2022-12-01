@@ -20,10 +20,10 @@ const run = () => {
     switch (input) {
       case 'quit':
         rl.close()
-        await terminate()
+        await app.terminate()
         break
       case 'broadcast':
-        websocketService.broadcastMessageToAll(`MESSAGE to all nodes: I'm listening on port: ${nodeState.getListenPort()}`)
+        app.broadcastMessageToAll(`MESSAGE to all nodes: I'm listening on port: ${nodeState.getListenPort()}`)
         run()
         break
       case 'peers':
@@ -34,9 +34,10 @@ const run = () => {
       case 'nodes':
         // The ones that were running when this node instance registered
         logger.info('nodes online:', nodeState.getOtherActiveNodes())
+        break
         // falls through
-      case 'send':
-        websocketService.broadcastMessageToAll(message)
+      // case 'send':
+      //   app.broadcastMessageToAll(message)
       default:
         run()
         break

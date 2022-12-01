@@ -1,5 +1,3 @@
-const Querier = require('./querier')
-
 /**
  * Makes querys to dsatter database
  *
@@ -49,7 +47,8 @@ class Dao {
    * @returns {Promise}
    */
   getAllChats() {
-    return this.db.executeQuery('all', 'SELECT * FROM chats')
+    return this.db.executeQuery('all', `SELECT chatName AS 'name'
+    chatId AS 'chatId' FROM messages`)
   }
 
   /**
@@ -57,7 +56,12 @@ class Dao {
    * @returns {Promise}
    */
   getAllMessages() {
-    return this.db.executeQuery('all', 'SELECT * FROM messages')
+    return this.db.executeQuery('all', `SELECT node_id AS 'nodeId'
+    id AS 'id',
+    chat_id AS 'chatId',
+    messageText AS 'text',
+    messageDateTime AS 'time',
+    messageSender AS 'sender' FROM messages`)
   }
 
   /**
@@ -100,9 +104,19 @@ class Dao {
      */
   addNewMessage(message) {
     return this.db.executeQuery('run', `INSERT INTO messages
-      (node_id, id, messageId, messageText, messageDateTime, messageSender, chat_id) 
+      (node_id, id, messageId, messageText, messageDateTime, messageSender, chat_id)
       VALUES (?, ?, ?, ?, ?, ?, ?)`,
     [message.nodeId, message.id, message.messageId, message.text, message.dateTime, message.sender, message.chat_id])
+  }
+
+  getLastChatId(nodeId) {
+    return this.db.executeQuery('get', `SELECT MAX(id)
+      FROM chats WHERE node_id = :nodeId`, [nodeId])
+  }
+
+  getLastMessageId(nodeId) {
+    return this.db.executeQuery('get', `SELECT MAX(id)
+      FROM messages WHERE node_id = :nodeId`, [nodeId])
   }
 }
 

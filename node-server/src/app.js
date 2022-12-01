@@ -15,7 +15,7 @@ const getPortArg = () => {
   return -1
 }
 
-const init = async () => {
+const initialize = async () => {
   websocketService = new WebsocketService()
   db = new DatabaseService()
   await db.initiateDatabase()
@@ -40,7 +40,14 @@ const init = async () => {
 }
 
 const returnConnections = () => {
-  return websocketService.openConnections()
+  return [
+    websocketService.openInboundConnections(),
+    websocketService.openOutboundConnections()
+  ]
+}
+
+const broadcastMessageToAll = (message) => {
+  return websocketService.broadcastMessageToAll(message)
 }
 
 /**
@@ -82,15 +89,10 @@ const terminate = async () => {
   }
 }
 
-
-
-const initialize = async () => {
-  await init()
-}
-
 module.exports = {
   initialize,
   run,
   returnConnections,
+  broadcastMessageToAll,
   terminate
 }
