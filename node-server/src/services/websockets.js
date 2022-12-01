@@ -45,6 +45,10 @@ class WebsocketService {
     wsServer.broadcastToAll(message)
     wsClient.broadcastToAll(message)
   }
+
+  broadcastToServers = (message) => wsClient.broadcastToAll(message)
+
+  sendToAny = wsClient.sendToAny
 }
 
 module.exports = WebsocketService

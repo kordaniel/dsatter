@@ -117,6 +117,8 @@ class DatabaseService {
     logger.info(await this.getAllChats())
     logger.info(await this.getAllMessages())
   }
+
+  getDao = () => dao
 }
 
 module.exports = DatabaseService

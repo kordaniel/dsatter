@@ -118,6 +118,14 @@ class Dao {
     return this.db.executeQuery('get', `SELECT MAX(id)
       FROM messages WHERE node_id = :nodeId`, [nodeId])
   }
+
+  getLastMessageIds() {
+    return this.db.executeQuery('get', `SELECT node_id, MAX(id) FROM messages GROUP BY node_id`)
+  }
+
+  getMessagesAfter(nodeId, id) {
+    return this.db.executeQuery('get', `SELECT * FROM messages WHERE node_id = :nodeID AND id > :id`, [nodeId, id])
+  }
 }
 
 module.exports = Dao

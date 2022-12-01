@@ -17,7 +17,7 @@ const getRemoteAddress = (req) => `${req.socket.remoteAddress}:${req.socket.remo
  * Opens websocket and handles all its traffic
  * @param {number} port
  */
-const init = (port) => {
+const init = (port, synchronizer) => {
   assert(wss === null, 'ws-serv init(): wss is not null')
 
   wss = new WebSocketServer({ port })
@@ -49,9 +49,11 @@ const init = (port) => {
       const message = isBinary ? data : data.toString()
       if (isBinary) {
         logger.info(`RECEIVED message from ${getRemoteAddress(req)} -> [[BINARY data not printed]]`)
+      } else if (typeof data === 'object' && data.name === 'syncRequest') {
+	const diff = synchronizer.getMessageDiff(data.payload)
+	ws.send({ name: 'syncReply', payload: diff })
       } else {
         logger.info(`RECEIVED message from ${getRemoteAddress(req)} -> [[${message}]]`)
-
       }
     })
 

@@ -2,8 +2,10 @@ const logger    = require('../../common/utils/logger')
 const nodeState = require('./state/node')
 const WebsocketService = require('./services/websockets')
 const DatabaseService = require('./services/database')
+const Synchronizer = require('./services/synchronizer.js')
 let websocketService
 let db
+let synchronizer
 
 const getPortArg = () => {
   const args = process.argv
@@ -20,6 +22,7 @@ const initialize = async () => {
   db = new DatabaseService()
   await db.initiateDatabase()
   await db.openDatabaseConnection()
+  synchronizer = new Synchronizer(20, db.getDao(), websocketService)
 
   try {
     const ownPort = getPortArg()
@@ -33,6 +36,7 @@ const initialize = async () => {
     logger.info(`Listening for WS connection on PORT ${nodeState.getListenPort()}`)
     logger.info(`Other nodes online: ${nodeState.getOtherActiveNodes()}`)
     logger.info('----------------')
+    synchronizer.start()
   } catch (err) {
     logger.error('initializing:', err)
     process.exit(70) // sysexits.h EX_SOFTWARE (internal software error)

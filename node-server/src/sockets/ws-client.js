@@ -1,6 +1,7 @@
 const logger    = require('../../../common/utils/logger')
 const config    = require('../utils/config')
 const nodeState = require('../state/node')
+const { getRandomElementFromArr }    = require('../../../common/utils/helpers.js')
 
 const { WebSocket } = require('ws')
 
@@ -29,7 +30,7 @@ const heartbeat = (ws) => {
 const getRemoteAddress = (ws) => ws._url
 const getConnections = () => Object.keys(connections)
 
-const connect = (socket) => {
+const connect = (socket, sync) => {
   if(Object.hasOwn(connections, socket)) {
     logger.error('Connection already in map:', socket)
     return
@@ -67,6 +68,8 @@ const connect = (socket) => {
     const message = isBinary ? data : data.toString()
     if (isBinary) {
       logger.info(`RECEIVED message from ${getRemoteAddress(ws)} -> [[BINARY data not printed]]`)
+    } else if (typeof data === 'object' && data.name === 'syncReply') {
+      sync.updateMessages(messageDiff)
     } else {
       logger.info(`RECEIVED message from ${getRemoteAddress(ws)} -> [[${message}]]`)
     }
@@ -115,11 +118,16 @@ const broadcastToAll = (message) => {
   })
 }
 
+const sendToAny = (message) => {
+  getRandomElementFromArr(getConnections).send(message)
+}
+
 module.exports = {
   connect,
   disconnect,
   connectToAll,
   disconnectFromAll,
   openConnections,
+  sendToAny,
   broadcastToAll
 }
