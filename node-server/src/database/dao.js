@@ -47,8 +47,8 @@ class Dao {
    * @returns {Promise}
    */
   getAllChats() {
-    return this.db.executeQuery('all', `SELECT chatName AS 'name'
-      chatId AS 'chatId' FROM chats`)
+    return this.db.executeQuery('all', `SELECT chatId AS 'chatId',
+    chatName AS 'name' FROM chats`)
   }
 
   /**
