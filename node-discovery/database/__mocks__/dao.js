@@ -4,7 +4,7 @@ const testData = require('../../utils/test-data')
 class Dao {
   nodes
   activeNodes
-  
+
   // eslint-disable-next-line no-unused-vars
   constructor(querier) {
     logger.info('Mock database created')

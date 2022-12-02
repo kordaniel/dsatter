@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+
 const querier = require('../../src/database/querier.js')
 const Dao = require('../../src/database/dao.js')
 const DatabaseService = require('../../src/services/database.js')

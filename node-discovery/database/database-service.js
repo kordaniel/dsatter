@@ -47,7 +47,7 @@ class DatabaseService {
    * @param {ActiveNode} data
    * @returns {Promise<*>}
    */
-   addActiveNodeToDatabase = async (data) => {
+  addActiveNodeToDatabase = async (data) => {
     if (!data.id)
       return
     else {
@@ -67,7 +67,7 @@ class DatabaseService {
    * Returns all active nodes in node database
    * @returns {Promise<*>}
    */
-   getAllActiveNodes = async () => {
+  getAllActiveNodes = async () => {
     return dao.getAllActiveNodes()
   }
 
@@ -102,9 +102,9 @@ class DatabaseService {
 
   readTestData = async () => {
     for (let n of testData.nodes)
-      this.addNodeToDatabase(c)
+      this.addNodeToDatabase(n)
     for (let a of testData.activeNodes)
-      this.addMessageToDatabase(m)
+      this.addMessageToDatabase(a)
     logger.info(await this.getAllNodes())
     logger.info(await this.getAllActiveNodes())
   }

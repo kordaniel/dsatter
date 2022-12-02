@@ -21,7 +21,7 @@ class Dao {
    */
   createTableNodes() {
     return this.db.executeQuery('run', `CREATE TABLE IF NOT EXISTS nodes (
-      id INTEGER PRIMARY KEY,
+      id INTEGER PRIMARY KEY NOT NULL,
       password TEXT)`)
   }
 
@@ -31,10 +31,10 @@ class Dao {
    */
   createTableActiveNodes() {
     return this.db.executeQuery('run', `CREATE TABLE IF NOT EXISTS activeNodes (
-      id INTEGER PRIMARY KEY,
-      syncport INTEGER,
-      clientport INTEGER,
-      address TEXT)`)
+      id INTEGER PRIMARY KEY NOT NULL,
+      syncport INTEGER NOT NULL,
+      clientport INTEGER NOT NULL,
+      address TEXT NOT NULL)`)
   }
 
   /**
@@ -42,7 +42,7 @@ class Dao {
    * @returns {Promise}
    */
   getAllNodes() {
-    return this.db.executeQuery('all', `SELECT id AS 'id' FROM nodes`)
+    return this.db.executeQuery('all', 'SELECT id AS \'id\' FROM nodes')
   }
 
   /**
@@ -62,7 +62,7 @@ class Dao {
    * @returns {Promise}
    */
   getNode(id) {
-    return this.db.executeQuery('get', `SELECT * FROM chats WHERE id = :id`, [id])
+    return this.db.executeQuery('get', 'SELECT * FROM chats WHERE id = :id', [id])
   }
 
   /**
@@ -82,21 +82,21 @@ class Dao {
    * @param {Node} node
    * @returns {Promise}
    */
-  addNewChat(node) {
+  addNewNode(node) {
     return this.db.executeQuery('run', `INSERT INTO nodes
       (id, password) VALUES (?, ?)`,
-      [node.id, node.password])
+    [node.id, node.password])
   }
 
   /**
    * Adds new activeNode to table activeNodes
-   * @param {ActiveNodes} node
+   * @param {ActiveNode} node
    * @returns {Promise}
    */
-  addNewMessage(mode) {
+  addNewActiveNode(node) {
     return this.db.executeQuery('run', `INSERT INTO activeNodes
       (id, syncport, clientport, address) VALUES (?, ?, ?, ?)`,
-      [node.id, node.syncport, node.clientport, node.address])
+    [node.id, node.syncport, node.clientport, node.address])
   }
 
   /**
@@ -104,7 +104,7 @@ class Dao {
    * @returns {Promise}
    */
   getLastNodeId() {
-    return this.db.executeQuery('get', `SELECT MAX(id) FROM nodes`)
+    return this.db.executeQuery('get', 'SELECT MAX(id) FROM nodes')
   }
 }
 

@@ -22,14 +22,14 @@ const activeNodes = [
     id: 112,
     syncport: 10001,
     clientport: 12001,
-    address: "address1"
+    address: 'address1'
   },
   {
     id: 56,
     syncport: 10002,
     clientport: 12002,
-    address: "address2"
+    address: 'address2'
   }
 ]
 
-module.exports = {nodes, activeNodes}
+module.exports = { nodes, activeNodes }

@@ -21,10 +21,10 @@ class Dao {
    */
   createTableMessages() {
     return this.db.executeQuery('run', `CREATE TABLE IF NOT EXISTS messages (
-      node_id INTEGER,
-      id INTEGER,
-      messageId INTEGER PRIMARY KEY,
-      chat_id INTEGER REFERENCES chats,
+      node_id INTEGER NOT NULL,
+      id INTEGER NOT NULL,
+      messageId INTEGER PRIMARY KEY NOT NULL,
+      chat_id INTEGER NOT NULL REFERENCES chats,
       messageText TEXT,
       messageDateTime TEXT,
       messageSender TEXT)`)
@@ -36,9 +36,9 @@ class Dao {
    */
   createTableChats() {
     return this.db.executeQuery('run', `CREATE TABLE IF NOT EXISTS chats (
-      node_id INTEGER,
-      id INTEGER,
-      chatId INTEGER PRIMARY KEY,
+      node_id INTEGER NOT NULL,
+      id INTEGER NOT NULL,
+      chatId INTEGER PRIMARY KEY NOT NULL,
       chatName TEXT)`)
   }
 
@@ -94,7 +94,7 @@ class Dao {
   addNewChat(chat) {
     return this.db.executeQuery('run', `INSERT INTO chats
       (node_id, id, chatId, chatName) VALUES (?, ?, ?, ?)`,
-      [chat.nodeId, chat.id, chat.chatId, chat.name])
+    [chat.nodeId, chat.id, chat.chatId, chat.name])
   }
 
   /**
@@ -106,7 +106,7 @@ class Dao {
     return this.db.executeQuery('run', `INSERT INTO messages
       (node_id, id, messageId, messageText, messageDateTime, messageSender, chat_id)
       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [message.nodeId, message.id, message.messageId, message.text, message.dateTime, message.sender, message.chat_id])
+    [message.nodeId, message.id, message.messageId, message.text, message.dateTime, message.sender, message.chat_id])
   }
 
   /**
