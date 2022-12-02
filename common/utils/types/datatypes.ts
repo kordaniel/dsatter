@@ -2,58 +2,61 @@
  * Message in database
  */
 type Message = {
-    nodeId: number, // given by discovery node
-    id: number, // given by the node, manual autoincrement
-    text: string,
-    time: string,
-    sender: string,
-    chatId: string //node_id + id of the chat
+  nodeId: number, // given by discovery node
+  id: number, // given by the node, manual autoincrement
+  messageId: string, //node_id + id
+  text: string,
+  datetime: string,
+  sender: string,
+  chatId: string //node_id + id of the chat
 }
 
 /**
  * Chat in database
  */
 type Chat = {
-    nodeId: number, // given by discovery node
-    id: number, // given by the node, manual autoincrement
-    chatId: string, //node_id + id
-    chatname: string
+  nodeId: number, // given by discovery node
+  id: number, // given by the node, manual autoincrement
+  chatId: string, //node_id + id
+  name: string
 }
 
 /**
  * Message from client to server
  */
 type ClientMessage = {
-    messagetext: string,
-    sender: string,
-    chatId: number
+  type: string,
+  messagetext: string,
+  sender: string,
+  chatId: number
 }
 
 /**
  * Data between servers
  */
 type SyncMessage = {
-    messages: Message[],
-    chats: Chat[],
-    timestamp: string
+  type: string,
+  messages: Message[],
+  chats: Chat[],
+  timestamp: string
 }
 
 /**
  * Registered nodes in discovery database
  */
 type RegisteredNode = {
-    id: number, // node_id
-    password: any
+  id: number, // node_id
+  password: any
 }
 
 /**
  * Active nodes in discovery database
  */
 type ActiveNode = {
-    id: number,
-    syncport: number,
-    clientport: number,
-    address: string
+  id: number,
+  syncport: number,
+  clientport: number,
+  address: string
 }
 
 // ENDPOINTS:
