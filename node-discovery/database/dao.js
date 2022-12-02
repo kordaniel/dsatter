@@ -70,7 +70,7 @@ class Dao {
    * @param {number} id
    * @returns {Promise}
    */
-  getMessages(id) {
+  getActiveNode(id) {
     return this.db.executeQuery('get', `SELECT id AS 'id',
       syncport  AS 'syncport ',
       clientport AS 'clientport',
