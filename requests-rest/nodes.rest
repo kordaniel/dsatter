@@ -6,7 +6,8 @@ POST http://localhost:8080/api/nodes/active/register
 Content-Type: application/json
 
 {
-  "port": 113
+  "serverPort": 41952,
+  "clientPort": 55004
 }
 
 ###
@@ -15,5 +16,6 @@ POST http://localhost:8080/api/nodes/active/unregister
 Content-Type: application/json
 
 {
-  "port": 113
+  "serverPort": 41956,
+  "clientPort": 55001
 }

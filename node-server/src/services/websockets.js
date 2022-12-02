@@ -1,50 +1,61 @@
-const wsServer = require('../sockets/ws-serv')
-const wsClient = require('../sockets/ws-client')
+const WsServer = require('../sockets/ws-serv')
 
-class WebsocketService {
+const wsNodeServer   = WsServer()
+const wsClientServer = WsServer()
+const wsClient       = require('../sockets/ws-client')
 
-  /**
-   * Initializes the websocket server to listen for WS connections on the
-   * port passed as argument and attempts to open a websocket client connection
-   * to all servers specified in the array passed as the argument remoteEnpoints.
-   * @param {Number} listenPort The port to listen for incoming websocket connections.
-   * @param {Number[]} remoteEndpoints Array containing all remote endpoints.
-   */
-  initialize = (listenPort, remoteEndpoints = []) => {
-    // TODO: Get adress&port from config module
-    wsServer.init(listenPort)
-    wsClient.connectToAll(remoteEndpoints)
-  }
 
-  /**
-   * Closes all open websocket connections and shuts down the websocket server.
-   */
-  terminate = () => {
-    wsClient.disconnectFromAll()
-    wsServer.terminate()
-  }
-
-  openInboundConnections = ()  => {
-    return wsServer.openConnections()
-  }
-
-  openOutboundConnections = () => {
-    return wsClient.openConnections()
-  }
-
-  openConnections = () => {
-    return [
-      ...this.openInboundConnections(),
-      ...this.openOutboundConnections()
-    ]
-  }
-
-  //const sendMessageToOne = () => {}
-
-  broadcastMessageToAll = (message) => {
-    wsServer.broadcastToAll(message)
-    wsClient.broadcastToAll(message)
-  }
+/**
+ * Initializes all websocket servers to listen for WS connections on the
+ * ports passed as argument and attempts to open a websocket client connection
+ * to all servers specified in the array passed as the argument remoteEnpoints.
+ * @param {Number} listenWsServerPort The port to listen for incoming WS connections from other node-servers.
+ * @param {Number} listenWsClientPort The port to listen for incoming websocket connections from clients.
+ * @param {Object[]} remoteEndpoints Array containing all remote endpoints.
+ */
+const initialize = (listenWsServerPort, listenWsClientPort, remoteEndpoints = []) => {
+  wsClientServer.init(listenWsClientPort) // Serves as endpoint for clients to connect to
+  wsNodeServer.init(listenWsServerPort)   // Serves as endpoint for other node-server instances to connect to
+  wsClient.connectToAll(remoteEndpoints)  // Forms WS connection to all other running node-server instances
 }
 
-module.exports = WebsocketService
+/**
+ * Closes all open websocket connections and shuts down the websocket servers.
+ */
+const terminate = () => {
+  wsClientServer.terminate()
+  wsClient.disconnectFromAll()
+  wsNodeServer.terminate()
+}
+
+const openInboundConnections  = () => wsNodeServer.openConnections()
+const openOutboundConnections = () => wsClient.openConnections()
+const openClientConnections   = () => wsClientServer.openConnections()
+
+const openConnections = () => [
+  ...openInboundConnections(),
+  ...openOutboundConnections(),
+  ...openClientConnections()
+]
+
+//const sendMessageToOne = () => {}
+
+const broadcastToNodeServers = (message) => {
+  wsNodeServer.broadcastToAll(message)
+  wsClient.broadcastToAll(message)
+}
+
+const broadcastToClients = (message) => {
+  wsClientServer.broadcastToAll(message)
+}
+
+module.exports = {
+  initialize,
+  terminate,
+  openInboundConnections,
+  openOutboundConnections,
+  openClientConnections,
+  openConnections,
+  broadcastToNodeServers,
+  broadcastToClients
+}

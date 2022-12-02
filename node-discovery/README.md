@@ -10,7 +10,7 @@ POST localhost:8080/api/nodes/active/unregister
 ```
 
 ## Client applications
-Query for a list of active chatserver nodes, with suggestion of specific node to connect to.
+Query for a list of active chatserver nodes. The returned list is sorted (randomly for now) so that the client should always prefer the first chatserver node in the list that accepts the connection.
 ```
 GET localhost:8080/api/clients
 ```
