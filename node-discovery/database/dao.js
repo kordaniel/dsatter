@@ -1,8 +1,8 @@
 /**
  * Makes querys to dsatter discovery database
  *
- * @typedef {import('../../../common/utils/types/datatypes).Node} Node
- * @typedef {import('../../../common/utils/types/datatypes).ActiveNode} ActiveNode
+ * @typedef {import('../../common/utils/types/datatypes).Node} Node
+ * @typedef {import('../../common/utils/types/datatypes).ActiveNode} ActiveNode
  */
 class Dao {
 

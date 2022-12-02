@@ -1,5 +1,5 @@
 const sqlite3 = require('sqlite3').verbose()
-const logger  = require('../../../common/utils/logger')
+const logger  = require('../../common/utils/logger')
 const config = require('../utils/config.js')
 
 let db

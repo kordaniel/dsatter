@@ -1,4 +1,4 @@
-const logger    = require('../../../../common/utils/logger')
+const logger    = require('../../../common/utils/logger')
 const testData = require('../../utils/test-data')
 
 class Dao {
@@ -7,30 +7,30 @@ class Dao {
   
   // eslint-disable-next-line no-unused-vars
   constructor(querier) {
-    logger.test('Mock database created')
+    logger.info('Mock database created')
   }
 
   createTableNodes = () => {
     this.nodes = testData.nodes
   }
 
-  createActiveNodes = () => {
+  createTableActiveNodes = () => {
     this.activeNodes = testData.activeNodes
   }
 
-  getNodes = () => {
+  getAllNodes = () => {
     return Promise.resolve(this.nodes)
   }
 
-  getActiveNodes = () => {
+  getAllActiveNodes = () => {
     return Promise.resolve(this.activeNodes)
   }
 
-  getNodeById = (id) => {
+  getNode = (id) => {
     return Promise.resolve(this.nodes.filter((n) => n.id === id))
   }
 
-  getActiveNodeById = (id) => {
+  getActiveNode = (id) => {
     return Promise.resolve(this.activeNodes.filter((n) => n.id === id))
   }
 
