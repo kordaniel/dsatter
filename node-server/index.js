@@ -78,6 +78,7 @@ const run = () => {
       case 'nodes':
         // The ones that were running when this node instance registered
         logger.info('nodes online:', nodeState.getOtherActiveNodes())
+        run()
         break
       default:
         run()
