@@ -1,8 +1,12 @@
 
 // TODO: update connection "lists" at exit
 
+const config    = require('./utils/config')
 const logger    = require('../common/utils/logger')
 const nodeState = require('./state/node')
+const {
+  parseArgs
+}               = require('../common/utils/helpers')
 
 const websocketService = require('./services/websockets')
 
@@ -13,16 +17,6 @@ const rl = readline.createInterface({
   output: process.stdout,
   terminal: false
 })
-
-const getPortArg = () => {
-  const args = process.argv
-  const portIx = args.indexOf('--port') + 1
-  if(portIx > 0) {
-    return args[portIx]
-  }
-
-  return -1
-}
 
 logger.info('CHATSERVER node starting')
 switch (process.env.NODE_ENV) {
@@ -39,18 +33,35 @@ switch (process.env.NODE_ENV) {
 logger.info('------------------------')
 
 const init = async () => {
+  const parsedArgs = parseArgs(process.argv, ['nodeservport'])
+
+  if (process.env.NODE_ENV === 'production' &&
+      !Object.hasOwn(parsedArgs, 'nodeservport')) {
+    logger.error('Missing required argument --nodeservport=<port> when running in production mode. Exiting..')
+    process.exit(64) // sysexits.h EX_USAGE (command line usage error)
+  }
+
+  const nodeServerPort = Object.hasOwn(parsedArgs, 'nodeservport')
+    ? parsedArgs['nodeservport']
+    : config.NODE_DEFAULT_SERV_WS_PORT
+
   try {
-    const portArg = getPortArg()
-    await nodeState.initialize(portArg)
+    await nodeState.initialize(
+      nodeServerPort,
+      config.NODE_DEFAULT_CLIENT_WS_PORT
+    )
+
     websocketService.initialize(
-      nodeState.getListenPort(),
+      nodeState.getListenPortWsServers(),
+      nodeState.getListenPortWsClients(),
       nodeState.getOtherActiveNodes()
     )
 
     logger.info('Node initialized')
     logger.info('----------------')
-    logger.info(`Listening for WS connection on PORT ${nodeState.getListenPort()}`)
-    logger.info(`Other nodes online: ${nodeState.getOtherActiveNodes()}`)
+    logger.info(`Listening for WS connections from other node-servers on PORT ${nodeState.getListenPortWsServers()}`)
+    logger.info(`Listening for WS connections from clients on PORT ${nodeState.getListenPortWsClients()}`)
+    logger.info('Other nodes online:', nodeState.getOtherActiveNodes())
     logger.info('----------------')
   } catch (err) {
     logger.error('initializing:', err)
@@ -65,7 +76,7 @@ const terminate = async () => {
     logger.info()
     logger.info('------------------')
     logger.info('CHATSERVER node is terminating')
-    logger.info(`Other nodes running: ${nodeState.getOtherActiveNodes()}`)
+    logger.info('Other nodes online:', nodeState.getOtherActiveNodes())
   } catch (err) {
     logger.error('terminating:', err)
   }
@@ -81,14 +92,26 @@ const run = () => {
         rl.close()
         await terminate()
         break
-      case 'broadcast':
-        websocketService.broadcastMessageToAll(`MESSAGE to all nodes: I'm listening on port: ${nodeState.getListenPort()}`)
+      case 'broadcasts':
+        websocketService.broadcastToNodeServers(
+          `MESSAGE to all nodes: I'm listening on port: ${nodeState.getListenPortWsServers()}`
+        )
         run()
         break
-      case 'peers':
-        logger.info('Peers:')
+      case 'broadcastc':
+        websocketService.broadcastToClients(
+          `MESSAGE to all clients: I'm listening on port: ${nodeState.getListenPortWsClients()}`
+        )
+        run()
+        break
+      case 'status':
+        logger.info('Listening sockets:')
+        logger.info(`\tNode servers: ${nodeState.getListenPortWsServers()}`)
+        logger.info(`\tClients: ${nodeState.getListenPortWsClients()}`)
+        logger.info('Open connections:')
         logger.info('\tOutbound:', websocketService.openOutboundConnections())
         logger.info('\tInbound:', websocketService.openInboundConnections())
+        logger.info('\tClients:', websocketService.openClientConnections())
         run()
         break
       case 'nodes':
