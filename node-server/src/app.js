@@ -1,37 +1,41 @@
-const logger    = require('../../common/utils/logger')
-const nodeState = require('./state/node')
-const WebsocketService = require('./services/websockets')
 const DatabaseService = require('./services/database')
-let websocketService
+
+const config    = require('./utils/config')
+const logger    = require('../../common/utils/logger')
+
+const nodeState = require('./state/node')
+const websocketService = require('./services/websockets')
+
 let db
 
-const getPortArg = () => {
-  const args = process.argv
-  const portIx = args.indexOf('--port') + 1
-  if(portIx > 0) {
-    return args[portIx]
-  }
+const initialize = async (parsedArgs) => {
+  const nodeServerPort = Object.hasOwn(parsedArgs, 'nodeservport')
+    ? parsedArgs['nodeservport']
+    : config.NODE_DEFAULT_SERV_WS_PORT
+  const dbpath = Object.hasOwn(parsedArgs, 'dbpath')
+    ? parsedArgs['dbpath']
+    : config.DB_PATH
 
-  return -1
-}
-
-const initialize = async () => {
-  websocketService = new WebsocketService()
   db = new DatabaseService()
-  await db.initiateDatabase()
+  await db.initiateDatabase(dbpath)
   await db.openDatabaseConnection()
 
   try {
-    const ownPort = getPortArg()
-    await nodeState.initialize(ownPort)
+    await nodeState.initialize(
+      nodeServerPort,
+      config.NODE_DEFAULT_CLIENT_WS_PORT
+    )
     websocketService.initialize(
-      nodeState.getListenPort(),
+      nodeState.getListenPortWsServers(),
+      nodeState.getListenPortWsClients(),
       nodeState.getOtherActiveNodes()
     )
+
     logger.info('Node initialized')
     logger.info('----------------')
-    logger.info(`Listening for WS connection on PORT ${nodeState.getListenPort()}`)
-    logger.info(`Other nodes online: ${nodeState.getOtherActiveNodes()}`)
+    logger.info(`Listening for WS connections from other node-servers on PORT ${nodeState.getListenPortWsServers()}`)
+    logger.info(`Listening for WS connections from clients on PORT ${nodeState.getListenPortWsClients()}`)
+    logger.info('Other nodes online:', nodeState.getOtherActiveNodes())
     logger.info('----------------')
   } catch (err) {
     logger.error('initializing:', err)
@@ -39,16 +43,27 @@ const initialize = async () => {
   }
 }
 
-const returnConnections = () => {
-  return [
-    websocketService.openInboundConnections(),
-    websocketService.openOutboundConnections()
-  ]
+const broadcastToNodeServers = (message) => {
+  websocketService.broadcastToNodeServers(message)
 }
 
-const broadcastMessageToAll = (message) => {
-  return websocketService.broadcastMessageToAll(message)
+const broadcastToClients = (message) => {
+  websocketService.broadcastToClients(message)
 }
+
+const openOutboundConnections = () => {
+  return websocketService.openOutboundConnections()
+}
+
+const openInboundConnections = () => {
+  return websocketService.openInboundConnections()
+}
+
+const openClientConnections = () => {
+  return websocketService.openClientConnections()
+}
+
+
 
 /**
  * Listen to Websocket messages and react
@@ -83,7 +98,7 @@ const terminate = async () => {
     logger.info()
     logger.info('------------------')
     logger.info('CHATSERVER node is terminating')
-    logger.info(`Other nodes running: ${nodeState.getOtherActiveNodes()}`)
+    logger.info('Other nodes running:', nodeState.getOtherActiveNodes())
   } catch (err) {
     logger.error('terminating:', err)
   }
@@ -92,7 +107,10 @@ const terminate = async () => {
 module.exports = {
   initialize,
   run,
-  returnConnections,
-  broadcastMessageToAll,
+  broadcastToNodeServers,
+  broadcastToClients,
+  openOutboundConnections,
+  openInboundConnections,
+  openClientConnections,
   terminate
 }

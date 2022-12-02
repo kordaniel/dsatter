@@ -12,4 +12,4 @@ COPY node-server/*.js ./
 
 RUN npm install
 
-ENTRYPOINT ["npm", "run", "start", "--", "--port"]
+ENTRYPOINT ["npm", "run", "start", "--"]
