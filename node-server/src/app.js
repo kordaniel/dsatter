@@ -12,9 +12,12 @@ const initialize = async (parsedArgs) => {
   const nodeServerPort = Object.hasOwn(parsedArgs, 'nodeservport')
     ? parsedArgs['nodeservport']
     : config.NODE_DEFAULT_SERV_WS_PORT
+  const dbpath = Object.hasOwn(parsedArgs, 'dbpath')
+    ? parsedArgs['dbpath']
+    : config.DB_PATH
 
   db = new DatabaseService()
-  await db.initiateDatabase()
+  await db.initiateDatabase(dbpath)
   await db.openDatabaseConnection()
 
   try {

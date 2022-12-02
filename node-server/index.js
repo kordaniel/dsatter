@@ -21,13 +21,25 @@ switch (process.env.NODE_ENV) {
 logger.info('------------------------')
 
 
-const parsedArgs = parseArgs(process.argv, ['nodeservport'])
+const parsedArgs = parseArgs(process.argv, [])
 
-if (process.env.NODE_ENV === 'production' &&
-    !Object.hasOwn(parsedArgs, 'nodeservport')) {
-  logger.error('Missing required argument --nodeservport=<port> when running in production mode. Exiting..')
-  process.exit(64) // sysexits.h EX_USAGE (command line usage error)
+// Make sure we have all the right, required arguments in every environment.
+switch (process.env.NODE_ENV) {
+  case 'development':
+    if (!Object.hasOwn(parsedArgs, 'dbpath')) {
+      logger.error('Missing required argument --dbpath=<PATH.db> when running in development mode. Exiting..')
+      process.exit(64) // sysexits.h EX_USAGE (command line usage error)
+    }
+    break
+  case 'production':
+    if (!Object.hasOwn(parsedArgs, 'nodeservport')) {
+      logger.error('Missing required argument --nodeservport=<port> when running in production mode. Exiting..')
+      process.exit(64) // sysexits.h EX_USAGE (command line usage error)
+    }
+    break
+  default: break
 }
+
 
 app.initialize(parsedArgs).then(() => {
   if (process.env.NODE_ENV === 'development') {
