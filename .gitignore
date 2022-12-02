@@ -1,3 +1,3 @@
 node-server/node_modules/
-node-server/dsatter.db
+node-server/*.db
 node-discovery/node_modules/

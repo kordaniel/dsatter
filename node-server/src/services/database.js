@@ -13,8 +13,8 @@ class DatabaseService {
   /**
    * Initiates database
    */
-  initiateDatabase = async () => {
-    querier.initiateDatabase()
+  initiateDatabase = async (dbpath) => {
+    querier.initiateDatabase(dbpath)
   }
 
   /**

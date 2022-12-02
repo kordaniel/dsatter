@@ -1,22 +1,14 @@
 const logger    = require('../../../common/utils/logger')
 const config    = require('../utils/config')
 const nodeState = require('../state/node')
-const { getRandomElementFromArr }    = require('../../../common/utils/helpers.js')
+const {
+  parseSocket
+}               = require('../../../common/utils/helpers')
 
 const { WebSocket } = require('ws')
 
 const connections = {}
 
-const parseSocket = (socket) => {
-  const re = new RegExp('^(.+):([0-9]+)$')
-  const match = socket.match(re)
-  return { addr: match[1], port: match[2] }
-}
-
-// If address contains colon, assume IPv6
-const isIPv6 = (addr) => {
-  return addr.indexOf(':') > -1
-}
 
 const heartbeat = (ws) => {
   clearTimeout(ws.pingTimeout)
@@ -31,22 +23,16 @@ const getRemoteAddress = (ws) => ws._url
 const getConnections = () => Object.keys(connections)
 
 const connect = (socket, sync) => {
-  if(Object.hasOwn(connections, socket)) {
-    logger.error('Connection already in map:', socket)
+  const endpointUrl = `ws://${parseSocket(socket)}`
+
+  if(Object.hasOwn(connections, endpointUrl)) {
+    logger.error('Connection already in map:', endpointUrl)
     return
   }
 
-  const { addr, port } = parseSocket(socket)
-
-  const endpointUrl = isIPv6(addr) ? `ws://[${addr}]:${port}` : `ws://${addr}:${port}`
-
-  logger.info('Initializing WS connection to:', endpointUrl)
+  logger.info('Initializing outbound WS connection to:', endpointUrl)
 
   const ws = new WebSocket(endpointUrl)
-
-  // TODO: - State/info about running nodes should come directly from discovery service
-  //         instead of updating it manually inside each node
-  //       - When updating "anything", use the url/ip in the ws object(?)
 
   ws.on('error', (err) => {
     logger.info('WS client ERROR event:', err)
@@ -54,10 +40,10 @@ const connect = (socket, sync) => {
   })
 
   ws.on('open', () => {
-    connections[socket] = ws
+    connections[endpointUrl] = ws
     heartbeat(ws)
     logger.info('OPENED outbound WS connection to:', endpointUrl)
-    ws.send(`HELLO. I'm listening for WS connections on port: ${nodeState.getListenPort()}`)
+    ws.send(`HELLO. I'm listening for node-server WS connections on port: ${nodeState.getListenPortWsServers()}`)
   })
 
   ws.on('ping', () => {
@@ -77,29 +63,31 @@ const connect = (socket, sync) => {
 
   ws.on('close', () => {
     // This event is fired even if there is an error before succesfull connection
-    if (!Object.hasOwn(connections, socket)) {
+    if (!Object.hasOwn(connections, endpointUrl)) {
       return
     }
 
     clearTimeout(ws.pingTimeout)
-    const endpoint = getRemoteAddress(connections[socket])
-    delete connections[socket]
+    const remoteEndpoint = getRemoteAddress(connections[endpointUrl])
+    delete connections[endpointUrl]
     nodeState.removeFromOtherActiveNodes(socket)
-    logger.info('CLOSED outbound WS connection to:', endpoint)
+    logger.info('CLOSED outbound WS connection to:', remoteEndpoint)
   })
 }
 
-const disconnect = (port) => {
-  if(!Object.hasOwn(connections, port)) {
-    logger.error('Connection not found in map:', port)
+const disconnect = (endpointUrl) => {
+  if(!Object.hasOwn(connections, endpointUrl)) {
+    logger.error('Connection not found in map:', endpointUrl)
     return
   }
 
-  logger.info('CLOSING outbound WS connection to:', getRemoteAddress(connections[socket]))
-  connections[socket].close()
+  logger.info('CLOSING outbound WS connection to:', getRemoteAddress(connections[endpointUrl]))
+  connections[endpointUrl].close()
 }
 
-const connectToAll = (sockets) => sockets.forEach(s => connect(s))
+const connectToAll = (sockets, synchronizer) => {
+  sockets.forEach(s => connect(s, synchronizer))
+}
 
 const disconnectFromAll = () => {
   getConnections().forEach(conn => {

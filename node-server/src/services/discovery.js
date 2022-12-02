@@ -15,9 +15,12 @@ const getActiveNodes = async () => {
   }
 }
 
-const registerAsActive = async (port) => {
+const registerAsActive = async (serverWsPort, clientWsPort) => {
   try {
-    const res = await axios.post(`${baseUrl}/register`, { 'port': port })
+    const res = await axios.post(`${baseUrl}/register`, {
+      'serverPort': serverWsPort,
+      'clientPort': clientWsPort
+    })
     return res.data
   } catch (err) {
     logger.error('performing POST register active:', err.cause)
@@ -25,9 +28,13 @@ const registerAsActive = async (port) => {
   }
 }
 
-const unregisterAsActive = async (port) => {
+const unregisterAsActive = async (serverWsPort, clientWsPort) => {
+  // TODO: Use token/credentials to identify node instead of port
   try {
-    const res = await axios.post(`${baseUrl}/unregister`, { 'port': port })
+    const res = await axios.post(`${baseUrl}/unregister`, {
+      'serverPort': serverWsPort,
+      'clientPort': clientWsPort
+    })
     return res.data
   } catch (err) {
     logger.error('performing POST unregister active:', err.cause)
@@ -35,6 +42,7 @@ const unregisterAsActive = async (port) => {
   }
 }
 
+/*
 const reportUnreachable = async (port) => {
   try {
     const res = await axios.post(`${baseUrl}/reportUnreachable`, { 'port': port })
@@ -44,10 +52,10 @@ const reportUnreachable = async (port) => {
     throw Error(err)
   }
 }
+*/
 
 module.exports = {
   getActiveNodes,
   registerAsActive,
-  unregisterAsActive,
-  reportUnreachable
+  unregisterAsActive
 }
