@@ -1,12 +1,13 @@
 const assert = require('assert')
 const config = require('../utils/config')
-const logger = require('../../common/utils/logger')
+const logger = require('../../../common/utils/logger')
 const {
   isNonEmptyArray,
   sleep,
   randomInt,
   shallowEqual
-}            = require('../../common/utils/helpers')
+}            = require('../../../common/utils/helpers')
+
 
 const discoveryService = require('../services/discovery')
 

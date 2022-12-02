@@ -1,13 +1,11 @@
-const logger    = require('../../common/utils/logger')
+const logger    = require('../../../common/utils/logger')
 const config    = require('../utils/config')
 const nodeState = require('../state/node')
 const {
   parseSocket
-}               = require('../../common/utils/helpers')
+}               = require('../../../common/utils/helpers')
 
-const {
-  WebSocket
-}               = require('ws')
+const { WebSocket } = require('ws')
 
 const connections = {}
 

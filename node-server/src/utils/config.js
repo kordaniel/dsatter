@@ -1,4 +1,4 @@
-const commonConfig = require('../../common/utils/config')
+const commonConfig = require('../../../common/utils/config')
 
 const NODE_DISCOVERY_URL  = commonConfig.NODE_DISCOVERY_URL
 const NODE_DISCOVERY_PORT = commonConfig.NODE_DISCOVERY_PORT
@@ -8,8 +8,10 @@ const NODE_DEFAULT_CLIENT_WS_PORT = commonConfig.NODE_DEFAULT_CLIENT_WS_PORT
 
 const WS_PING_INTERVAL     = commonConfig.WS_PING_INTERVAL // ms
 const MAX_EXPECTED_LATENCY = commonConfig.MAX_EXPECTED_LATENCY // timeout
+
 const DISABLE_PORT_DANCING = process.env.NODE_ENV !== 'development' // use port dancing when running in development environment
 
+const DB_PATH = commonConfig.DB_PATH
 
 
 module.exports = {
@@ -19,5 +21,6 @@ module.exports = {
   NODE_DEFAULT_CLIENT_WS_PORT,
   WS_PING_INTERVAL,
   MAX_EXPECTED_LATENCY,
-  DISABLE_PORT_DANCING
+  DISABLE_PORT_DANCING,
+  DB_PATH
 }

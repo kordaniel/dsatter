@@ -7,10 +7,7 @@ WORKDIR "/home/app/node-server"
 
 COPY node-server/package.json ./
 COPY node-server/package-lock.json ./
-COPY node-server/utils/ ./utils/
-COPY node-server/services/ ./services/
-COPY node-server/sockets/ ./sockets/
-COPY node-server/state/ ./state/
+COPY node-server/src/ ./src
 COPY node-server/*.js ./
 
 RUN npm install

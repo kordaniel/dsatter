@@ -1,10 +1,8 @@
 const assert = require('assert')
-const logger = require('../../common/utils/logger')
+const logger = require('../../../common/utils/logger')
 const config = require('../utils/config')
 
-const {
-  WebSocketServer
-}            = require('ws')
+const { WebSocketServer } = require('ws')
 
 const getRemoteAddress = (req) => `${req.socket.remoteAddress}:${req.socket.remotePort}`
 
@@ -16,6 +14,11 @@ const WsServer = () => {
     ws.isAlive = true
   }
 
+  /**
+   * Opens websocket and handles all its traffic
+   * @param {Number} port The port to bind this server to
+   * @param {bool} restartAfterError If set to true, attempt to rebind port in case of EADDRINUSE failure
+   */
   const init = (port, restartAfterError = true) => {
     assert(wss === null, 'ws-serv init(): wss is not null')
 
@@ -46,6 +49,7 @@ const WsServer = () => {
 
       } else {
         logger.error('Websocket server:', ws)
+        //logger.info(`RECEIVED message from ${getRemoteAddress(req)} -> [[${message}]]`)
       }
     })
 
