@@ -1,17 +1,25 @@
 const nodeDiscRouter = require('express').Router()
 const nodesRegister  = require('../services/nodes')
 
+
 nodeDiscRouter.get('/active', (req, res) => {
-  res.json(nodesRegister.getNodes())
+  res.json({ 'activeNodes': nodesRegister.getActiveNodes() })
 })
 
 nodeDiscRouter.post('/active/register', (req, res) => {
-  const { port }    = req.body
-  const activeNodes = nodesRegister.getNodes()
-  const success     = nodesRegister.registerNode(port)
+  const serverNodeIp = req.ip
+  const {
+    serverPort,
+    clientPort
+  }                  = req.body
+
+  const activeNodes  = nodesRegister.getActiveNodes()
+  const success      = nodesRegister.registerNode(serverNodeIp, serverPort, clientPort)
 
   const responseObj = {
-    'wasRegistered': success ? port : false,
+    'address':     success ? serverNodeIp : false,
+    'serverPort':  success ? serverPort : false,
+    'clientPort':  success ? clientPort : false,
     'activeNodes': activeNodes
   }
 
@@ -19,12 +27,17 @@ nodeDiscRouter.post('/active/register', (req, res) => {
 })
 
 nodeDiscRouter.post('/active/unregister', (req, res) => {
-  const { port } = req.body
-  const success  = nodesRegister.unregisterNode(port)
+  const serverNodeIp = req.ip
+  const {
+    serverPort,
+    clientPort
+  }                  = req.body
+
+  const success      = nodesRegister.unregisterNode(serverNodeIp, serverPort, clientPort)
 
   const responseObj = {
     'wasUnregistered': success,
-    'activeNodes': nodesRegister.getNodes()
+    'activeNodes': nodesRegister.getActiveNodes()
   }
 
   res.json(responseObj)
