@@ -18,7 +18,7 @@ jobs:
     steps:
     - run: pwd
     - run: ls -la
-    - run: cd ../node-server/
+    - run: cd ..
     - run: ls -la
     - run: cd node-server/
     - uses: actions/checkout@v3
