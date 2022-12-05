@@ -12,8 +12,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: node-server/
     strategy:
-      matrix { dir: ['node-discovery', 'node-server']}:
+      matrix:
+       { dir: ['node-discovery', 'node-server']}
         node-version: [16.18]
     steps:
     - uses: actions/checkout@v3
