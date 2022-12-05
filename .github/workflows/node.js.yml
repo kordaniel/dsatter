@@ -18,7 +18,9 @@ jobs:
     steps:
     - run: pwd
     - run: ls -la
-    - run: cd ./node-server/
+    - run: cd ../node-server/
+    - run: ls -la
+    - run: cd node-server/
     - uses: actions/checkout@v3
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
