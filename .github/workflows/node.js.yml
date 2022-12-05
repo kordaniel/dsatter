@@ -8,15 +8,14 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-    
-defaults:
-  run:
-    shell: bash
-    working-directory: node-server/
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: node-server/
     strategy:
       matrix:
         node-version: [16.18]
