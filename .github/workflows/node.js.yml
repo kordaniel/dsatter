@@ -15,9 +15,8 @@ jobs:
     strategy:
       matrix:
         node-version: [16.18]
-    defaults:
-      working-directory: './node-server'
     steps:
+    - run: cd node-server
     - uses: actions/checkout@v3
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
