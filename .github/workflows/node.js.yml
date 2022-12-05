@@ -10,14 +10,13 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  node-discovery:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: node-server/
+        working-directory: node-discovery/
     strategy:
       matrix:
-       { dir: ['node-discovery', 'node-server']}
         node-version: [16.18]
     steps:
     - uses: actions/checkout@v3
@@ -26,7 +25,27 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-        cache-dependency-path: ${{ matrix.dir }}/package-lock.json
+        cache-dependency-path: node-discovery/package-lock.json
+    - run: npm ci
+    - run: npm run build --if-present
+    - run: npm test
+
+  node-server:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: node-server/
+    strategy:
+      matrix:
+        node-version: [16.18]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: node-server/package-lock.json
     - run: npm ci
     - run: npm run build --if-present
     - run: npm test
