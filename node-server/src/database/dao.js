@@ -7,9 +7,9 @@
 class Dao {
 
   /**
-     * Constructor
-     * @param {Querier} querier
-     */
+   * Constructor
+   * @param {Querier} querier
+   */
   constructor(querier) {
     this.db = querier
   }
@@ -21,10 +21,10 @@ class Dao {
    */
   createTableMessages() {
     return this.db.executeQuery('run', `CREATE TABLE IF NOT EXISTS messages (
-      node_id INTEGER,
-      id INTEGER,
-      messageId INTEGER PRIMARY KEY,
-      chat_id INTEGER REFERENCES chats,
+      node_id INTEGER NOT NULL,
+      id INTEGER NOT NULL,
+      messageId INTEGER PRIMARY KEY NOT NULL,
+      chat_id INTEGER NOT NULL REFERENCES chats,
       messageText TEXT,
       messageDateTime TEXT,
       messageSender TEXT)`)
@@ -36,9 +36,9 @@ class Dao {
    */
   createTableChats() {
     return this.db.executeQuery('run', `CREATE TABLE IF NOT EXISTS chats (
-      node_id INTEGER,
-      id INTEGER,
-      chatId INTEGER PRIMARY KEY,
+      node_id INTEGER NOT NULL,
+      id INTEGER NOT NULL,
+      chatId INTEGER PRIMARY KEY NOT NULL,
       chatName TEXT)`)
   }
 
@@ -47,8 +47,8 @@ class Dao {
    * @returns {Promise}
    */
   getAllChats() {
-    return this.db.executeQuery('all', `SELECT chatName AS 'name'
-    chatId AS 'chatId' FROM messages`)
+    return this.db.executeQuery('all', `SELECT chatId AS 'chatId',
+    chatName AS 'name' FROM chats`)
   }
 
   /**
@@ -57,11 +57,11 @@ class Dao {
    */
   getAllMessages() {
     return this.db.executeQuery('all', `SELECT node_id AS 'nodeId'
-    id AS 'id',
-    chat_id AS 'chatId',
-    messageText AS 'text',
-    messageDateTime AS 'time',
-    messageSender AS 'sender' FROM messages`)
+      id AS 'id',
+      chat_id AS 'chatId',
+      messageText AS 'text',
+      messageDateTime AS 'time',
+      messageSender AS 'sender' FROM messages`)
   }
 
   /**
@@ -87,10 +87,10 @@ class Dao {
   }
 
   /**
-     * Adds new chat to table chats
-     * @param {Chat} chat
-     * @returns {Promise}
-     */
+   * Adds new chat to table chats
+   * @param {Chat} chat
+   * @returns {Promise}
+   */
   addNewChat(chat) {
     return this.db.executeQuery('run', `INSERT INTO chats
       (node_id, id, chatId, chatName) VALUES (?, ?, ?, ?)`,
@@ -98,22 +98,31 @@ class Dao {
   }
 
   /**
-     * Adds new message to table messages
-     * @param {Message} message
-     * @returns {Promise}
-     */
+   * Adds new message to table messages
+   * @param {Message} message
+   * @returns {Promise}
+   */
   addNewMessage(message) {
     return this.db.executeQuery('run', `INSERT INTO messages
       (node_id, id, messageId, messageText, messageDateTime, messageSender, chat_id)
       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [message.nodeId, message.id, message.messageId, message.text, message.dateTime, message.sender, message.chat_id])
+    [message.nodeId, message.id, message.messageId, message.text, 
+      message.dateTime, message.sender, message.chat_id])
   }
 
+  /**
+   * Returns the biggest existing chatId for given node
+   * @returns {Promise}
+   */
   getLastChatId(nodeId) {
     return this.db.executeQuery('get', `SELECT MAX(id)
       FROM chats WHERE node_id = :nodeId`, [nodeId])
   }
 
+  /**
+   * Returns the biggest existing messageId for given node
+   * @returns {Promise}
+   */
   getLastMessageId(nodeId) {
     return this.db.executeQuery('get', `SELECT MAX(id)
       FROM messages WHERE node_id = :nodeId`, [nodeId])
