@@ -7,8 +7,7 @@ const nodes = [
   {
     id: 241,
     password: 'password2'
-  }
-  ,
+  },
   {
     id: 56,
     password: 'password3'
