@@ -16,7 +16,9 @@ jobs:
       matrix:
         node-version: [16.18]
     steps:
-    - run: cd node-server/
+    - run: pwd
+    - run: ls
+    - run: cd ./node-server/
     - uses: actions/checkout@v3
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
