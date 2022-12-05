@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
-      matrix {dir: './node-server'}:
+      matrix: {dir: './node-server'}
         node-version: [16.18]
     steps:
     - uses: actions/checkout@v3
