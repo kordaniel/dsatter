@@ -3,11 +3,11 @@ const logger = require('../../../common/utils/logger')
 
 const axios = require('axios')
 
-const baseUrl = `${config.NODE_DISCOVERY_URL}:${config.NODE_DISCOVERY_PORT}/api/nodes/active`
+const baseUrl = `${config.NODE_DISCOVERY_URL}:${config.NODE_DISCOVERY_PORT}/api/nodes`
 
 const getActiveNodes = async () => {
   try {
-    const res = await axios.get(baseUrl)
+    const res = await axios.get(`${baseUrl}/active`)
     return res.data
   } catch (err) {
     logger.error('performing GET request:', err.cause)
@@ -17,7 +17,7 @@ const getActiveNodes = async () => {
 
 const registerAsActive = async (serverWsPort, clientWsPort) => {
   try {
-    const res = await axios.post(`${baseUrl}/register`, {
+    const res = await axios.post(`${baseUrl}/active/login`, {
       'serverPort': serverWsPort,
       'clientPort': clientWsPort
     })
@@ -31,13 +31,24 @@ const registerAsActive = async (serverWsPort, clientWsPort) => {
 const unregisterAsActive = async (serverWsPort, clientWsPort) => {
   // TODO: Use token/credentials to identify node instead of port
   try {
-    const res = await axios.post(`${baseUrl}/unregister`, {
+    const res = await axios.post(`${baseUrl}/active/logout`, {
       'serverPort': serverWsPort,
       'clientPort': clientWsPort
     })
     return res.data
   } catch (err) {
     logger.error('performing POST unregister active:', err.cause)
+    throw Error(err)
+  }
+}
+
+const registerNode = async () => {
+  // query for a new fresh ID
+  try {
+    const res = await axios.post(`${baseUrl}/register`, { })
+    return res.data
+  } catch (err) {
+    logger.err('performing POST register new node:', err.cause)
     throw Error(err)
   }
 }
@@ -57,5 +68,6 @@ const reportUnreachable = async (port) => {
 module.exports = {
   getActiveNodes,
   registerAsActive,
-  unregisterAsActive
+  unregisterAsActive,
+  registerNode
 }

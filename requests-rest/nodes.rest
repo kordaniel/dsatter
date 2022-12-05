@@ -2,7 +2,7 @@ GET http://localhost:8080/api/nodes/active
 
 ###
 
-POST http://localhost:8080/api/nodes/active/register
+POST http://localhost:8080/api/nodes/active/login
 Content-Type: application/json
 
 {
@@ -12,10 +12,19 @@ Content-Type: application/json
 
 ###
 
-POST http://localhost:8080/api/nodes/active/unregister
+POST http://localhost:8080/api/nodes/active/logout
 Content-Type: application/json
 
 {
   "serverPort": 41956,
   "clientPort": 55001
+}
+
+###
+
+POST http://localhost:8080/api/nodes/register
+Content-Type: application/json
+
+{
+
 }
