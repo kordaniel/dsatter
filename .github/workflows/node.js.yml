@@ -13,11 +13,14 @@ jobs:
   build:
     runs-on: ubuntu-latest
     defaults:
-      working-directory: node-server/
+      run:
+        shell: bash
+        working-directory: node-server/
     strategy:
       matrix:
         node-version: [16.18]
     steps:
+    - run: pwd
     - uses: actions/checkout@v3
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
