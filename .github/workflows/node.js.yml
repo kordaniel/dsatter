@@ -15,13 +15,13 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
-      matrix: {dir: './node-server'}
+      matrix:
         node-version: [16.18]
     steps:
     - uses: actions/checkout@v3
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
-      working-directory: ${{ matrix.dir }}
+      working-directory: './node-server'
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
