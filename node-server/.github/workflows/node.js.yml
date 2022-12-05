@@ -16,7 +16,6 @@ jobs:
 
     strategy:
       matrix:
-        {dir: ['node-discovery', 'node-server']}
         node-version: [16.18]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
