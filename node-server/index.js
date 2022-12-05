@@ -92,9 +92,22 @@ const run = () => {
         logger.info('nodes online:', nodeState.getOtherActiveNodes())
         run()
         break
+      case 'register':
+        testRegistration()
+        run()
+        break
       default:
         run()
         break
     }
   })
+}
+
+// -----------------------------------------------
+// TODO: REMOVE!!!
+const discoveryService = require('./src/services/discovery')
+const testRegistration = async () => {
+  const id = await discoveryService.registerNode()
+  logger.info('Discovery node replied with:', id)
+  return id
 }

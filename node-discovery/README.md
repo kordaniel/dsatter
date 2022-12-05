@@ -2,11 +2,17 @@
 Provides a REST api for both chatserver nodes and the client applications
 
 ## Chatserver nodes
-Query for a list of active nodes. Register and unregister own activity.
+###
+Register a new node
+```
+POST localhost:8080/api/nodes/register
+```
+### Active online nodes
+Query for a list of active nodes. Login and logout running node-servers.
 ```
 GET  localhost:8080/api/nodes/active
-POST localhost:8080/api/nodes/active/register
-POST localhost:8080/api/nodes/active/unregister
+POST localhost:8080/api/nodes/active/login
+POST localhost:8080/api/nodes/active/logout
 ```
 
 ## Client applications
