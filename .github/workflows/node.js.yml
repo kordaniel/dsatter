@@ -13,9 +13,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     defaults:
-      run:
-        shell: bash
-        working-directory: node-server/
+      working-directory: node-server/
     strategy:
       matrix:
         node-version: [16.18]
