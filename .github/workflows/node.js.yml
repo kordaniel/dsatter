@@ -15,9 +15,6 @@ jobs:
     defaults:
       run:
         working-directory: node-server/
-    strategy:
-      matrix:
-        node-version: 16.18
     steps:
     - run: ls -la
     - uses: actions/checkout@v3
