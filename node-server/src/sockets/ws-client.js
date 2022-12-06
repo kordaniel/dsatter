@@ -54,8 +54,13 @@ const connect = (socket, sync) => {
     const message = isBinary ? data : data.toString()
     if (isBinary) {
       logger.info(`RECEIVED message from ${getRemoteAddress(ws)} -> [[BINARY data not printed]]`)
+    } else if (message.charAt(0) === '{') {
+      logger.info(`RECEIVED JSON from ${getRemoteAddress(ws)} -> (${message})`)
+      const obj = JSON.parse(message)
+      if (obj.name === 'syncReply') {
+	sync.updateMessages(obj.payload)
+      }
     } else if (typeof data === 'object' && data.name === 'syncReply') {
-      sync.updateMessages(messageDiff)
     } else {
       logger.info(`RECEIVED message from ${getRemoteAddress(ws)} -> [[${message}]]`)
     }

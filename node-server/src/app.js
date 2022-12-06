@@ -20,7 +20,7 @@ const initialize = async (parsedArgs) => {
   db = new DatabaseService()
   await db.initiateDatabase(dbpath)
   await db.openDatabaseConnection()
-  synchronizer = new Synchronizer(2000, db.getDao(), websocketService)
+  synchronizer = new Synchronizer(20000, db, websocketService)
 
   try {
     await nodeState.initialize(
@@ -41,10 +41,34 @@ const initialize = async (parsedArgs) => {
     logger.info('Other nodes online:', nodeState.getOtherActiveNodes())
     logger.info('----------------')
     synchronizer.start()
+    pushRandomMessages()
   } catch (err) {
     logger.error('initializing:', err)
     process.exit(70) // sysexits.h EX_SOFTWARE (internal software error)
   }
+}
+
+const pushRandomMessages = () => {
+  pushTestMessage()
+  const randomInt = require('../../common/utils/helpers.js').randomInt
+  setTimeout(pushRandomMessages, randomInt(5000, 50000))
+}
+
+const pushTestMessage = () => {
+  const randomInt = require('../../common/utils/helpers.js').randomInt
+  const nodeId = parseInt(nodeState.getListenPortWsServers())
+  const id = randomInt(100, 10000)
+  const message = {
+    nodeId: nodeId,
+    id: id,
+    messageId: `${nodeId}${id}`,
+    text: `this is a message that contains number ${randomInt(50, 839)}. The end.`,
+    dateTime: new Date().toLocaleString([], { hour12: false }),
+    sender: 'Julia',
+    chatId: 11
+  }
+  logger.info('Adding new test message...')
+  db.addMessageToDatabase(message)
 }
 
 const broadcastToNodeServers = (message) => {

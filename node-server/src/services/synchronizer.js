@@ -1,16 +1,26 @@
 const logger    = require('../../../common/utils/logger')
 
 class Synchronizer {
-  constructor(interval, dao, connService) {
+  constructor(interval, db, connService) {
     this.interval = interval
-    this.dao = dao
+    this.db = db
     this.connService = connService
   }
 
-  sync = () => {
-    const latestMessages = this.dao.getLastMessageIds()
-    logger.info('Synchronizing...')
-    this.connService.broadcastToServers({ name: 'syncRequest', payload: latestMessages })
+  sync = async () => {
+    let latestMessages = await this.db.getLastMessageIds()
+    if (!Array.isArray(latestMessages)) {
+      if (!latestMessages.node_id) {
+	latestMessages = []
+      } else {
+	latestMessages = [latestMessages]
+      }
+    }
+    let latestByNodeId = {}
+    latestMessages.forEach(obj => { latestByNodeId[obj.node_id] = obj['MAX(id)'] })
+    logger.info(`Synchronizing... Last message ids: ${JSON.stringify(latestByNodeId)}`)
+
+    this.connService.broadcastToNodeServers(JSON.stringify({ name: 'syncRequest', payload: latestByNodeId }))
   }
 
   start = () => {
@@ -19,22 +29,42 @@ class Synchronizer {
   }
 
   // can make this smarter by running in single query
-  getMessageDiff = (latestIds) => {
+  getMessageDiff = async (latestIds) => {
+    logger.info(`Processing sync request, diff: ${JSON.stringify(latestIds)}`)
     const diff = {}
-    latestIds.forEach(({node_id, id}) => {
-      diff[nodeId] = this.dao.getMessagesAfter(nodeId, id)
-    })
+    let knownIds = await this.db.getNodeIds()
+    logger.info(`Known node ids in DB: ${JSON.stringify(knownIds)}`)
+    const sentIds = Object.keys(latestIds)
+    logger.info(`Sent ids in request: ${JSON.stringify(sentIds)}`)
+    await Promise.all(knownIds.map(async ({node_id}) => {
+      const nodeId = '' + node_id
+      diff[node_id] = await this.db.getMessagesAfter(node_id, sentIds.includes(nodeId) ? latestIds[nodeId] : 0)
+    }))
+
+    logger.info(`Sync diff generated, diff: ${JSON.stringify(diff)}.`)
 
     return diff
   }
 
   updateMessages = (messageDiff) => {
-    messageDiff.keys().forEach(key => {
+    logger.info(`Received sync response, diff: ${JSON.stringify(messageDiff)}`)
+    let messageCount = 0
+    Object.keys(messageDiff).forEach(key => {
       messageDiff[key].forEach(message => {
-	this.dao.addNewMessage(message)
+	const dbMessage = {
+	  nodeId: message.node_id,
+	  id: message.id,
+	  messageId: message.messageId,
+	  text: message.messageText,
+	  dateTime: message.messageDateTime,
+	  sender: message.messageSender,
+	  chat_id: message.chat_id
+	}
+	this.db.addMessageToDatabase(dbMessage)
+	messageCount++
       })
     })
-    logger.info(`Synchronization done`)
+    logger.info(`Synchronization done, ${messageCount} messages synchronized`)
   }
 
   stop = () => {

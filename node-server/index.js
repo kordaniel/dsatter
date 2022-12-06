@@ -92,6 +92,10 @@ const run = () => {
         logger.info('nodes online:', nodeState.getOtherActiveNodes())
         run()
         break
+      case 'pushTestMessage':
+        app.pushTestMessage()
+        run()
+        break
       default:
         run()
         break
