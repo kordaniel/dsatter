@@ -1,5 +1,5 @@
 const logger    = require('../../../common/utils/logger')
-const testData = require('../../utils/test-data')
+const testData = require('../../test/test-data')
 
 class Dao {
   nodes

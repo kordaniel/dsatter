@@ -1,8 +1,10 @@
 const commonConfig = require('../../common/utils/config')
 
-const DB_PATH = commonConfig.DB_PATH
+const NODE_DISCOVERY_PORT = commonConfig.NODE_DISCOVERY_PORT
+const DB_PATH_DISCOVERY   = commonConfig.DB_PATH_DISCOVERY
 
 
 module.exports = {
-  DB_PATH
+  NODE_DISCOVERY_PORT,
+  DB_PATH_DISCOVERY
 }

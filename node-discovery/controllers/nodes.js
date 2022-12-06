@@ -1,6 +1,8 @@
 const nodeDiscRouter = require('express').Router()
 const nodesRegister  = require('../services/nodes')
 
+const dbService      = require('../database/database-service')
+
 // -----------------------------------------
 // TODO: Remove and use database connection
 function* idGenerator() {
@@ -15,13 +17,13 @@ const nextId = idGenerator()
 
 nodeDiscRouter.post('/register', (req, res) => {
   // TODO: Query DB (?) and return the next free id. No checks needed
+  //res.json({ id: dbService.FUNCTION_FOR_NEW_NODE_ID() })
   res.json({ id: nextId.next().value })
 })
 
 nodeDiscRouter.get('/active', (req, res) => {
   res.json({ 'activeNodes': nodesRegister.getActiveNodes() })
 })
-
 
 nodeDiscRouter.post('/active/login', (req, res) => {
   const serverNodeIp = req.ip
