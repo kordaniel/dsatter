@@ -23,6 +23,7 @@ app.use('/api/nodes', nodeDiscoveryRouter)
 app.use('/api/clients', clientsRouter)
 
 app.use(middleware.unknownEndpoint)
+app.use(middleware.errorHandler)
 
 initialize()
   .then(() => {
