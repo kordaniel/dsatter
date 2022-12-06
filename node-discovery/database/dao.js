@@ -62,7 +62,7 @@ class Dao {
    * @returns {Promise}
    */
   getNode(id) {
-    return this.db.executeQuery('get', 'SELECT * FROM chats WHERE id = :id', [id])
+    return this.db.executeQuery('get', 'SELECT * FROM nodes WHERE id = :id', [id])
   }
 
   /**
@@ -104,7 +104,7 @@ class Dao {
    * @returns {Promise}
    */
   getLastNodeId() {
-    return this.db.executeQuery('get', 'SELECT MAX(id) FROM nodes')
+    return this.db.executeQuery('get', 'SELECT MAX(id) maxId FROM nodes')
   }
 }
 

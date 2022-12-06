@@ -1,3 +1,4 @@
+const logger   = require('../../common/utils/logger')
 const querier  = require('./querier')
 const Dao      = require('./dao')
 
@@ -36,8 +37,14 @@ const addNodeToDatabase = async (data) => {
   if (data.id)
     return
   else {
-    const node = { ...data, id: this.createNewNodeId() }
-    return dao.addNewNode(node)
+    // NOTE: Race condition might happen here..(?)
+    // -------------------------------------------
+    //       The database should probably assign a new id when
+    //       adding the new node
+    const node = { ...data, id: await createNewNodeId() }
+    logger.debug('Adding node to DB:', node)
+    await dao.addNewNode(node)
+    return searchNodeDatabase(node.id)
   }
 }
 
@@ -95,8 +102,9 @@ const closeDataBaseConnection = () => {
   querier.closeDatabaseConnection()
 }
 
-const createNodeId = () => {
-  return dao.getLastChatId() + 1
+const createNewNodeId = async () => {
+  const { maxId } = await dao.getLastNodeId()
+  return maxId === null ? 1 : maxId + 1
 }
 
 module.exports = {
@@ -109,5 +117,5 @@ module.exports = {
   searchNodeDatabase,
   searchActiveNodeDatabase,
   closeDataBaseConnection,
-  createNodeId
+  createNewNodeId
 }
