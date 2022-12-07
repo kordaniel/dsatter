@@ -22,7 +22,7 @@ const heartbeat = (ws) => {
 const getRemoteAddress = (ws) => ws._url
 const getConnections = () => Object.keys(connections)
 
-const connect = (socket) => {
+const connect = (socket, sync) => {
   const endpointUrl = `ws://${parseSocket(socket)}`
 
   if(Object.hasOwn(connections, endpointUrl)) {
@@ -54,6 +54,13 @@ const connect = (socket) => {
     const message = isBinary ? data : data.toString()
     if (isBinary) {
       logger.info(`RECEIVED message from ${getRemoteAddress(ws)} -> [[BINARY data not printed]]`)
+    } else if (message.charAt(0) === '{') {
+      logger.info(`RECEIVED JSON from ${getRemoteAddress(ws)} -> (${message})`)
+      const obj = JSON.parse(message)
+      if (obj.name === 'syncReply') {
+        sync.updateMessages(obj.payload)
+      }
+    } else if (typeof data === 'object' && data.name === 'syncReply') {
     } else {
       logger.info(`RECEIVED message from ${getRemoteAddress(ws)} -> [[${message}]]`)
     }
@@ -83,8 +90,8 @@ const disconnect = (endpointUrl) => {
   connections[endpointUrl].close()
 }
 
-const connectToAll = (sockets) => {
-  sockets.forEach(s => connect(s))
+const connectToAll = (sockets, synchronizer) => {
+  sockets.forEach(s => connect(s, synchronizer))
 }
 
 const disconnectFromAll = () => {
@@ -104,11 +111,16 @@ const broadcastToAll = (message) => {
   })
 }
 
+const sendToAny = (message) => {
+  getRandomElementFromArr(getConnections).send(message)
+}
+
 module.exports = {
   connect,
   disconnect,
   connectToAll,
   disconnectFromAll,
   openConnections,
+  sendToAny,
   broadcastToAll
 }

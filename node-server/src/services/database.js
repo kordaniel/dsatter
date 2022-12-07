@@ -73,6 +73,22 @@ class DatabaseService {
     return dao.getAllChats()
   }
 
+  getNodeIds = async () => {
+    const nodeIds = await dao.getNodeIds()
+
+    return nodeIds
+  }
+
+  getLastMessageIds = async () => {
+    const messageIds = await dao.getLastMessageIds()
+
+    return messageIds
+  }
+
+  getMessagesAfter = async (nodeId, id) => {
+    const messages = await dao.getMessagesAfter(nodeId, id)
+    return messages
+  }
 
   /**
    * Searches message database with given chatId
@@ -117,6 +133,8 @@ class DatabaseService {
     logger.info(await this.getAllChats())
     logger.info(await this.getAllMessages())
   }
+
+  getDao = () => dao
 }
 
 module.exports = DatabaseService

@@ -92,8 +92,12 @@ const run = () => {
         logger.info('nodes online:', nodeState.getOtherActiveNodes())
         run()
         break
-      case 'register':
-        testRegistration()
+      case 'pushTestMessage':
+        app.pushTestMessage()
+        run()
+        break
+      case 'dump':
+        logger.info('Dumping DB:', await app.dumpDatabase())
         run()
         break
       default:

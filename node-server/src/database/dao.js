@@ -24,7 +24,7 @@ class Dao {
       node_id INTEGER NOT NULL,
       id INTEGER NOT NULL,
       messageId INTEGER PRIMARY KEY NOT NULL,
-      chat_id INTEGER NOT NULL REFERENCES chats,
+      chat_id INTEGER NOT NULL,
       messageText TEXT,
       messageDateTime TEXT,
       messageSender TEXT)`)
@@ -48,7 +48,7 @@ class Dao {
    */
   getAllChats() {
     return this.db.executeQuery('all', `SELECT chatId AS 'chatId',
-    chatName AS 'name' FROM chats`)
+      chatName AS 'name' FROM chats`)
   }
 
   /**
@@ -56,7 +56,7 @@ class Dao {
    * @returns {Promise}
    */
   getAllMessages() {
-    return this.db.executeQuery('all', `SELECT node_id AS 'nodeId'
+    return this.db.executeQuery('all', `SELECT node_id AS 'nodeId',
       id AS 'id',
       chat_id AS 'chatId',
       messageText AS 'text',
@@ -103,7 +103,7 @@ class Dao {
    * @returns {Promise}
    */
   addNewMessage(message) {
-    return this.db.executeQuery('run', `INSERT INTO messages
+    return this.db.executeQuery('run', `INSERT OR IGNORE INTO messages
       (node_id, id, messageId, messageText, messageDateTime, messageSender, chat_id)
       VALUES (?, ?, ?, ?, ?, ?, ?)`,
     [message.nodeId, message.id, message.messageId, message.text, 
@@ -124,8 +124,25 @@ class Dao {
    * @returns {Promise}
    */
   getLastMessageId(nodeId) {
-    return this.db.executeQuery('get', `SELECT MAX(id)
+    return this.db.executeQuery('all', `SELECT MAX(id)
       FROM messages WHERE node_id = :nodeId`, [nodeId])
+  }
+
+  getLastMessageIds() {
+    return this.db.executeQuery('all', `SELECT node_id, MAX(id) 
+      FROM messages 
+      WHERE node_id IS NOT NULL AND id IS NOT NULL 
+      GROUP BY node_id`)
+  }
+
+  getMessagesAfter(nodeId, id) {
+    return this.db.executeQuery('all', `SELECT * FROM messages 
+      WHERE (node_id = ?) AND (id > ?)`, [nodeId, id])
+  }
+
+  getNodeIds() {
+    return this.db.executeQuery('all', `SELECT DISTINCT node_id 
+      FROM messages WHERE node_id IS NOT NULL`)
   }
 }
 
