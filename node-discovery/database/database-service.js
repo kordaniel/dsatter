@@ -104,6 +104,10 @@ const searchActiveNodeDatabase = async (id) => {
   return dao.getActiveNode(id)
 }
 
+const clearActiveNodeDatabase = async () => {
+  return dao.clearActiveNode()
+}
+
 /**
  * Closes connection to local sqlite3 database
  */
@@ -126,6 +130,7 @@ module.exports = {
   getAllActiveNodes,
   searchNodeDatabase,
   searchActiveNodeDatabase,
+  clearActiveNodeDatabase,
   closeDataBaseConnection,
   createNewNodeId
 }

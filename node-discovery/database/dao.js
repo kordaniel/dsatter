@@ -72,7 +72,7 @@ class Dao {
    */
   getActiveNode(id) {
     return this.db.executeQuery('get', `SELECT id AS 'id',
-      syncport  AS 'syncport ',
+      syncport  AS 'syncport',
       clientport AS 'clientport',
       address AS 'address' FROM activeNodes WHERE id = :id`, [id])
   }
@@ -108,6 +108,17 @@ class Dao {
     return this.db.executeQuery(
       'run',
       'DELETE FROM activeNodes WHERE id = :id', [id]
+    )
+  }
+
+  /**
+   * Removes all rows from table activeNodes
+   * @returns {Promise}
+   */
+  clearActiveNode() {
+    return this.db.executeQuery(
+      'run',
+      'DELETE FROM activeNodes'
     )
   }
 

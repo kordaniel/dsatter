@@ -1,5 +1,4 @@
 const nodeDiscRouter = require('express').Router()
-const nodesRegister  = require('../services/nodes')
 
 const logger         = require('../../common/utils/logger')
 const dbService      = require('../database/database-service')
@@ -32,19 +31,19 @@ nodeDiscRouter.post('/register', async (req, res) => {
 
 nodeDiscRouter.get('/active', async (req, res) => {
   const activeNodes = await dbService.getAllActiveNodes()
-  logger.debug('Active nodes:', activeNodes)
   res.json({ activeNodes })
 })
 
 nodeDiscRouter.post('/active/login', async (req, res) => {
-  const serverNodeIp = req.ip
+  const address = req.ip
   const {
     id,
     password,
     syncport,
-    clientPort
+    clientport
   }                  = req.body
 
+  logger.debug('LOGIN:', id, password, syncport, clientport)
   if (!password) {
     return res.status(400).json({
       error: 'password required'
@@ -71,10 +70,10 @@ nodeDiscRouter.post('/active/login', async (req, res) => {
   const otherActiveNodes = await dbService.getAllActiveNodes()
 
   await dbService.addActiveNodeToDatabase({
-    'id': id,
-    'syncport': syncport,
-    'clientport': clientPort,
-    'address': serverNodeIp
+    id,
+    syncport,
+    clientport,
+    address
   })
 
   const responseObj = {
@@ -91,9 +90,9 @@ nodeDiscRouter.post('/active/logout', async (req, res) => {
     password
   } = req.body
 
-  if (!password) {
+  if (!id || !password) {
     return res.status(400).json({
-      error: 'password required'
+      error: 'id or password missing'
     })
   }
   if (typeof password !== 'string') {

@@ -14,6 +14,7 @@ logger.info('Node-discovery service starting up')
 const initialize = async () => {
   await dbService.initiateDatabase(config.DB_PATH_DISCOVERY)
   await dbService.openDatabaseConnection()
+  await dbService.clearActiveNodeDatabase()
 }
 
 app.use(express.json())
