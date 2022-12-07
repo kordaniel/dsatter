@@ -69,7 +69,7 @@ const WsServer = () => {
         const message = isBinary ? data : data.toString()
         if (isBinary) {
           logger.info(`RECEIVED message from ${getRemoteAddress(req)} -> [[BINARY data not printed]]`)
-	} else if (message.charAt(0) === '{') {
+        } else if (message.charAt(0) === '{') {
 	  const obj = JSON.parse(message)
 	  if (obj.name === 'syncRequest') {
 	    logger.info(`Sync request received: (${message})`)

@@ -58,7 +58,7 @@ const connect = (socket, sync) => {
       logger.info(`RECEIVED JSON from ${getRemoteAddress(ws)} -> (${message})`)
       const obj = JSON.parse(message)
       if (obj.name === 'syncReply') {
-	sync.updateMessages(obj.payload)
+        sync.updateMessages(obj.payload)
       }
     } else if (typeof data === 'object' && data.name === 'syncReply') {
     } else {
