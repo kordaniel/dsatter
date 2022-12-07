@@ -44,14 +44,10 @@ nodeDiscRouter.post('/active/login', async (req, res) => {
   }                  = req.body
 
   logger.debug('LOGIN:', id, password, syncport, clientport)
-  if (!password) {
+
+  if (!(id && password && syncport && clientport)) {
     return res.status(400).json({
-      error: 'password required'
-    })
-  }
-  if (typeof password !== 'string') {
-    return res.status(400).json({
-      error: 'password is not a string'
+      error: 'id, password, syncport, clientport expected'
     })
   }
 
@@ -75,6 +71,7 @@ nodeDiscRouter.post('/active/login', async (req, res) => {
     clientport,
     address
   })
+
 
   const responseObj = {
     ...(await dbService.searchActiveNodeDatabase(id)), // id, syncport, clientport, address
