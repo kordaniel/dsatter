@@ -14,3 +14,8 @@ CREATE TABLE chats (
     chatId INTEGER PRIMARY KEY NOT NULL,
     chatName TEXT
 );
+
+CREATE TABLE node (
+    id INTEGER PRIMARY KEY NOT NULL,
+    password TEXT
+);

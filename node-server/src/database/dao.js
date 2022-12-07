@@ -3,6 +3,7 @@
  *
  * @typedef {import('../../../common/utils/types/datatypes).Message} Message
  * @typedef {import('../../../common/utils/types/datatypes).Chat} Chat
+ * @typedef {import('../../../common/utils/types/datatypes).Node} Node
  */
 class Dao {
 
@@ -15,6 +16,16 @@ class Dao {
   }
 
 
+  /**
+   * Creates table Node for own info if that does not exist.
+   * @returns {Promise}
+   */
+   createTableNode() {
+    return this.db.executeQuery('run', `CREATE TABLE IF NOT EXISTS node (
+      id INTEGER PRIMARY KEY NOT NULL,
+      password TEXT)`)
+  }
+  
   /**
    * Creates table Messages if that does not exist.
    * @returns {Promise}
@@ -40,6 +51,15 @@ class Dao {
       id INTEGER NOT NULL,
       chatId INTEGER PRIMARY KEY NOT NULL,
       chatName TEXT)`)
+  }
+
+  /**
+   * Returns the node
+   * @returns {Promise}
+   */
+   getNode() {
+    return this.db.executeQuery('all', `SELECT id AS 'id',
+      password AS 'password' FROM node`)
   }
 
   /**
@@ -87,6 +107,17 @@ class Dao {
   }
 
   /**
+   * Adds new node to table nodes
+   * @param {Node} node
+   * @returns {Promise}
+   */
+   addNewNode(node) {
+    return this.db.executeQuery('run', `INSERT INTO node
+      (id, password) VALUES (?, ?)`,
+    [node.id, node.password])
+  }
+  
+  /**
    * Adds new chat to table chats
    * @param {Chat} chat
    * @returns {Promise}
@@ -121,6 +152,7 @@ class Dao {
 
   /**
    * Returns the biggest existing messageId for given node
+   * @param {number} nodeId
    * @returns {Promise}
    */
   getLastMessageId(nodeId) {
@@ -135,6 +167,13 @@ class Dao {
       GROUP BY node_id`)
   }
 
+  /**
+   * Returns all messages with given nodeId that have bigger id
+   * than the given id
+   * @param {number} nodeId 
+   * @param {number} id 
+   * @returns {Promise}
+   */
   getMessagesAfter(nodeId, id) {
     return this.db.executeQuery('all', `SELECT * FROM messages 
       WHERE (node_id = ?) AND (id > ?)`, [nodeId, id])

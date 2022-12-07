@@ -7,6 +7,7 @@ let dao
 /**
  * @typedef {import('../../../common/utils/types/datatypes).Message} Message
  * @typedef {import('../../../common/utils/types/datatypes).Chat} Chat
+ * @typedef {import('../../../common/utils/types/datatypes).Node} Node
  */
 class DatabaseService {
 
@@ -25,6 +26,21 @@ class DatabaseService {
     dao = d
     await dao.createTableChats()
     await dao.createTableMessages()
+  }
+
+  /**
+   * Adds chat with given data to the database
+   * Returns promise of the chatId
+   * @param {Chat} data
+   * @returns {Promise<*>}
+   */
+   addNodeToDatabase = async (node) => {
+    if (!node.id)
+      return
+    else {
+      if (await dao.getNode(node.id)) return
+      return dao.addNewNode(node)
+    }
   }
 
   /**
@@ -58,6 +74,15 @@ class DatabaseService {
   }
 
   /**
+   * Returns all nodes in the node database.
+   * There should be only one node.
+   * @returns {Promise<*>}
+   */
+   getNode = async () => {
+    return await dao.getNode()[0]
+  }
+
+  /**
    * Returns all messages in message database
    * @returns {Promise<*>}
    */
@@ -74,22 +99,17 @@ class DatabaseService {
   }
 
   getNodeIds = async () => {
-    const nodeIds = await dao.getNodeIds()
-
-    return nodeIds
+    return await dao.getNodeIds()
   }
 
   getLastMessageIds = async () => {
-    const messageIds = await dao.getLastMessageIds()
-
-    return messageIds
+    return await dao.getLastMessageIds()
   }
 
   getMessagesAfter = async (nodeId, id) => {
-    const messages = await dao.getMessagesAfter(nodeId, id)
-    return messages
+    return await dao.getMessagesAfter(nodeId, id)
   }
-
+  
   /**
    * Searches message database with given chatId
    * Returns promise of the list of messages
@@ -97,7 +117,7 @@ class DatabaseService {
    * @returns {Promise<*>}
    */
   searchMessageDatabase = async (chatId) => {
-    return dao.getMessages(chatId)
+    return await dao.getMessages(chatId)
   }
 
   /**
@@ -107,7 +127,7 @@ class DatabaseService {
    * @returns {Promise<*>}
    */
   searchChatDatabase = async (chatId) => {
-    return dao.getChat(chatId)
+    return await dao.getChat(chatId)
   }
 
   /**
