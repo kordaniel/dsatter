@@ -91,6 +91,11 @@ const openClientConnections = () => {
   return websocketService.openClientConnections()
 }
 
+const dumpDatabase = async () => {
+  const messages = await db.getAllMessages()
+  return messages
+}
+
 
 
 /**
@@ -140,5 +145,6 @@ module.exports = {
   openOutboundConnections,
   openInboundConnections,
   openClientConnections,
+  dumpDatabase,
   terminate
 }
