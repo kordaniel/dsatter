@@ -1,22 +1,30 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-console */
 
-const querier = require('../database/querier.js')
-const Dao = require('../database/dao.js')
+//const querier = require('../database/querier.js')
+//const Dao = require('../database/dao.js')
 const dbService = require('../database/database-service.js')
 const testData = require('./test-data.js')
 
-jest.mock('../database/querier.js')
-jest.mock('../database/dao.js')
+//jest.mock('../database/querier.js')
+//jest.mock('../database/dao.js')
 
 let dao
 
 beforeAll(async () => {
-  dao = new Dao(querier)
-  dbService.openDatabaseConnection(dao)
+  //dao = new Dao(querier)
+  await dbService.initiateDatabase(':memory:')
+  await dbService.openDatabaseConnection(dao)
 
-  for (let n of testData.nodes) {
+  const td = testData.nodes
+    .map(n => { return { password: n.password } })
+
+  for (let n of td) {
     await dbService.addNodeToDatabase(n)
+  }
+
+  for (let a of testData.activeNodes) {
+    await dbService.addActiveNodeToDatabase(a)
   }
 
   console.log(await dbService.getAllNodes())
@@ -27,14 +35,30 @@ describe('Database service works correctly', () => {
 
   test('Searching nodes works correctly', async () => {
     const nodes = await dbService.getAllNodes()
-    expect(nodes.length).toBe(testData.nodes.length)
-    expect(nodes[2].id).toBe(56)
+    expect(nodes).toHaveLength(testData.nodes.length)
+
+    //expect(nodes[2].id).toBe(56)
   })
 
   test('Searching active nodes works correctly', async () => {
     const activeNodes = await dbService.getAllActiveNodes()
-    expect(activeNodes.length).toBe(testData.activeNodes.length)
-    expect(activeNodes[0].clientport).toBe(12001)
-    expect(activeNodes[1].address).toBe('address2')
+
+    expect(activeNodes).toHaveLength(testData.activeNodes.length)
+
+    for (let activeNode of testData.activeNodes) {
+      expect(activeNodes).toContainEqual(activeNode)
+    }
+  })
+
+  test('Removing active node by ID works correctly', async () => {
+    const activeNodes = await dbService.getAllActiveNodes()
+    const activeNode = activeNodes[0]
+    expect(activeNodes).toHaveLength(testData.activeNodes.length)
+
+    await dbService.removeActiveNodeFromDatabase(activeNode.id)
+    const activeNodesLeft = await dbService.getAllActiveNodes()
+
+    expect(activeNodesLeft).toHaveLength(testData.activeNodes.length - 1)
+    expect(activeNodesLeft).not.toContainEqual(activeNode)
   })
 })
