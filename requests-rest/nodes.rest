@@ -6,7 +6,9 @@ POST http://localhost:8080/api/nodes/active/login
 Content-Type: application/json
 
 {
-  "serverPort": 41952,
+  "id": 24,
+  "password": "123",
+  "serverPort": 41959,
   "clientPort": 55004
 }
 
@@ -16,6 +18,8 @@ POST http://localhost:8080/api/nodes/active/logout
 Content-Type: application/json
 
 {
+  "id": 24,
+  "password": "123",
   "serverPort": 41956,
   "clientPort": 55001
 }
@@ -26,5 +30,5 @@ POST http://localhost:8080/api/nodes/register
 Content-Type: application/json
 
 {
-
+  "password": "123"
 }

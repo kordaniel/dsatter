@@ -62,6 +62,15 @@ const addActiveNodeToDatabase = async (data) => {
 }
 
 /**
+ * Removes a node from the active nodes table by id
+ * @param {Number} id
+ * @returns {Promise}
+ */
+const removeActiveNodeFromDatabase = async (id) => {
+  return dao.removeActiveNode(id)
+}
+
+/**
  * Returns all nodes in node database
  * @returns {Promise<*>}
  */
@@ -112,6 +121,7 @@ module.exports = {
   openDatabaseConnection,
   addNodeToDatabase,
   addActiveNodeToDatabase,
+  removeActiveNodeFromDatabase,
   getAllNodes,
   getAllActiveNodes,
   searchNodeDatabase,

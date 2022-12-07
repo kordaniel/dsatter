@@ -42,7 +42,7 @@ class Dao {
    * @returns {Promise}
    */
   getAllNodes() {
-    return this.db.executeQuery('all', 'SELECT id AS \'id\' FROM nodes')
+    return this.db.executeQuery('all', 'SELECT id AS \'id\', password AS \'password\' FROM nodes')
   }
 
   /**
@@ -51,7 +51,7 @@ class Dao {
    */
   getAllActiveNodes() {
     return this.db.executeQuery('all', `SELECT id AS 'id',
-      syncport  AS 'syncport ',
+      syncport  AS 'syncport',
       clientport AS 'clientport',
       address AS 'address' FROM activeNodes`)
   }
@@ -97,6 +97,18 @@ class Dao {
     return this.db.executeQuery('run', `INSERT INTO activeNodes
       (id, syncport, clientport, address) VALUES (?, ?, ?, ?)`,
     [node.id, node.syncport, node.clientport, node.address])
+  }
+
+  /**
+   * Removes node by id from table activeNodes
+   * @param {Number} id
+   * @returns {Promise}
+   */
+  removeActiveNode(id) {
+    return this.db.executeQuery(
+      'run',
+      'DELETE FROM activeNodes WHERE id = :id', [id]
+    )
   }
 
   /**
