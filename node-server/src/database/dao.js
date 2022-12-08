@@ -20,12 +20,12 @@ class Dao {
    * Creates table Node for own info if that does not exist.
    * @returns {Promise}
    */
-   createTableNode() {
+  createTableNode() {
     return this.db.executeQuery('run', `CREATE TABLE IF NOT EXISTS node (
       id INTEGER PRIMARY KEY NOT NULL,
       password TEXT)`)
   }
-  
+
   /**
    * Creates table Messages if that does not exist.
    * @returns {Promise}
@@ -57,7 +57,7 @@ class Dao {
    * Returns the node
    * @returns {Promise}
    */
-   getNode() {
+  getNode() {
     return this.db.executeQuery('all', `SELECT id AS 'id',
       password AS 'password' FROM node`)
   }
@@ -107,16 +107,28 @@ class Dao {
   }
 
   /**
+   * Returns messages with given nodeId
+   * @param {Number} nodeId
+   * @returns {Promise}
+   */
+  getMessagesWithNodeId(nodeId) {
+    return this.db.executeQuery('all', `SELECT messageText AS 'text',
+      messageDateTime AS 'time',
+      messageSender AS 'sender'
+      FROM messages WHERE node_id = :nodeId`, [nodeId])
+  }
+
+  /**
    * Adds new node to table nodes
    * @param {Node} node
    * @returns {Promise}
    */
-   addNewNode(node) {
+  addNewNode(node) {
     return this.db.executeQuery('run', `INSERT INTO node
       (id, password) VALUES (?, ?)`,
     [node.id, node.password])
   }
-  
+
   /**
    * Adds new chat to table chats
    * @param {Chat} chat
@@ -137,8 +149,8 @@ class Dao {
     return this.db.executeQuery('run', `INSERT OR IGNORE INTO messages
       (node_id, id, messageId, messageText, messageDateTime, messageSender, chat_id)
       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [message.nodeId, message.id, message.messageId, message.text, 
-      message.dateTime, message.sender, message.chat_id])
+    [message.nodeId, message.id, message.messageId, message.text,
+      message.dateTime, message.sender, message.chatId])
   }
 
   /**
@@ -170,8 +182,8 @@ class Dao {
   /**
    * Returns all messages with given nodeId that have bigger id
    * than the given id
-   * @param {number} nodeId 
-   * @param {number} id 
+   * @param {number} nodeId
+   * @param {number} id
    * @returns {Promise}
    */
   getMessagesAfter(nodeId, id) {

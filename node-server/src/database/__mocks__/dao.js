@@ -18,6 +18,10 @@ class Dao {
     this.messages = testData.messages
   }
 
+  createTableNode = () => {
+    this.nodes = testData.nodes
+  }
+
   getChat = (chatId) => {
     return Promise.resolve(this.chats.filter((c) => c.chatId === chatId))
   }

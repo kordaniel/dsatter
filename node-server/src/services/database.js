@@ -26,6 +26,7 @@ class DatabaseService {
     dao = d
     await dao.createTableChats()
     await dao.createTableMessages()
+    await dao.createTableNode()
   }
 
   /**
@@ -34,13 +35,15 @@ class DatabaseService {
    * @param {Chat} data
    * @returns {Promise<*>}
    */
-   addNodeToDatabase = async (node) => {
-    if (!node.id)
-      return
-    else {
-      if (await dao.getNode(node.id)) return
-      return dao.addNewNode(node)
+  addNodeToDatabase = async (node) => {
+    if (!node.id || !node.password) {
+      logger.error('Attempted to add a node without id or passwd to DB')
+      return null
     }
+
+    // TODO: Handle case when id is already in the DB. (empty array always evaluates to true)
+
+    return dao.addNewNode(node)
   }
 
   /**
@@ -78,8 +81,16 @@ class DatabaseService {
    * There should be only one node.
    * @returns {Promise<*>}
    */
-   getNode = async () => {
-    return await dao.getNode()[0]
+  getNode = async () => {
+    const allNodes = await dao.getNode()
+
+    if (allNodes.length > 1) {
+      logger.error('Several node objects in DB')
+    }
+
+    return allNodes.length !== 0
+      ? allNodes[0]
+      : null
   }
 
   /**
@@ -88,6 +99,15 @@ class DatabaseService {
    */
   getAllMessages = async () => {
     return dao.getAllMessages()
+  }
+
+  /**
+   * Returns all messages with given nodeId in message database
+   * @param {Number} nodeId
+   * @returns {Promise<*>}
+   */
+  getMessagesWithNodeId = async (nodeId) => {
+    return dao.getMessagesWithNodeId(nodeId)
   }
 
   /**
@@ -109,7 +129,7 @@ class DatabaseService {
   getMessagesAfter = async (nodeId, id) => {
     return await dao.getMessagesAfter(nodeId, id)
   }
-  
+
   /**
    * Searches message database with given chatId
    * Returns promise of the list of messages
