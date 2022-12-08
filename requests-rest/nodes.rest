@@ -6,10 +6,10 @@ POST http://localhost:8080/api/nodes/active/login
 Content-Type: application/json
 
 {
-  "id": 24,
-  "password": "123",
-  "syncport": 41959,
-  "clientPort": 55004
+  "id": 3,
+  "password": "abcd",
+  "syncport": 41953,
+  "clientport": 55006
 }
 
 ###
@@ -18,8 +18,8 @@ POST http://localhost:8080/api/nodes/active/logout
 Content-Type: application/json
 
 {
-  "id": 24,
-  "password": "123"
+  "id": 2,
+  "password": "abcd"
 }
 
 ###
@@ -28,5 +28,5 @@ POST http://localhost:8080/api/nodes/register
 Content-Type: application/json
 
 {
-  "password": "123"
+  "password": 123
 }

@@ -15,11 +15,13 @@ const getActiveNodes = async () => {
   }
 }
 
-const registerAsActive = async (serverWsPort, clientWsPort) => {
+const registerAsActive = async (nodeId, password, syncport, clientport) => {
   try {
     const res = await axios.post(`${baseUrl}/active/login`, {
-      'serverPort': serverWsPort,
-      'clientPort': clientWsPort
+      'id': nodeId,
+      password,
+      syncport,
+      clientport
     })
     return res.data
   } catch (err) {
@@ -28,12 +30,12 @@ const registerAsActive = async (serverWsPort, clientWsPort) => {
   }
 }
 
-const unregisterAsActive = async (serverWsPort, clientWsPort) => {
+const unregisterAsActive = async (nodeId, password) => {
   // TODO: Use token/credentials to identify node instead of port
   try {
     const res = await axios.post(`${baseUrl}/active/logout`, {
-      'serverPort': serverWsPort,
-      'clientPort': clientWsPort
+      'id': nodeId,
+      password
     })
     return res.data
   } catch (err) {
@@ -42,13 +44,13 @@ const unregisterAsActive = async (serverWsPort, clientWsPort) => {
   }
 }
 
-const registerNode = async () => {
+const registerNode = async (password) => {
   // query for a new fresh ID
   try {
-    const res = await axios.post(`${baseUrl}/register`, { })
+    const res = await axios.post(`${baseUrl}/register`, { password })
     return res.data
   } catch (err) {
-    logger.err('performing POST register new node:', err.cause)
+    logger.error('performing POST register new node:', err.cause)
     throw Error(err)
   }
 }

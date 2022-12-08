@@ -52,13 +52,13 @@ class Synchronizer {
     Object.keys(messageDiff).forEach(key => {
       messageDiff[key].forEach(message => {
         const dbMessage = {
-	  nodeId: message.node_id,
-	  id: message.id,
-	  messageId: message.messageId,
-	  text: message.messageText,
-	  dateTime: message.messageDateTime,
-	  sender: message.messageSender,
-	  chat_id: message.chat_id
+          nodeId: message.node_id,
+          id: message.id,
+          messageId: message.messageId,
+          text: message.messageText,
+          dateTime: message.messageDateTime,
+          sender: message.messageSender,
+          chat_id: message.chat_id
         }
         this.db.addMessageToDatabase(dbMessage)
         messageCount++

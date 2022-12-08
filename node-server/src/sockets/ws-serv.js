@@ -70,12 +70,12 @@ const WsServer = () => {
         if (isBinary) {
           logger.info(`RECEIVED message from ${getRemoteAddress(req)} -> [[BINARY data not printed]]`)
         } else if (message.charAt(0) === '{') {
-	  const obj = JSON.parse(message)
-	  if (obj.name === 'syncRequest') {
-	    logger.info(`Sync request received: (${message})`)
-	    const diff = await synchronizer.getMessageDiff(obj.payload)
-	    ws.send(JSON.stringify({ name: 'syncReply', payload: diff }))
-	  }
+          const obj = JSON.parse(message)
+          if (obj.name === 'syncRequest') {
+            logger.info(`Sync request received: (${message})`)
+            const diff = await synchronizer.getMessageDiff(obj.payload)
+            ws.send(JSON.stringify({ name: 'syncReply', payload: diff }))
+          }
         } else {
           logger.info(`RECEIVED message from ${getRemoteAddress(req)} -> [[${message}]]`)
         }
