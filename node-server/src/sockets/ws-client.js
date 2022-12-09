@@ -50,24 +50,28 @@ const connect = (socket, sync) => {
     heartbeat(ws)
   })
 
-  ws.on('message', (data, isBinary) => {
+  ws.on('message', async (data, isBinary) => {
     const message = isBinary ? data : data.toString()
     if (isBinary) {
       logger.info(`RECEIVED message from ${getRemoteAddress(ws)} -> [[BINARY data not printed]]`)
     } else if (message.charAt(0) === '{') {
       logger.info(`RECEIVED JSON from ${getRemoteAddress(ws)} -> (${message})`)
       const obj = JSON.parse(message)
-      if (obj.name === 'syncReply') {
+
+      if (obj.name === 'syncRequest') {
+        logger.info(`Sync request received from ${getRemoteAddress(ws)}: (${message})`)
+        const diff = await sync.getMessageDiff(obj.payload)
+        ws.send(JSON.stringify({ name: 'syncReply', payload: diff }))
+      } else if (obj.name === 'syncReply') {
         sync.updateMessages(obj.payload)
       }
-    } else if (typeof data === 'object' && data.name === 'syncReply') {
     } else {
       logger.info(`RECEIVED message from ${getRemoteAddress(ws)} -> [[${message}]]`)
     }
   })
 
   ws.on('close', () => {
-    // This event is fired even if there is an error before succesfull connection
+    // This event is fired even if there is an error before successful connection
     if (!Object.hasOwn(connections, endpointUrl)) {
       return
     }
