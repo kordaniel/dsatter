@@ -69,7 +69,6 @@ const WsServer = () => {
         const message = isBinary ? data : data.toString()
         if (isBinary) {
           logger.info(`RECEIVED message from ${getRemoteAddress(req)} -> [[BINARY data not printed]]`)
-<<<<<<< HEAD
         } else if (message.charAt(0) === '{') {
           const obj = JSON.parse(message)
           if (obj.name === 'syncRequest') {
@@ -77,15 +76,6 @@ const WsServer = () => {
             const diff = await synchronizer.getMessageDiff(obj.payload)
             ws.send(JSON.stringify({ name: 'syncReply', payload: diff }))
           }
-=======
-	} else if (message.charAt(0) === '{') {
-	  const obj = JSON.parse(message)
-	  if (obj.name === 'syncRequest') {
-	    logger.info(`Sync request received: (${message})`)
-	    const diff = await synchronizer.getMessageDiff(obj.payload)
-	    ws.send(JSON.stringify({ name: 'syncReply', payload: diff }))
-	  }
->>>>>>> main
         } else {
           logger.info(`RECEIVED message from ${getRemoteAddress(req)} -> [[${message}]]`)
         }
