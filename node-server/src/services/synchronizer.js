@@ -9,13 +9,7 @@ class Synchronizer {
 
   sync = async () => {
     let latestMessages = await this.db.getLastMessageIds()
-    if (!Array.isArray(latestMessages)) {
-      if (!latestMessages.node_id) {
-        latestMessages = []
-      } else {
-        latestMessages = [latestMessages]
-      }
-    }
+
     let latestByNodeId = {}
     latestMessages.forEach(obj => { latestByNodeId[obj.node_id] = obj['MAX(id)'] })
     logger.info(`Synchronizing... Last message ids: ${JSON.stringify(latestByNodeId)}`)
