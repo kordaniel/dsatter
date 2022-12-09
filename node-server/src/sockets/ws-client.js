@@ -1,18 +1,15 @@
 const logger    = require('../../../common/utils/logger')
 const config    = require('../utils/config')
 const nodeState = require('../state/node')
-const {
-  parseSocket
-}               = require('../../../common/utils/helpers')
-
+const { parseSocket } = require('../../../common/utils/helpers')
 const { WebSocket } = require('ws')
+const messageHandler = require('../services/message-handler')
 
 const connections = {}
 
 
 const heartbeat = (ws) => {
   clearTimeout(ws.pingTimeout)
-
   ws.pingTimeout = setTimeout(() => {
     // TODO: Update otheractive nodes, report to discovery service
     ws.terminate()
@@ -31,7 +28,6 @@ const connect = (socket, sync) => {
   }
 
   logger.info('Initializing outbound WS connection to:', endpointUrl)
-
   const ws = new WebSocket(endpointUrl)
 
   ws.on('error', (err) => {
@@ -71,7 +67,6 @@ const connect = (socket, sync) => {
     if (!Object.hasOwn(connections, endpointUrl)) {
       return
     }
-
     clearTimeout(ws.pingTimeout)
     const remoteEndpoint = getRemoteAddress(connections[endpointUrl])
     delete connections[endpointUrl]

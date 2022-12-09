@@ -19,7 +19,7 @@ const WsServer = () => {
    * @param {Number} port The port to bind this server to
    * @param {bool} restartAfterError If set to true, attempt to rebind port in case of EADDRINUSE failure
    */
-  const init = (port, synchronizer, restartAfterError = true) => {
+  const init = (port, handle, restartAfterError = true) => {
     assert(wss === null, 'ws-serv init(): wss is not null')
 
     wss = new WebSocketServer({ port: port })
@@ -69,15 +69,10 @@ const WsServer = () => {
         const message = isBinary ? data : data.toString()
         if (isBinary) {
           logger.info(`RECEIVED message from ${getRemoteAddress(req)} -> [[BINARY data not printed]]`)
-        } else if (message.charAt(0) === '{') {
-          const obj = JSON.parse(message)
-          if (obj.name === 'syncRequest') {
-            logger.info(`Sync request received: (${message})`)
-            const diff = await synchronizer.getMessageDiff(obj.payload)
-            ws.send(JSON.stringify({ name: 'syncReply', payload: diff }))
-          }
         } else {
-          logger.info(`RECEIVED message from ${getRemoteAddress(req)} -> [[${message}]]`)
+          const response = await handle(message)
+          if (response)
+            ws.send(response)
         }
       })
 

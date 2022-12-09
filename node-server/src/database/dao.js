@@ -95,6 +95,18 @@ class Dao {
   }
 
   /**
+   * Returns message with given id
+   * @param {number} messageId
+   * @returns {Promise}
+   */
+   getMessage(messageId) {
+    return this.db.executeQuery('get', `SELECT id AS 'id',
+      messageDateTime AS 'time',
+      messageSender AS 'sender'
+      FROM messages WHERE messageId = :messageId`, [messageId])
+  }
+
+  /**
    * Returns messages with given chatID
    * @param {number} chatId
    * @returns {Promise}

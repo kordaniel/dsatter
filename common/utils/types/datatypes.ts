@@ -4,11 +4,11 @@
 type Message = {
   nodeId: number, // given by discovery node
   id: number, // given by the node, manual autoincrement
-  messageId: string, //node_id + id
+  messageId: string, // nodeId + id
   text: string,
   datetime: string,
   sender: string,
-  chatId: string //node_id + id of the chat
+  chatId: string // nodeId + id of the chat
 }
 
 /**
@@ -17,7 +17,7 @@ type Message = {
 type Chat = {
   nodeId: number, // given by discovery node
   id: number, // given by the node, manual autoincrement
-  chatId: string, //node_id + id
+  chatId: string, // nodeId + id
   name: string
 }
 
@@ -45,7 +45,7 @@ type SyncMessage = {
  * Registered nodes in discovery database
  */
 type RegisteredNode = {
-  id: number, // node_id
+  id: number, // nodeId
   password: any
 }
 
