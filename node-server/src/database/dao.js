@@ -3,17 +3,28 @@
  *
  * @typedef {import('../../../common/utils/types/datatypes).Message} Message
  * @typedef {import('../../../common/utils/types/datatypes).Chat} Chat
+ * @typedef {import('../../../common/utils/types/datatypes).Node} Node
  */
 class Dao {
 
   /**
-     * Constructor
-     * @param {Querier} querier
-     */
+   * Constructor
+   * @param {Querier} querier
+   */
   constructor(querier) {
     this.db = querier
   }
 
+
+  /**
+   * Creates table Node for own info if that does not exist.
+   * @returns {Promise}
+   */
+  createTableNode() {
+    return this.db.executeQuery('run', `CREATE TABLE IF NOT EXISTS node (
+      id INTEGER PRIMARY KEY NOT NULL,
+      password TEXT)`)
+  }
 
   /**
    * Creates table Messages if that does not exist.
@@ -21,10 +32,10 @@ class Dao {
    */
   createTableMessages() {
     return this.db.executeQuery('run', `CREATE TABLE IF NOT EXISTS messages (
-      node_id INTEGER,
-      id INTEGER,
-      messageId INTEGER PRIMARY KEY,
-      chat_id INTEGER chats,
+      node_id INTEGER NOT NULL,
+      id INTEGER NOT NULL,
+      messageId INTEGER PRIMARY KEY NOT NULL,
+      chat_id INTEGER,
       messageText TEXT,
       messageDateTime TEXT,
       messageSender TEXT)`)
@@ -36,10 +47,19 @@ class Dao {
    */
   createTableChats() {
     return this.db.executeQuery('run', `CREATE TABLE IF NOT EXISTS chats (
-      node_id INTEGER,
-      id INTEGER,
-      chatId INTEGER PRIMARY KEY,
+      node_id INTEGER NOT NULL,
+      id INTEGER NOT NULL,
+      chatId INTEGER PRIMARY KEY NOT NULL,
       chatName TEXT)`)
+  }
+
+  /**
+   * Returns the node
+   * @returns {Promise}
+   */
+  getNode() {
+    return this.db.executeQuery('all', `SELECT id AS 'id',
+      password AS 'password' FROM node`)
   }
 
   /**
@@ -57,11 +77,11 @@ class Dao {
    */
   getAllMessages() {
     return this.db.executeQuery('all', `SELECT node_id AS 'nodeId',
-    id AS 'id',
-    chat_id AS 'chatId',
-    messageText AS 'text',
-    messageDateTime AS 'time',
-    messageSender AS 'sender' FROM messages`)
+      id AS 'id',
+      chat_id AS 'chatId',
+      messageText AS 'text',
+      messageDateTime AS 'time',
+      messageSender AS 'sender' FROM messages`)
   }
 
   /**
@@ -87,10 +107,33 @@ class Dao {
   }
 
   /**
-     * Adds new chat to table chats
-     * @param {Chat} chat
-     * @returns {Promise}
-     */
+   * Returns messages with given nodeId
+   * @param {Number} nodeId
+   * @returns {Promise}
+   */
+  getMessagesWithNodeId(nodeId) {
+    return this.db.executeQuery('all', `SELECT messageText AS 'text',
+      messageDateTime AS 'time',
+      messageSender AS 'sender'
+      FROM messages WHERE node_id = :nodeId`, [nodeId])
+  }
+
+  /**
+   * Adds new node to table nodes
+   * @param {Node} node
+   * @returns {Promise}
+   */
+  addNewNode(node) {
+    return this.db.executeQuery('run', `INSERT INTO node
+      (id, password) VALUES (?, ?)`,
+    [node.id, node.password])
+  }
+
+  /**
+   * Adds new chat to table chats
+   * @param {Chat} chat
+   * @returns {Promise}
+   */
   addNewChat(chat) {
     return this.db.executeQuery('run', `INSERT INTO chats
       (node_id, id, chatId, chatName) VALUES (?, ?, ?, ?)`,
@@ -98,37 +141,59 @@ class Dao {
   }
 
   /**
-     * Adds new message to table messages
-     * @param {Message} message
-     * @returns {Promise}
-     */
+   * Adds new message to table messages
+   * @param {Message} message
+   * @returns {Promise}
+   */
   addNewMessage(message) {
     return this.db.executeQuery('run', `INSERT OR IGNORE INTO messages
       (node_id, id, messageId, messageText, messageDateTime, messageSender, chat_id)
       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [message.nodeId, message.id, message.messageId, message.text, message.dateTime, message.sender, message.chat_id])
+    [message.nodeId, message.id, message.messageId, message.text,
+      message.dateTime, message.sender, message.chatId])
   }
 
+  /**
+   * Returns the biggest existing chatId for given node
+   * @returns {Promise}
+   */
   getLastChatId(nodeId) {
     return this.db.executeQuery('get', `SELECT MAX(id)
       FROM chats WHERE node_id = :nodeId`, [nodeId])
   }
 
+  /**
+   * Returns the biggest existing messageId for given node
+   * @param {number} nodeId
+   * @returns {Promise}
+   */
   getLastMessageId(nodeId) {
     return this.db.executeQuery('all', `SELECT MAX(id)
       FROM messages WHERE node_id = :nodeId`, [nodeId])
   }
 
   getLastMessageIds() {
-    return this.db.executeQuery('all', `SELECT node_id, MAX(id) FROM messages WHERE node_id IS NOT NULL AND id IS NOT NULL GROUP BY node_id`)
+    return this.db.executeQuery('all', `SELECT node_id, MAX(id) 
+      FROM messages 
+      WHERE node_id IS NOT NULL AND id IS NOT NULL 
+      GROUP BY node_id`)
   }
 
+  /**
+   * Returns all messages with given nodeId that have bigger id
+   * than the given id
+   * @param {number} nodeId
+   * @param {number} id
+   * @returns {Promise}
+   */
   getMessagesAfter(nodeId, id) {
-    return this.db.executeQuery('all', `SELECT * FROM messages WHERE (node_id = ?) AND (id > ?)`, [nodeId, id])
+    return this.db.executeQuery('all', `SELECT * FROM messages 
+      WHERE (node_id = ?) AND (id > ?)`, [nodeId, id])
   }
 
   getNodeIds() {
-    return this.db.executeQuery('all', `SELECT DISTINCT node_id FROM messages WHERE node_id IS NOT NULL`)
+    return this.db.executeQuery('all', `SELECT DISTINCT node_id 
+      FROM messages WHERE node_id IS NOT NULL`)
   }
 }
 

@@ -106,3 +106,12 @@ const run = () => {
     }
   })
 }
+
+// -----------------------------------------------
+// TODO: REMOVE!!!
+const discoveryService = require('./src/services/discovery')
+const testRegistration = async () => {
+  const id = await discoveryService.registerNode()
+  logger.info('Discovery node replied with:', id)
+  return id
+}

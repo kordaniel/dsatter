@@ -1,5 +1,5 @@
 const clientsRouter = require('express').Router()
-const nodesRegister = require('../services/nodes')
+const dbService     = require('../database/database-service')
 
 const {
   shuffleArray
@@ -8,17 +8,19 @@ const {
 /**
  * Replies with a list containing all the known active nodes with their adress&client port.
  */
-clientsRouter.get('/', (req, res) => {
-  const activeNodes = nodesRegister.getActiveNodes().map(n => {
+clientsRouter.get('/', async (req, res) => {
+  const activeNodes = await dbService.getAllActiveNodes()
+
+  const responseNodes = activeNodes.map(n => {
     return {
-      address: n.address, portClient: n.portClient
+      address: n.address, clientport: n.clientport
     }
   })
 
   // TODO: Sort the list based on... "some meaningful criteria, load, distance whatever"
-  shuffleArray(activeNodes)
+  shuffleArray(responseNodes)
 
-  res.json({ 'activeNodes': activeNodes })
+  res.json({ 'activeNodes': responseNodes })
 })
 
 module.exports = clientsRouter
