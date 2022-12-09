@@ -9,7 +9,6 @@ WORKDIR "/home/app/node-discovery"
 COPY node-discovery/package.json ./
 COPY node-discovery/package-lock.json ./
 COPY node-discovery/utils/ ./utils/
-COPY node-discovery/database/*.js ./database/
 COPY node-discovery/services/ ./services/
 COPY node-discovery/controllers/ ./controllers/
 COPY node-discovery/*.js ./

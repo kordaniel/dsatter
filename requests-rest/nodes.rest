@@ -2,31 +2,20 @@ GET http://localhost:8080/api/nodes/active
 
 ###
 
-POST http://localhost:8080/api/nodes/active/login
+POST http://localhost:8080/api/nodes/active/register
 Content-Type: application/json
 
 {
-  "id": 3,
-  "password": "abcd",
-  "syncport": 41953,
-  "clientport": 55006
+  "serverPort": 41952,
+  "clientPort": 55004
 }
 
 ###
 
-POST http://localhost:8080/api/nodes/active/logout
+POST http://localhost:8080/api/nodes/active/unregister
 Content-Type: application/json
 
 {
-  "id": 2,
-  "password": "abcd"
-}
-
-###
-
-POST http://localhost:8080/api/nodes/register
-Content-Type: application/json
-
-{
-  "password": 123
+  "serverPort": 41956,
+  "clientPort": 55001
 }

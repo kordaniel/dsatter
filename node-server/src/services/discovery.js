@@ -3,11 +3,11 @@ const logger = require('../../../common/utils/logger')
 
 const axios = require('axios')
 
-const baseUrl = `${config.NODE_DISCOVERY_URL}:${config.NODE_DISCOVERY_PORT}/api/nodes`
+const baseUrl = `${config.NODE_DISCOVERY_URL}:${config.NODE_DISCOVERY_PORT}/api/nodes/active`
 
 const getActiveNodes = async () => {
   try {
-    const res = await axios.get(`${baseUrl}/active`)
+    const res = await axios.get(baseUrl)
     return res.data
   } catch (err) {
     logger.error('performing GET request:', err.cause)
@@ -15,13 +15,11 @@ const getActiveNodes = async () => {
   }
 }
 
-const registerAsActive = async (nodeId, password, syncport, clientport) => {
+const registerAsActive = async (serverWsPort, clientWsPort) => {
   try {
-    const res = await axios.post(`${baseUrl}/active/login`, {
-      'id': nodeId,
-      password,
-      syncport,
-      clientport
+    const res = await axios.post(`${baseUrl}/register`, {
+      'serverPort': serverWsPort,
+      'clientPort': clientWsPort
     })
     return res.data
   } catch (err) {
@@ -30,27 +28,16 @@ const registerAsActive = async (nodeId, password, syncport, clientport) => {
   }
 }
 
-const unregisterAsActive = async (nodeId, password) => {
+const unregisterAsActive = async (serverWsPort, clientWsPort) => {
   // TODO: Use token/credentials to identify node instead of port
   try {
-    const res = await axios.post(`${baseUrl}/active/logout`, {
-      'id': nodeId,
-      password
+    const res = await axios.post(`${baseUrl}/unregister`, {
+      'serverPort': serverWsPort,
+      'clientPort': clientWsPort
     })
     return res.data
   } catch (err) {
     logger.error('performing POST unregister active:', err.cause)
-    throw Error(err)
-  }
-}
-
-const registerNode = async (password) => {
-  // query for a new fresh ID
-  try {
-    const res = await axios.post(`${baseUrl}/register`, { password })
-    return res.data
-  } catch (err) {
-    logger.error('performing POST register new node:', err.cause)
     throw Error(err)
   }
 }
@@ -70,6 +57,5 @@ const reportUnreachable = async (port) => {
 module.exports = {
   getActiveNodes,
   registerAsActive,
-  unregisterAsActive,
-  registerNode
+  unregisterAsActive
 }

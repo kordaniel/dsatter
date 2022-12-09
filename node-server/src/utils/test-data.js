@@ -57,19 +57,4 @@ const messages = [
   }
 ]
 
-const nodes = [
-  {
-    id: 1,
-    password: 'veryS1krit'
-  },
-  {
-    id: 2,
-    password: 'birthdayIsPasswd'
-  }
-]
-
-module.exports = {
-  chats,
-  messages,
-  nodes
-}
+module.exports = { chats, messages }

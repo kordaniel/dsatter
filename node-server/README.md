@@ -23,10 +23,6 @@ npm install
 npm run dev
 npm run lint
 ```
-### Test environment
-```
-npm run test
-```
 ### Production environment
 ```
 npm run start -- --nodeservport=10101

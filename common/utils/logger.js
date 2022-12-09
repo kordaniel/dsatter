@@ -2,12 +2,6 @@
 
 const getFormattedTime = () => `[${new Date().toISOString()}]`
 
-const test = (...params) => {
-  if (process.env.NODE_ENV === 'test') {
-    console.log(...params)
-  }
-}
-
 const debug = (...params) => {
   if (process.env.NODE_ENV === 'development') {
     console.log(getFormattedTime(), '[DEBUG]:', ...params)
@@ -27,7 +21,6 @@ const error = (...params) => {
 }
 
 module.exports = {
-  test,
   debug,
   info,
   error

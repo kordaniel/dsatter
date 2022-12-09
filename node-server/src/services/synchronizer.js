@@ -11,9 +11,9 @@ class Synchronizer {
     let latestMessages = await this.db.getLastMessageIds()
     if (!Array.isArray(latestMessages)) {
       if (!latestMessages.node_id) {
-        latestMessages = []
+	latestMessages = []
       } else {
-        latestMessages = [latestMessages]
+	latestMessages = [latestMessages]
       }
     }
     let latestByNodeId = {}
@@ -51,17 +51,17 @@ class Synchronizer {
     let messageCount = 0
     Object.keys(messageDiff).forEach(key => {
       messageDiff[key].forEach(message => {
-        const dbMessage = {
-          nodeId: message.node_id,
-          id: message.id,
-          messageId: message.messageId,
-          text: message.messageText,
-          dateTime: message.messageDateTime,
-          sender: message.messageSender,
-          chat_id: message.chat_id
-        }
-        this.db.addMessageToDatabase(dbMessage)
-        messageCount++
+	const dbMessage = {
+	  nodeId: message.node_id,
+	  id: message.id,
+	  messageId: message.messageId,
+	  text: message.messageText,
+	  dateTime: message.messageDateTime,
+	  sender: message.messageSender,
+	  chat_id: message.chat_id
+	}
+	this.db.addMessageToDatabase(dbMessage)
+	messageCount++
       })
     })
     logger.info(`Synchronization done, ${messageCount} messages synchronized`)

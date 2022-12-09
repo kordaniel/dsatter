@@ -6,32 +6,8 @@ const logger    = require('../../common/utils/logger')
 const nodeState = require('./state/node')
 const Synchronizer = require('./services/synchronizer.js')
 const websocketService = require('./services/websockets')
-const discoveryService = require('./services/discovery')
-
-const {
-  generateRandomString
-} = require('../../common/utils/helpers')
 
 let db
-
-const handleRegistration = async () => {
-  const nodeServerObj = await db.getNode()
-
-  if (nodeServerObj !== null) {
-    return nodeServerObj
-  }
-
-  const newNodeServObj = await discoveryService.registerNode(generateRandomString(12))
-  const result = await db.addNodeToDatabase(newNodeServObj)
-
-  if (result === null) {
-    process.exit(70) // internal software error
-  }
-
-  const savedNodeServerObj = await db.getNode()
-
-  return savedNodeServerObj
-}
 
 const initialize = async (parsedArgs) => {
   const nodeServerPort = Object.hasOwn(parsedArgs, 'nodeservport')
@@ -46,16 +22,10 @@ const initialize = async (parsedArgs) => {
   await db.openDatabaseConnection()
   synchronizer = new Synchronizer(20000, db, websocketService)
 
-  const nodeServObj = await handleRegistration()
-
-  const synchronizer = new Synchronizer(20000, db, websocketService)
-
-
   try {
     await nodeState.initialize(
       nodeServerPort,
-      config.NODE_DEFAULT_CLIENT_WS_PORT,
-      nodeServObj
+      config.NODE_DEFAULT_CLIENT_WS_PORT
     )
     websocketService.initialize(
       nodeState.getListenPortWsServers(),
@@ -84,15 +54,9 @@ const pushRandomMessages = () => {
   setTimeout(pushRandomMessages, randomInt(5000, 50000))
 }
 
-const pushTestMessage = async () => {
+const pushTestMessage = () => {
   const randomInt = require('../../common/utils/helpers.js').randomInt
-  const nodeId = nodeState.getNodeId()
-
-  if (!nodeId) {
-    logger.error('NODEID undefined')
-    return
-  }
-
+  const nodeId = parseInt(nodeState.getListenPortWsServers())
   const id = randomInt(100, 10000)
   const message = {
     nodeId: nodeId,
@@ -103,9 +67,8 @@ const pushTestMessage = async () => {
     sender: 'Julia',
     chatId: 11
   }
-  logger.debug('Adding new test message...')
-  await db.addMessageToDatabase(message)
-  //logger.debug('Message in DB:[[', await db.getMessagesWithNodeId(message.id) , ']]')
+  logger.info('Adding new test message...')
+  db.addMessageToDatabase(message)
 }
 
 const broadcastToNodeServers = (message) => {
@@ -162,16 +125,9 @@ const makeDatabaseQuery = async (message) => {
 }
 
 const terminate = async () => {
-  const nodeServerObj = await db.getNode()
-
-  if (nodeServerObj === null) {
-    logger.error('Node credentials not found in DB')
-    process.exit(70) // internal software error
-  }
-
   websocketService.terminate()
   try {
-    await nodeState.close(nodeServerObj)
+    await nodeState.close()
     logger.info()
     logger.info('------------------')
     logger.info('CHATSERVER node is terminating')
