@@ -44,6 +44,7 @@ const initialize = async (parsedArgs) => {
   db = new DatabaseService()
   await db.initiateDatabase(dbpath)
   await db.openDatabaseConnection()
+  synchronizer = new Synchronizer(20000, db, websocketService)
 
   const nodeServObj = await handleRegistration()
 
