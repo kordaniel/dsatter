@@ -11,6 +11,7 @@ const {
 
 const discoveryService = require('../services/discovery')
 
+let nodeId = -1
 let listenPortWsServers = -1
 let listenPortWsClients = -1
 let otherNodes = []
@@ -43,14 +44,20 @@ const setOtherNodes = (activeNodes) => {
     : []
 }
 
+const setNodeId = (id) => {
+  nodeId = id
+}
+
 const removeFromOtherActiveNodes = (socket) => {
   otherNodes = otherNodes.filter(node => !shallowEqual(node, socket))
   // TODO: Inform discovery service node that 'node' is unreachable
 }
 
-const initialize = async (listenWsServerPort, listenWsClientPort) => {
+const initialize = async (listenWsServerPort, listenWsClientPort, nodeServObj) => {
   assert(listenPortWsServers === -1, 'Attempted to reinitialize state/node')
   assert(listenPortWsClients === -1, 'Attempted to reinitialize state/node')
+
+  setNodeId(nodeServObj.id)
 
   const sleepTimeMaxMs = 4 * 1000
   let sleepTimeMs = 500
@@ -61,18 +68,16 @@ const initialize = async (listenWsServerPort, listenWsClientPort) => {
 
   do {
     try {
-      const regRes = await discoveryService.registerAsActive(serverWsPort, clientWsPort)
+      const regRes = await discoveryService.registerAsActive(
+        getNodeId(), nodeServObj.password, serverWsPort, clientWsPort
+      )
 
-      if (regRes.address === false) {
-        logger.info(`Registration failed, sleeping for ${sleepTimeMs}ms before trying again`)
-        await sleep(sleepTimeMs)
-        sleepTimeMs = Math.min(sleepTimeMs + sleepTimeMs, sleepTimeMaxMs)
-      } else {
-        setListenPortWsServers(regRes.serverPort)
-        setListenPortWsClients(regRes.clientPort)
-        setOtherNodes(regRes.activeNodes)
-        wasRegistered = true
-      }
+      logger.debug('Discovery node registration:', regRes)
+      setListenPortWsServers(regRes.syncport)
+      setListenPortWsClients(regRes.clientport)
+      setOtherNodes(regRes.activeNodes)
+      wasRegistered = true
+
     } catch (err) {
       logger.error('state/node initialize():', err)
       logger.info(`Registration failed with error, sleeping for ${sleepTimeMs}ms before trying again`)
@@ -83,18 +88,22 @@ const initialize = async (listenWsServerPort, listenWsClientPort) => {
   } while (!wasRegistered)
 }
 
-const close = async () => {
+const close = async (nodeServObj) => {
   // TODO: Add error handling. Discovery is unreachable, unregistration failed etc
+  assert(getNodeId() === nodeServObj.id)
+
   try {
     const unregRes = await discoveryService.unregisterAsActive(
-      getListenPortWsServers(),
-      getListenPortWsClients()
+      getNodeId(), nodeServObj.password
     )
     cleanup(unregRes.activeNodes)
-    return unregRes.wasUnregistered
   } catch (err) {
     logger.error('node/state, close():', err)
   }
+}
+
+const getNodeId = () => {
+  return nodeId === -1 ? undefined : nodeId
 }
 
 const getListenPortWsServers = () => listenPortWsServers
@@ -105,6 +114,7 @@ module.exports = {
   initialize,
   removeFromOtherActiveNodes,
   close,
+  getNodeId,
   getListenPortWsServers,
   getListenPortWsClients,
   getOtherActiveNodes

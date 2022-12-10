@@ -1,43 +1,113 @@
 const nodeDiscRouter = require('express').Router()
-const nodesRegister  = require('../services/nodes')
 
+const logger         = require('../../common/utils/logger')
+const dbService      = require('../database/database-service')
 
-nodeDiscRouter.get('/active', (req, res) => {
-  res.json({ 'activeNodes': nodesRegister.getActiveNodes() })
+nodeDiscRouter.post('/register', async (req, res) => {
+  // NOTE: Password is intentionally saved as plaintext into the DB
+  const { password } = req.body
+
+  if (!password) {
+    return res.status(400).json({
+      error: 'password required'
+    })
+  }
+  if (typeof password !== 'string') {
+    return res.status(400).json({
+      error: 'password is not a string'
+    })
+  }
+
+  // TODO: validate password
+
+  const newNode = await dbService.addNodeToDatabase({ password })
+
+  if (!newNode) {
+    return res.status(500).send()
+  }
+
+  res.json(newNode)
 })
 
-nodeDiscRouter.post('/active/register', (req, res) => {
-  const serverNodeIp = req.ip
+nodeDiscRouter.get('/active', async (req, res) => {
+  const activeNodes = await dbService.getAllActiveNodes()
+  res.json({ activeNodes })
+})
+
+nodeDiscRouter.post('/active/login', async (req, res) => {
+  const address = req.ip
   const {
-    serverPort,
-    clientPort
+    id,
+    password,
+    syncport,
+    clientport
   }                  = req.body
 
-  const activeNodes  = nodesRegister.getActiveNodes()
-  const success      = nodesRegister.registerNode(serverNodeIp, serverPort, clientPort)
+  logger.debug('LOGIN:', id, password, syncport, clientport)
+
+  if (!(id && password && syncport && clientport)) {
+    return res.status(400).json({
+      error: 'id, password, syncport, clientport expected'
+    })
+  }
+
+  const nodeObjWithId = await dbService.searchNodeDatabase(id)
+
+  if (!nodeObjWithId || nodeObjWithId.password !== password) {
+    return res.status(401).json({ error: 'invalid credentials' })
+  }
+
+  // NOTE: Simply remove the previous row with same ID from DB...
+  const activeNodeObj = await dbService.searchActiveNodeDatabase(id)
+  if (activeNodeObj) {
+    await dbService.removeActiveNodeFromDatabase(activeNodeObj.id)
+  }
+
+  const otherActiveNodes = await dbService.getAllActiveNodes()
+
+  await dbService.addActiveNodeToDatabase({
+    id,
+    syncport,
+    clientport,
+    address
+  })
+
 
   const responseObj = {
-    'address':     success ? serverNodeIp : false,
-    'serverPort':  success ? serverPort : false,
-    'clientPort':  success ? clientPort : false,
-    'activeNodes': activeNodes
+    ...(await dbService.searchActiveNodeDatabase(id)), // id, syncport, clientport, address
+    activeNodes: otherActiveNodes
   }
 
   res.json(responseObj)
 })
 
-nodeDiscRouter.post('/active/unregister', (req, res) => {
-  const serverNodeIp = req.ip
+nodeDiscRouter.post('/active/logout', async (req, res) => {
   const {
-    serverPort,
-    clientPort
-  }                  = req.body
+    id,
+    password
+  } = req.body
 
-  const success      = nodesRegister.unregisterNode(serverNodeIp, serverPort, clientPort)
+  if (!id || !password) {
+    return res.status(400).json({
+      error: 'id or password missing'
+    })
+  }
+  if (typeof password !== 'string') {
+    return res.status(400).json({
+      error: 'password is not a string'
+    })
+  }
+
+  const nodeObjWithId = await dbService.searchNodeDatabase(id)
+
+  if (!nodeObjWithId || nodeObjWithId.password !== password) {
+    return res.status(401).json({ error: 'invalid credentials' })
+  }
+
+  await dbService.removeActiveNodeFromDatabase(id)
 
   const responseObj = {
-    'wasUnregistered': success,
-    'activeNodes': nodesRegister.getActiveNodes()
+    'activeNodes': await dbService.getAllActiveNodes()
   }
 
   res.json(responseObj)

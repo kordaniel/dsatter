@@ -68,8 +68,8 @@ const isIPv6 = (addr) => {
  */
 const parseSocket = (socket) => {
   return isIPv6(socket.address)
-    ? `[${socket.address}]:${socket.portServer}`
-    : `${socket.address}:${socket.portServer}`
+    ? `[${socket.address}]:${socket.syncport}`
+    : `${socket.address}:${socket.syncport}`
 }
 
 
@@ -104,6 +104,21 @@ const parseArgs = (args, requiredFields = []) => {
   return parsedArgs
 }
 
+/**
+ * Generates a (cryptographically unsecure) random string consisting of
+ * characters from the sets 0-9 and a-z.
+ * @param {Number} length The length of the string
+ * @returns {String} The generated string
+ */
+const generateRandomString = (length = 8) => {
+  if (length === 0) {
+    return ''
+  } else if (length > 11) {
+    return Math.random().toString(36).slice(-11) + generateRandomString(length-11)
+  }
+  return Math.random().toString(36).slice(-length)
+}
+
 module.exports = {
   isEmptyArray,
   isNonEmptyArray,
@@ -114,5 +129,6 @@ module.exports = {
   randomInt,
   isIPv6,
   parseSocket,
-  parseArgs
+  parseArgs,
+  generateRandomString
 }

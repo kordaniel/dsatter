@@ -22,7 +22,7 @@ const heartbeat = (ws) => {
 const getRemoteAddress = (ws) => ws._url
 const getConnections = () => Object.keys(connections)
 
-const connect = (socket) => {
+const connect = (socket, sync) => {
   const endpointUrl = `ws://${parseSocket(socket)}`
 
   if(Object.hasOwn(connections, endpointUrl)) {
@@ -50,17 +50,28 @@ const connect = (socket) => {
     heartbeat(ws)
   })
 
-  ws.on('message', (data, isBinary) => {
+  ws.on('message', async (data, isBinary) => {
     const message = isBinary ? data : data.toString()
     if (isBinary) {
       logger.info(`RECEIVED message from ${getRemoteAddress(ws)} -> [[BINARY data not printed]]`)
+    } else if (message.charAt(0) === '{') {
+      logger.info(`RECEIVED JSON from ${getRemoteAddress(ws)} -> (${message})`)
+      const obj = JSON.parse(message)
+
+      if (obj.name === 'syncRequest') {
+        logger.info(`Sync request received from ${getRemoteAddress(ws)}: (${message})`)
+        const diff = await sync.getMessageDiff(obj.payload)
+        ws.send(JSON.stringify({ name: 'syncReply', payload: diff }))
+      } else if (obj.name === 'syncReply') {
+        sync.updateMessages(obj.payload)
+      }
     } else {
       logger.info(`RECEIVED message from ${getRemoteAddress(ws)} -> [[${message}]]`)
     }
   })
 
   ws.on('close', () => {
-    // This event is fired even if there is an error before succesfull connection
+    // This event is fired even if there is an error before successful connection
     if (!Object.hasOwn(connections, endpointUrl)) {
       return
     }
@@ -83,8 +94,8 @@ const disconnect = (endpointUrl) => {
   connections[endpointUrl].close()
 }
 
-const connectToAll = (sockets) => {
-  sockets.forEach(s => connect(s))
+const connectToAll = (sockets, synchronizer) => {
+  sockets.forEach(s => connect(s, synchronizer))
 }
 
 const disconnectFromAll = () => {
@@ -104,11 +115,16 @@ const broadcastToAll = (message) => {
   })
 }
 
+const sendToAny = (message) => {
+  getRandomElementFromArr(getConnections).send(message)
+}
+
 module.exports = {
   connect,
   disconnect,
   connectToAll,
   disconnectFromAll,
   openConnections,
+  sendToAny,
   broadcastToAll
 }

@@ -1,16 +1,21 @@
 CREATE TABLE messages (
     node_id INTEGER NOT NULL,
-    message_id INTEGER NOT NULL AUTOINCREMENT,
+    id INTEGER NOT NULL,
+    messageId INTEGER PRIMARY KEY NOT NULL,
     chat_id INTEGER NOT NULL REFERENCES chats,
     messageText TEXT,
     messageDateTime TEXT,
-    messageSender TEXT,
-    PRIMARY KEY (node_id, message_id)
+    messageSender TEXT
 );
 
 CREATE TABLE chats (
 	node_id INTEGER NOT NULL,
-    chat_id INTEGER NOT NULL AUTOINCREMENT,
-    chatName TEXT,
-    PRIMARY KEY (node_id, chat_id)
+    id INTEGER NOT NULL,
+    chatId INTEGER PRIMARY KEY NOT NULL,
+    chatName TEXT
+);
+
+CREATE TABLE node (
+    id INTEGER PRIMARY KEY NOT NULL,
+    password TEXT
 );

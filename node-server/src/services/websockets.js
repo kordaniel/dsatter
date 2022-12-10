@@ -13,10 +13,10 @@ const wsClient       = require('../sockets/ws-client')
  * @param {Number} listenWsClientPort The port to listen for incoming websocket connections from clients.
  * @param {Object[]} remoteEndpoints Array containing all remote endpoints.
  */
-const initialize = (listenWsServerPort, listenWsClientPort, remoteEndpoints = []) => {
+const initialize = (listenWsServerPort, listenWsClientPort, synchronizer, remoteEndpoints = []) => {
   wsClientServer.init(listenWsClientPort) // Serves as endpoint for clients to connect to
-  wsNodeServer.init(listenWsServerPort)   // Serves as endpoint for other node-server instances to connect to
-  wsClient.connectToAll(remoteEndpoints)  // Forms WS connection to all other running node-server instances
+  wsNodeServer.init(listenWsServerPort, synchronizer)   // Serves as endpoint for other node-server instances to connect to
+  wsClient.connectToAll(remoteEndpoints, synchronizer)  // Forms WS connection to all other running node-server instances
 }
 
 /**
