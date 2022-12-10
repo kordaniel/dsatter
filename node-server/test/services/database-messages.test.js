@@ -1,14 +1,6 @@
 /* eslint-disable no-undef */
 
-//const querier = require('../../src/database/querier.js')
-//const Dao = require('../../src/database/dao.js')
-const DatabaseService = require('../../src/services/database.js')
-const dbService = new DatabaseService()
-
-//jest.mock('../../src/database/querier.js')
-//jest.mock('../../src/database/dao.js')
-
-//let dao
+const dbService = require('../../src/services/database.js')
 
 const messages = [
   {
@@ -32,7 +24,6 @@ const messages = [
 ]
 
 beforeAll(async () => {
-  //dao = new Dao(querier)
   await dbService.initiateDatabase(':memory:')
   await dbService.openDatabaseConnection()
 })

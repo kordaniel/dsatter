@@ -70,7 +70,7 @@ const WsServer = () => {
         if (isBinary) {
           logger.info(`RECEIVED message from ${getRemoteAddress(req)} -> [[BINARY data not printed]]`)
         } else {
-          const response = await handle(getRemoteAddress(ws), message)
+          const response = await handle(getRemoteAddress(req), message)
           if (response)
             ws.send(response)
         }

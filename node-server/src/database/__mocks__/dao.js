@@ -23,7 +23,11 @@ class Dao {
   }
 
   getChat = (chatId) => {
-    return Promise.resolve(this.chats.filter((c) => c.chatId === chatId))
+    return Promise.resolve(this.chats.filter((c) => c.chatId === chatId)[0])
+  }
+
+  getMessage = (messageId) => {
+    return Promise.resolve(this.messages.filter((m) => m.messageId === messageId)[0])
   }
 
   getMessages = (chatId) => {

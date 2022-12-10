@@ -1,7 +1,10 @@
 const logger    = require('../../../common/utils/logger')
 const config    = require('../utils/config')
 const nodeState = require('../state/node')
-const { parseSocket } = require('../../../common/utils/helpers')
+const {
+  parseSocket,
+  getRandomElementFromArr
+} = require('../../../common/utils/helpers')
 const { WebSocket } = require('ws')
 
 const connections = {}

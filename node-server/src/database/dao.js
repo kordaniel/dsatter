@@ -99,7 +99,7 @@ class Dao {
    * @param {number} messageId
    * @returns {Promise}
    */
-   getMessage(messageId) {
+  getMessage(messageId) {
     return this.db.executeQuery('get', `SELECT id AS 'id',
       messageDateTime AS 'time',
       messageSender AS 'sender'

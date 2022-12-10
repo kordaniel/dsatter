@@ -13,6 +13,7 @@ const installSynchronizer = (synchronizerObj) => {
  * @returns {Promise<*>}
  * @private
  */
+/* eslint-disable no-case-declarations */
 const handle = async (address, object) => {
   if (!synchronizer) {
     logger.error('SYNCHRONIZER not installed')
@@ -28,17 +29,18 @@ const handle = async (address, object) => {
       case 'synchReply':
         logger.info(`Sync reply received from ${address}: ${message}`)
         synchronizer.updateMessages(message.payload)
-        break
+        return
       case 'clientSyncRequest':
-        const diff = await synchronizer.getMessageDiff(obj.payload)
+        const clientDiff = await synchronizer.getMessageDiff(message.payload)
         logger.info(`Client sync request received from ${address}: ${message}`)
-        return JSON.stringify({ name: 'clientSyncReply', payload: diff })
+        return JSON.stringify({ name: 'clientSyncReply', payload: clientDiff })
       case 'clientSynchReply':
         logger.info(`Client sync reply received from ${address}: ${message}`)
-        break
+        return
       case 'newMessageFromClient':
         logger.info(`Message from a client received from ${address}: ${message}`)
-        return
+        const added = await addMessageToDatabase(message.payload)
+        return JSON.stringify({ name: 'clientMessageResponse', payload: added })
       case 'newMessagesForClient':
         logger.info(`Messages for clients received from ${address}: ${message}`)
         return
@@ -51,19 +53,20 @@ const handle = async (address, object) => {
   } else {
     logger.info(`RECEIVED message from ${address} -> [[${object}]]`)
   }
-  
+
 }
 
 
 /**
- * 
- * @param {Message} message 
+ * @param {Message} message
+ * @returns {boolean}
  */
 const addMessageToDatabase = async (message) => {
-    await db.addMessageToDatabase(message)
-    const saved = await db.searchMessageDatabase(messageId)
-    if (saved.id === message.id && saved.dateTime === message.dateTime)
-        return true
+  await db.addMessageToDatabase(message)
+  const saved = await db.searchMessageDatabase(message.messageId)
+  if (saved.id === message.id && saved.dateTime === message.dateTime)
+    return true
+  return false
 }
 
 module.exports = {

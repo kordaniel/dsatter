@@ -139,7 +139,7 @@ const searchMessagesWithChat = async (chatId) => {
  * @param {number} messageId
  * @returns {Promise<*>}
  */
- const searchMessageDatabase = async (messageId) => {
+const searchMessageDatabase = async (messageId) => {
   return await dao.getMessage(messageId)
 }
 
@@ -193,6 +193,7 @@ module.exports = {
   getNodeIds,
   getLastMessageIds,
   getMessagesAfter,
+  searchMessagesWithChat,
   searchMessageDatabase,
   searchChatDatabase,
   closeDataBaseConnection,
