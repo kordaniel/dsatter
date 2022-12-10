@@ -1,18 +1,14 @@
-const DatabaseService = require('./services/database')
-
+const db = require('./services/database')
 const config    = require('./utils/config')
 const logger    = require('../../common/utils/logger')
-
 const nodeState = require('./state/node')
-const Synchronizer = require('./services/synchronizer.js')
+const Synchronizer = require('./services/synchronizer')
 const websocketService = require('./services/websockets')
 const discoveryService = require('./services/discovery')
 
 const {
   generateRandomString
 } = require('../../common/utils/helpers')
-
-let db
 
 const handleRegistration = async () => {
   const nodeServerObj = await db.getNode()
@@ -40,8 +36,6 @@ const initialize = async (parsedArgs) => {
   const dbpath = Object.hasOwn(parsedArgs, 'dbpath')
     ? parsedArgs['dbpath']
     : config.DB_PATH
-
-  db = new DatabaseService()
   await db.initiateDatabase(dbpath)
   await db.openDatabaseConnection()
   const nodeServObj = await handleRegistration()
@@ -130,34 +124,6 @@ const dumpDatabase = async () => {
   return messages
 }
 
-
-
-/**
- * Listen to Websocket messages and react
- */
-const run = () => {
-
-}
-
-/**
- * Makes database querys and returns promises
- * @param {ClientMessage} message
- * @returns {Promise<*>}
- * @private
- */
-const makeDatabaseQuery = async (message) => {
-  switch (message.query) {
-    case 'addMessage':
-      return db.addMessageToDatabase(message.data)
-    case 'addChat':
-      return db.addChatToDatabase(message.data)
-    case 'searchMessages':
-      return db.searchMessageDatabase(message.data)
-    case 'searchChats':
-      return db.searchChatDatabase(message.data)
-  }
-}
-
 const terminate = async () => {
   const nodeServerObj = await db.getNode()
 
@@ -180,7 +146,6 @@ const terminate = async () => {
 
 module.exports = {
   initialize,
-  run,
   broadcastToNodeServers,
   broadcastToClients,
   openOutboundConnections,

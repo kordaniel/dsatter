@@ -2,9 +2,9 @@ const logger    = require('../../../common/utils/logger')
 const config    = require('../utils/config')
 const nodeState = require('../state/node')
 const {
-  parseSocket
-}               = require('../../../common/utils/helpers')
-
+  parseSocket,
+  getRandomElementFromArr
+} = require('../../../common/utils/helpers')
 const { WebSocket } = require('ws')
 
 const connections = {}
@@ -12,7 +12,6 @@ const connections = {}
 
 const heartbeat = (ws) => {
   clearTimeout(ws.pingTimeout)
-
   ws.pingTimeout = setTimeout(() => {
     // TODO: Update otheractive nodes, report to discovery service
     ws.terminate()
@@ -22,7 +21,7 @@ const heartbeat = (ws) => {
 const getRemoteAddress = (ws) => ws._url
 const getConnections = () => Object.keys(connections)
 
-const connect = (socket, sync) => {
+const connect = (socket, handle) => {
   const endpointUrl = `ws://${parseSocket(socket)}`
 
   if(Object.hasOwn(connections, endpointUrl)) {
@@ -31,7 +30,6 @@ const connect = (socket, sync) => {
   }
 
   logger.info('Initializing outbound WS connection to:', endpointUrl)
-
   const ws = new WebSocket(endpointUrl)
 
   ws.on('error', (err) => {
@@ -54,19 +52,10 @@ const connect = (socket, sync) => {
     const message = isBinary ? data : data.toString()
     if (isBinary) {
       logger.info(`RECEIVED message from ${getRemoteAddress(ws)} -> [[BINARY data not printed]]`)
-    } else if (message.charAt(0) === '{') {
-      logger.info(`RECEIVED JSON from ${getRemoteAddress(ws)} -> (${message})`)
-      const obj = JSON.parse(message)
-
-      if (obj.name === 'syncRequest') {
-        logger.info(`Sync request received from ${getRemoteAddress(ws)}: (${message})`)
-        const diff = await sync.getMessageDiff(obj.payload)
-        ws.send(JSON.stringify({ name: 'syncReply', payload: diff }))
-      } else if (obj.name === 'syncReply') {
-        sync.updateMessages(obj.payload)
-      }
     } else {
-      logger.info(`RECEIVED message from ${getRemoteAddress(ws)} -> [[${message}]]`)
+      const response = await handle(getRemoteAddress(ws), message)
+      if (response)
+        ws.send(response)
     }
   })
 
@@ -75,7 +64,6 @@ const connect = (socket, sync) => {
     if (!Object.hasOwn(connections, endpointUrl)) {
       return
     }
-
     clearTimeout(ws.pingTimeout)
     const remoteEndpoint = getRemoteAddress(connections[endpointUrl])
     delete connections[endpointUrl]
