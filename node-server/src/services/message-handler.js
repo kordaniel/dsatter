@@ -20,23 +20,30 @@ const handle = async (message) => {
 
   if (message.charAt(0) === '{') {
     const obj = JSON.parse(message)
-    if (obj.name === 'syncRequest') {
-      const diff = await synchronizer.getMessageDiff(obj.payload)
-      logger.info(`Sync request received: (${message})`)
-      return diff
+    switch (message.query) {
+      case 'syncRequest':
+        const diff = await synchronizer.getMessageDiff(obj.payload)
+        logger.info(`Sync request received: (${message})`)
+        return JSON.stringify({ name: 'syncReply', payload: diff })
+      case 'synchReply':
+        return
+      case 'clientSyncRequest':
+        const diff = await synchronizer.getMessageDiff(obj.payload)
+        logger.info(`Client Sync request received: (${message})`)
+        return JSON.stringify({ name: 'clientSyncReply', payload: diff })
+      case 'clientSynchReply':
+        return
+      case 'newMessageFromClient':
+        return
+      case 'newMessagesForClient':
+        return
+      case 'broadcastNewMessage':
+        return
     }
+  } else {
+    logger.info(`RECEIVED message from ${getRemoteAddress(ws)} -> [[${message}]]`)
   }
   
-  // switch (message.query) {
-  //   case 'addMessage':
-  //     return db.addMessageToDatabase(message.data)
-  //   case 'addChat':
-  //     return db.addChatToDatabase(message.data)
-  //   case 'searchMessages':
-  //     return db.searchMessageDatabase(message.data)
-  //   case 'searchChats':
-  //     return db.searchChatDatabase(message.data)
-  // }
 }
 
 
