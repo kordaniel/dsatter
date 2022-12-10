@@ -9,39 +9,47 @@ const installSynchronizer = (synchronizerObj) => {
 
 /**
  * Makes database querys and returns promises
- * @param {*} message
+ * @param {*} object
  * @returns {Promise<*>}
  * @private
  */
-const handle = async (message) => {
+const handle = async (address, object) => {
   if (!synchronizer) {
     logger.error('SYNCHRONIZER not installed')
   }
 
-  if (message.charAt(0) === '{') {
-    const obj = JSON.parse(message)
-    switch (message.query) {
+  if (object.charAt(0) === '{') {
+    const message = JSON.parse(object)
+    switch (message.name) {
       case 'syncRequest':
-        const diff = await synchronizer.getMessageDiff(obj.payload)
-        logger.info(`Sync request received: (${message})`)
+        const diff = await synchronizer.getMessageDiff(message.payload)
+        logger.info(`Sync request received from ${address}: ${message}`)
         return JSON.stringify({ name: 'syncReply', payload: diff })
       case 'synchReply':
-        return
+        logger.info(`Sync reply received from ${address}: ${message}`)
+        synchronizer.updateMessages(message.payload)
+        break
       case 'clientSyncRequest':
         const diff = await synchronizer.getMessageDiff(obj.payload)
-        logger.info(`Client Sync request received: (${message})`)
+        logger.info(`Client sync request received from ${address}: ${message}`)
         return JSON.stringify({ name: 'clientSyncReply', payload: diff })
       case 'clientSynchReply':
-        return
+        logger.info(`Client sync reply received from ${address}: ${message}`)
+        break
       case 'newMessageFromClient':
+        logger.info(`Message from a client received from ${address}: ${message}`)
         return
       case 'newMessagesForClient':
+        logger.info(`Messages for clients received from ${address}: ${message}`)
         return
       case 'broadcastNewMessage':
+        logger.info(`Message for broadcasting received from ${address}: ${message}`)
         return
+      default:
+        logger.info(`RECEIVED message from ${address}: ${message}`)
     }
   } else {
-    logger.info(`RECEIVED message from ${getRemoteAddress(ws)} -> [[${message}]]`)
+    logger.info(`RECEIVED message from ${address} -> [[${object}]]`)
   }
   
 }
