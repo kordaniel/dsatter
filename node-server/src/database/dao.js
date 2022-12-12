@@ -101,6 +101,9 @@ class Dao {
    */
   getMessage(messageId) {
     return this.db.executeQuery('get', `SELECT id AS 'id',
+      messageId as 'messageId',
+      chat_id as 'chatId',
+      messageText AS 'text',
       messageDateTime AS 'time',
       messageSender AS 'sender'
       FROM messages WHERE messageId = :messageId`, [messageId])
@@ -180,7 +183,7 @@ class Dao {
    * @returns {Promise}
    */
   getLastMessageId(nodeId) {
-    return this.db.executeQuery('all', `SELECT MAX(id)
+    return this.db.executeQuery('get', `SELECT MAX(id) AS maxId
       FROM messages WHERE node_id = :nodeId`, [nodeId])
   }
 
