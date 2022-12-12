@@ -2,25 +2,16 @@
 # This app has been tested with python 3.8.10
 
 import logging
-from typing import Union
 from tkinter import Tk
 
-from util.config import Configuration
-from util.helpers import get_parent_directory
+from util.helpers import urlify
 from ui.gui import App
 from services.rest_client import RESTClient
 from services.websocket import WebsocketClient
 from logic.message_handler import MessageHandler
 
 
-CONFIG_JS_SCRIPT_PATH = f'{get_parent_directory(__file__, 1)}/common/utils/config.js'
-
-
-def urlify(url: str, port: Union[int, str], path: str) -> str:
-    return f'{url}:{port}/{path}'
-
 def initialize() -> tuple:
-    conf = Configuration.parse_load_js_constants(CONFIG_JS_SCRIPT_PATH)
     # Logging levels: DEBUG, INFO, WARNING, ERROR, CRITICAL
     formatConfig = '[%(asctime)s] [%(levelname)s] %(filename)s:%(lineno)d: %(message)s'
 
@@ -29,25 +20,28 @@ def initialize() -> tuple:
         format=formatConfig
     )
 
-    endpoint = RESTClient.get(urlify(
-        Configuration.CONF['NODE_DISCOVERY_URL'],
-        Configuration.CONF['NODE_DISCOVERY_PORT'],
-        Configuration.CONF['NODE_DISCOVERY_PATH_CLIENT']
+    node_srv_endpoints = RESTClient.get(urlify(
+        'http://localhost',
+        '8080',
+        'api/clients'
     ))
 
-    if endpoint is None:
+    if node_srv_endpoints is None:
         logging.info('Discovery node unreachable, exiting')
         return None, None
 
-    endpoint_suggestion = endpoint['suggestedEndpoint']
-    #endpoints_all       = endpoint['activeNodes'] # TODO: Use ordered list returned by discovery node
+    endpoints_all = node_srv_endpoints['activeNodes']
 
-    if endpoint_suggestion == False:
+    if len(endpoints_all) == 0:
         logging.info('Discovery node failed to suggest node-server WS endpoint, exiting')
         return None, None
 
-    thread_wsclient    = WebsocketClient(f'ws://localhost:{endpoint_suggestion}')
     thread_msg_handler = MessageHandler()
+    WebsocketClient.Msg_handler = thread_msg_handler.handle_incoming
+
+    ns_endp = endpoints_all[0] # TODO: Iterate and try all suggestions if unable to connect
+    thread_wsclient    = WebsocketClient(f'ws://{urlify(*ns_endp.values())}')
+    MessageHandler.Websocket_msg_sender = thread_wsclient.send_message
 
     logging.info('dsatter CLIENT initialized')
 
@@ -63,9 +57,11 @@ def main() -> None:
     root = Tk()
 
     # TODO: Only pass the needed functions to App (instead of full objects)
-    app = App('dsatter Chat Client', thread_msg_handler, thread_wsclient, (1024, 1024), root)
+    app = App('dsatter Chat Client', thread_msg_handler.handle_new_client_message, (1024, 1024), root)
 
+    thread_msg_handler.on_message_event = app.refresh_msgs
     thread_msg_handler.start()
+
     thread_wsclient.start()
 
     app.mainloop()
@@ -76,6 +72,6 @@ def main() -> None:
     thread_wsclient.join()
     thread_msg_handler.join()
 
+
 if __name__ == '__main__':
-    #print(os.environ)
     main()

@@ -3,6 +3,7 @@ import threading
 
 import websocket
 
+
 # websocket library links
 # -----------------------
 # Official documentation: https://websocket-client.readthedocs.io/en/latest/index.html
@@ -15,6 +16,8 @@ class WebsocketClient(threading.Thread):
     and when the thread is started opens the connection and keeps it open. Thread is NOT run
     as a daemon.
     '''
+
+    Msg_handler = None
 
     def __init__(self, url: str) -> 'WebsocketClient':
         super().__init__()
@@ -71,10 +74,13 @@ class WebsocketClient(threading.Thread):
             f'name={t.name}, alive={t.is_alive()} daemon={t.daemon}, id={t.ident}'
         ))
 
-
     @staticmethod
     def on_message(ws: websocket._app.WebSocketApp, message: str) -> None:
         logging.debug(f'Websocket: RECEIVED: {message}')
+        if WebsocketClient.Msg_handler == None:
+            logging.error('Message handler not installed')
+            return
+        WebsocketClient.Msg_handler(message)
 
     @staticmethod
     def on_error(ws: websocket._app.WebSocketApp, error: websocket._exceptions) -> None:

@@ -1,5 +1,6 @@
 import logging
 import os
+from typing import Union
 from time import sleep
 
 
@@ -44,3 +45,22 @@ def get_parent_directory(filepath: str, levels: int = 0) -> str:
         return os.path.dirname(os.path.realpath(filepath))
 
     return get_parent_directory(os.path.dirname(os.path.realpath(filepath)), levels-1)
+
+
+def urlify(url: str, port: Union[int, str], path: str = "") -> str:
+    i = url.find('://')
+
+    if i == -1:
+        protocol = ''
+    else:
+        protocol = url[:i+3]
+        url = url[i+3:]
+
+    if ":" in url:
+        # Assume IPv6 if colon in url
+        url = f'[{url}]'
+
+    if len(protocol) > 0:
+        url = f'{protocol}{url}'
+
+    return f'{url}:{port}/{path}'
