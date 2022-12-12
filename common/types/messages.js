@@ -2,7 +2,6 @@
  * Module that holds constructor function for different message types (work-in-progress)
  */
 
-
 /**
  * Node-server requests syncing of messages
  * @param {*} payload
@@ -43,10 +42,12 @@ const ClientSync = () => {
  * @returns
  */
 const ClientSyncReply = (messagesArr) => {
-  return {
+  return JSON.stringify({
     name: 'clientSyncReply',
-    payload: messagesArr // [] Array containing all the newest messages with a maxlength to be defined
-  }
+    payload: Array.isArray(messagesArr) // [] Array containing all the newest messages with a maxlength to be defined
+      ? messagesArr
+      : [ messagesArr ]
+  })
 }
 
 /**
@@ -60,16 +61,27 @@ const ClientMessage = (messageObj) => {
   }
 }
 
+const ClientMessageResponse = (messagesArr) => {
+  return JSON.stringify({
+    name: 'clientMessageResponse',
+    payload: Array.isArray(messagesArr)
+      ? messagesArr
+      : [ messagesArr ]
+  })
+}
+
 /**
  * A list with all the new messages for the client (node-server receices message(s) from other node-servers)
  * @param {*} payload
  * @returns
  */
 const MessagesToClient = (messagesArr) => {
-  return {
+  return JSON.stringify({
     name: 'newMessagesForClient',
-    payload: messagesArr // Array containing all the new messages that the client does not have
-  }
+    payload: Array.isArray(messagesArr) // Array containing all the new messages that the client does not have
+      ? messagesArr
+      : [ messagesArr ]
+  })
 }
 
 /**
@@ -77,15 +89,15 @@ const MessagesToClient = (messagesArr) => {
  * @returns
  */
 const ShoutBroadcast = (messageObj) => {
-  return {
+  return JSON.stringify({
     name: 'broadcastNewMessage',
     payload: messageObj // One single message
-  }
+  })
 }
 
 module.exports = {
-  ClientSync,
   ClientSyncReply,
-  ClientMessage,
-  MessagesToClient
+  ClientMessageResponse,
+  MessagesToClient,
+  ShoutBroadcast
 }

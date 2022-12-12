@@ -80,7 +80,7 @@ class Dao {
       id AS 'id',
       chat_id AS 'chatId',
       messageText AS 'text',
-      messageDateTime AS 'time',
+      messageDateTime AS 'dateTime',
       messageSender AS 'sender' FROM messages`)
   }
 
@@ -105,7 +105,7 @@ class Dao {
       messageId as 'messageId',
       chat_id as 'chatId',
       messageText AS 'text',
-      messageDateTime AS 'time',
+      messageDateTime AS 'dateTime',
       messageSender AS 'sender'
       FROM messages WHERE messageId = :messageId`, [messageId])
   }
@@ -117,7 +117,7 @@ class Dao {
    */
   getMessages(chatId) {
     return this.db.executeQuery('all', `SELECT messageText AS 'text',
-      messageDateTime AS 'time',
+      messageDateTime AS 'dateTime',
       messageSender AS 'sender'
       FROM messages WHERE chat_id = :chatId`, [chatId])
   }
@@ -133,7 +133,7 @@ class Dao {
       messageId as 'messageId',
       chat_id as 'chatId',
       messageText AS 'text',
-      messageDateTime AS 'time',
+      messageDateTime AS 'dateTime',
       messageSender AS 'sender'
       FROM messages WHERE node_id = :nodeId`, [nodeId])
   }
@@ -213,7 +213,7 @@ class Dao {
       messageId as 'messageId',
       chat_id as 'chatId',
       messageText AS 'text',
-      messageDateTime AS 'time',
+      messageDateTime AS 'dateTime',
       messageSender AS 'sender'
       FROM messages 
       WHERE (node_id = :nodeId) AND (id > :id)`, [nodeId, id])
