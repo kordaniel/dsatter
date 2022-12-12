@@ -28,6 +28,7 @@ jobs:
         cache-dependency-path: node-discovery/package-lock.json
     - run: npm ci
     - run: npm run build --if-present
+    - run: npm run lint
     - run: npm test
 
   node-server:
@@ -48,4 +49,5 @@ jobs:
         cache-dependency-path: node-server/package-lock.json
     - run: npm ci
     - run: npm run build --if-present
+    - run: npm run lint
     - run: npm test

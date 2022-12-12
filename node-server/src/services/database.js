@@ -1,11 +1,10 @@
 /**
- * @typedef {import(../../../common/utils/types/datatypes).Message} Message
- * @typedef {import(../../../common/utils/types/datatypes).Chat} Chat
- * @typedef {import(../../../common/utils/types/datatypes).RegisteredNode} Node
+ * @typedef {import(../../../common/types/datatypes).Message} Message
+ * @typedef {import(../../../common/types/datatypes).Chat} Chat
+ * @typedef {import(../../../common/types/datatypes).RegisteredNode} RegisteredNode
  */
 
 const logger    = require('../../../common/utils/logger')
-const testData = require('../utils/test-data')
 const querier = require('../database/querier')
 const Dao = require('../database/dao')
 const {
@@ -34,9 +33,9 @@ const openDatabaseConnection = async (d = new Dao(querier)) => {
 }
 
 /**
- * Adds chat with given data to the database
- * Returns promise of the chatId
- * @param {Chat} data
+ * Adds node with given data to the database
+ * Returns promise
+ * @param {RegisteredNode} node
  * @returns {Promise<*>}
  */
 const addNodeToDatabase = async (node) => {
@@ -184,15 +183,6 @@ const createNewMessageId = async (nodeId) => {
   return maxId === null ? 1 : maxId + 1
 }
 
-const readTestData = async () => {
-  for (let c of testData.chats)
-    this.addChatToDatabase(c)
-  for (let m of testData.messages)
-    this.addMessageToDatabase(m)
-  logger.info(await this.getAllChats())
-  logger.info(await this.getAllMessages())
-}
-
 const getDao = () => dao
 
 
@@ -215,6 +205,5 @@ module.exports = {
   closeDataBaseConnection,
   createNewChatId,
   createNewMessageId,
-  readTestData,
   getDao
 }

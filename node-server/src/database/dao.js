@@ -1,9 +1,9 @@
 /**
  * Makes querys to dsatter database
  *
- * @typedef {import('../../../common/utils/types/datatypes).Message} Message
- * @typedef {import('../../../common/utils/types/datatypes).Chat} Chat
- * @typedef {import('../../../common/utils/types/datatypes).Node} Node
+ * @typedef {import(../../../common/types/datatypes).Message} Message
+ * @typedef {import(../../../common/types/datatypes).Chat} Chat
+ * @typedef {import(../../../common/types/datatypes).Node} Node
  */
 class Dao {
 
@@ -100,7 +100,8 @@ class Dao {
    * @returns {Promise}
    */
   getMessage(messageId) {
-    return this.db.executeQuery('get', `SELECT id AS 'id',
+    return this.db.executeQuery('get', `SELECT node_id AS 'nodeId',
+      id as 'id',
       messageId as 'messageId',
       chat_id as 'chatId',
       messageText AS 'text',
@@ -127,7 +128,11 @@ class Dao {
    * @returns {Promise}
    */
   getMessagesWithNodeId(nodeId) {
-    return this.db.executeQuery('all', `SELECT messageText AS 'text',
+    return this.db.executeQuery('all', `SELECT node_id AS 'nodeId',
+      id as 'id',  
+      messageId as 'messageId',
+      chat_id as 'chatId',
+      messageText AS 'text',
       messageDateTime AS 'time',
       messageSender AS 'sender'
       FROM messages WHERE node_id = :nodeId`, [nodeId])
@@ -173,7 +178,7 @@ class Dao {
    * @returns {Promise}
    */
   getLastChatId(nodeId) {
-    return this.db.executeQuery('get', `SELECT MAX(id)
+    return this.db.executeQuery('get', `SELECT MAX(id) AS 'id'
       FROM chats WHERE node_id = :nodeId`, [nodeId])
   }
 
@@ -183,13 +188,14 @@ class Dao {
    * @returns {Promise}
    */
   getLastMessageId(nodeId) {
-    return this.db.executeQuery('get', `SELECT MAX(id) AS maxId
+    return this.db.executeQuery('get', `SELECT MAX(id) AS 'maxId'
       FROM messages WHERE node_id = :nodeId`, [nodeId])
   }
 
   getLastMessageIds() {
-    return this.db.executeQuery('all', `SELECT node_id, MAX(id) 
-      FROM messages 
+    return this.db.executeQuery('all', `SELECT node_id AS 'nodeId',
+      MAX(id) AS 'id'
+      FROM messages
       WHERE node_id IS NOT NULL AND id IS NOT NULL 
       GROUP BY node_id`)
   }
@@ -202,12 +208,19 @@ class Dao {
    * @returns {Promise}
    */
   getMessagesAfter(nodeId, id) {
-    return this.db.executeQuery('all', `SELECT * FROM messages 
-      WHERE (node_id = ?) AND (id > ?)`, [nodeId, id])
+    return this.db.executeQuery('all', `SELECT node_id AS 'nodeId',
+      id as 'id',  
+      messageId as 'messageId',
+      chat_id as 'chatId',
+      messageText AS 'text',
+      messageDateTime AS 'time',
+      messageSender AS 'sender'
+      FROM messages 
+      WHERE (node_id = :nodeId) AND (id > :id)`, [nodeId, id])
   }
 
   getNodeIds() {
-    return this.db.executeQuery('all', `SELECT DISTINCT node_id 
+    return this.db.executeQuery('all', `SELECT DISTINCT node_id AS 'nodeId'
       FROM messages WHERE node_id IS NOT NULL`)
   }
 }

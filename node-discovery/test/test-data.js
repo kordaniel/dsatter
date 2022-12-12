@@ -1,4 +1,9 @@
-/**@type {import('../../common/utils/types/datatypes).Nodes[]}} */
+/**
+ * @typedef {import(../../common/types/datatypes).RegisteredNode} RegisteredNode
+ * @typedef {import(../../common/types/datatypes).ActiveNode} ActiveNode
+ */
+
+/**@type {RegisteredNode[]}} */
 const nodes = [
   {
     id: 112,
@@ -15,7 +20,7 @@ const nodes = [
 ]
 
 
-/**@type {import('../../common/utils/types/datatypes).ActiveNodes[]} */
+/**@type {ActiveNode[]} */
 const activeNodes = [
   {
     id: 112,
