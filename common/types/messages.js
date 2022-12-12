@@ -82,3 +82,10 @@ const ShoutBroadcast = (messageObj) => {
     payload: messageObj // One single message
   }
 }
+
+module.exports = {
+  ClientSync,
+  ClientSyncReply,
+  ClientMessage,
+  MessagesToClient
+}

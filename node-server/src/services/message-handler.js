@@ -5,7 +5,9 @@
 
 const logger    = require('../../../common/utils/logger')
 const db = require('./database')
-
+const {
+  getNodeId
+} = require('../state/node')
 let synchronizer = null
 
 const installSynchronizer = (synchronizerObj) => {
@@ -48,9 +50,26 @@ const handle = async (address, object) => {
         return
 
       case 'newMessageFromClient':
-        logger.info(`Message from a client received from ${address}: ${message}`)
-        const added = await addMessageToDatabase(message.payload)
-        return JSON.stringify({ name: 'clientMessageResponse', payload: added })
+        logger.info(`Message from a client received from ${address}:`, message)
+
+        const nodeId = getNodeId()
+        if (!nodeId) {
+          logger.error('handling message from client, nodeId is undefined')
+          return null
+        }
+        const msg = {
+          //id DATABASE creates id, message_id
+          nodeId,
+          ...message.payload, //text, sender, chatId
+          dateTime: new Date().toJSON()
+        }
+
+        const added = await addMessageToDatabase(msg)
+        if (added) {
+          return JSON.stringify({ name: 'clientMessageResponse', payload: added })
+        } else {
+          return
+        }
 
       case 'newMessagesForClient':
         logger.info(`Messages for clients received from ${address}: ${message}`)
@@ -76,10 +95,10 @@ const handle = async (address, object) => {
  */
 const addMessageToDatabase = async (message) => {
   await db.addMessageToDatabase(message)
-  const saved = await db.searchMessageDatabase(message.messageId)
-  if (saved.id === message.id && saved.dateTime === message.dateTime)
-    return true
-  return false
+  // db mutates message object, adds id and messageId
+  return Object.hasOwn(message, 'id') && Object.hasOwn(message, 'messageId')
+    ? message
+    : undefined
 }
 
 module.exports = {

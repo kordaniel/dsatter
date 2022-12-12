@@ -17,7 +17,7 @@ const initialize = (listenWsServerPort, listenWsClientPort, synchronizer, remote
   installSynchronizer(synchronizer)
   wsClientServer.init(listenWsClientPort, handle) // Serves as endpoint for clients to connect to
   wsNodeServer.init(listenWsServerPort, handle)   // Serves as endpoint for other node-server instances to connect to
-  wsClient.connectToAll(remoteEndpoints, synchronizer)  // Forms WS connection to all other running node-server instances
+  wsClient.connectToAll(remoteEndpoints, handle)  // Forms WS connection to all other running node-server instances
 }
 
 /**
