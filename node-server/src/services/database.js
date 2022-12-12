@@ -8,6 +8,11 @@ const logger    = require('../../../common/utils/logger')
 const testData = require('../utils/test-data')
 const querier = require('../database/querier')
 const Dao = require('../database/dao')
+const {
+  concateIntegers
+} = require('../../../common/utils/helpers')
+
+
 let dao
 
 /**
@@ -50,12 +55,22 @@ const addNodeToDatabase = async (node) => {
  * @returns {Promise<*>}
  */
 const addMessageToDatabase = async (data) => {
-  if (data.id)
-    return dao.addNewMessage(data)
-  else {
-    const message = { ...data, id: this.createNewMessageId() }
-    return dao.addNewMessage(message)
+  const msgObj = data
+
+  if (!msgObj.nodeId) {
+    logger.error('attempted to add a message without nodeId field')
+    return null
   }
+
+  if (!msgObj.id) {
+    const id = await createNewMessageId(msgObj.nodeId)
+    msgObj.id = id
+    msgObj.messageId = concateIntegers(msgObj.nodeId, msgObj.id)
+  } else if (!msgObj.messageId) {
+    msgObj.messageId = concateIntegers(msgObj.nodeId, msgObj.id)
+  }
+
+  return dao.addNewMessage(msgObj)
 }
 
 /**
@@ -164,8 +179,9 @@ const createNewChatId = () => {
   return dao.getLastChatId() + 1
 }
 
-const createNewMessageId = () => {
-  return dao.getLastMessageId() + 1
+const createNewMessageId = async (nodeId) => {
+  const { maxId } = await dao.getLastMessageId(nodeId)
+  return maxId === null ? 1 : maxId + 1
 }
 
 const readTestData = async () => {
