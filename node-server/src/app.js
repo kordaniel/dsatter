@@ -74,13 +74,13 @@ const initialize = async (parsedArgs) => {
 }
 
 const pushRandomMessages = () => {
-  pushTestMessage()
+  //pushTestMessage()
   const randomInt = require('../../common/utils/helpers.js').randomInt
-  setTimeout(pushRandomMessages, randomInt(5000, 50000))
+  //setTimeout(pushRandomMessages, randomInt(5000, 50000))
 }
 
 const pushTestMessage = async () => {
-  const randomInt = require('../../common/utils/helpers.js').randomInt
+  const { randomInt, concateIntegers, getRandomElementFromArr } = require('../../common/utils/helpers.js')
   const nodeId = nodeState.getNodeId()
 
   if (!nodeId) {
@@ -92,18 +92,18 @@ const pushTestMessage = async () => {
   const message = {
     nodeId: nodeId,
     id: id,
-    messageId: `${nodeId}${id}`,
+    messageId: concateIntegers(nodeId, id),
     text: `this is a message that contains number ${randomInt(50, 839)}. The end.`,
     //dateTime: new Date().toLocaleString([], { hour12: false }),
     dateTime: new Date().toJSON(),
-    sender: 'Julia',
+    sender: getRandomElementFromArr(['Julia', 'Jaana', 'Daniel', 'Joosua']),
     chatId: 11
   }
   logger.debug('Adding new test message...')
   await db.addMessageToDatabase(message)
-  websocketService.broadcastToClients(
-    MessagesToClient([message])
-  )
+  //websocketService.broadcastToClients(
+  //  MessagesToClient([message])
+  //)
   //logger.debug('Message in DB:[[', await db.getMessagesWithNodeId(message.id) , ']]')
 }
 
