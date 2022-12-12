@@ -27,7 +27,7 @@ const handle = async (address, object) => {
   }
 
   if (object.charAt(0) === '{') {
-    /** @type  */
+    /** @type {SyncMessage} */
     const message = JSON.parse(object)
     switch (message.name) {
       case 'syncRequest':
@@ -35,17 +35,17 @@ const handle = async (address, object) => {
         logger.info(`Sync request received from ${address}: ${message}`)
         return JSON.stringify({ name: 'syncReply', payload: diff })
 
-      case 'synchReply':
+      case 'syncReply':
         logger.info(`Sync reply received from ${address}: ${message}`)
         synchronizer.updateMessages(message.payload)
         return
-        
+
       case 'clientSyncRequest':
         const clientDiff = await synchronizer.getMessageDiff(message.payload)
         logger.info(`Client sync request received from ${address}: ${message}`)
         return JSON.stringify({ name: 'clientSyncReply', payload: clientDiff })
 
-      case 'clientSynchReply':
+      case 'clientSyncReply':
         logger.info(`Client sync reply received from ${address}: ${message}`)
         return
 
@@ -78,7 +78,7 @@ const handle = async (address, object) => {
       case 'broadcastNewMessage':
         logger.info(`Message for broadcasting received from ${address}: ${message}`)
         return
-        
+
       default:
         logger.info(`RECEIVED message from ${address}: ${message}`)
     }

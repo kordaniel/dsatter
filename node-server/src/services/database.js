@@ -5,7 +5,6 @@
  */
 
 const logger    = require('../../../common/utils/logger')
-const testData = require('../utils/test-data')
 const querier = require('../database/querier')
 const Dao = require('../database/dao')
 const {
@@ -184,15 +183,6 @@ const createNewMessageId = async (nodeId) => {
   return maxId === null ? 1 : maxId + 1
 }
 
-const readTestData = async () => {
-  for (let c of testData.chats)
-    this.addChatToDatabase(c)
-  for (let m of testData.messages)
-    this.addMessageToDatabase(m)
-  logger.info(await this.getAllChats())
-  logger.info(await this.getAllMessages())
-}
-
 const getDao = () => dao
 
 
@@ -215,6 +205,5 @@ module.exports = {
   closeDataBaseConnection,
   createNewChatId,
   createNewMessageId,
-  readTestData,
   getDao
 }

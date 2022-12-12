@@ -28,9 +28,8 @@ class Synchronizer {
     logger.info(`Known node ids in DB: ${JSON.stringify(knownIds)}`)
     const sentIds = Object.keys(latestIds)
     logger.info(`Sent ids in request: ${JSON.stringify(sentIds)}`)
-    await Promise.all(knownIds.map(async ({ node_id }) => {
-      const nodeId = '' + node_id
-      diff[node_id] = await this.db.getMessagesAfter(node_id, sentIds.includes(nodeId) ? latestIds[nodeId] : 0)
+    await Promise.all(knownIds.map(async ({ nodeId }) => {
+      diff[nodeId] = await this.db.getMessagesAfter(nodeId, sentIds.includes(nodeId) ? latestIds[nodeId] : 0)
     }))
 
     logger.info(`Sync diff generated, diff: ${JSON.stringify(diff)}.`)

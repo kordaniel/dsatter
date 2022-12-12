@@ -4,11 +4,11 @@
 type Message = {
   nodeId: number, // given by discovery node
   id: number, // given by the node, manual autoincrement
-  messageId: string, // nodeId + id
+  messageId: number, // nodeId + id
   text: string,
   datetime: string,
   sender: string,
-  chatId: string // nodeId + id of the chat
+  chatId: number // nodeId + id of the chat
 }
 
 /**
@@ -17,7 +17,7 @@ type Message = {
 type Chat = {
   nodeId: number, // given by discovery node
   id: number, // given by the node, manual autoincrement
-  chatId: string, // nodeId + id
+  chatId: number, // nodeId + id
   name: string
 }
 
@@ -46,9 +46,3 @@ type ActiveNode = {
   clientport: number,
   address: string
 }
-
-// ENDPOINTS:
-// /api/nodes/register POST {} => {id: number | token}
-// /api/nodes/login POST {id: number, password, clientport, syncport} => {successful: boolean, active: node[]}
-// /api/nodes/logout POST {id: number, password} => {successful: boolean}
-// /api/clients GET => {active: node[]}
