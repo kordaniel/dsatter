@@ -1,9 +1,9 @@
 /**
  * Makes querys to dsatter database
  *
- * @typedef {import('../../../common/utils/types/datatypes).Message} Message
- * @typedef {import('../../../common/utils/types/datatypes).Chat} Chat
- * @typedef {import('../../../common/utils/types/datatypes).Node} Node
+ * @typedef {import(../../../common/types/datatypes).Message} Message
+ * @typedef {import(../../../common/types/datatypes).Chat} Chat
+ * @typedef {import(../../../common/types/datatypes).Node} Node
  */
 class Dao {
 

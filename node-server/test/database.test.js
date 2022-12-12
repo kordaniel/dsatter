@@ -1,11 +1,11 @@
 /* eslint-disable no-undef */
 
-const querier = require('../../src/database/querier.js')
-const Dao = require('../../src/database/dao.js')
-const dbService = require('../../src/services/database.js')
+const querier = require('../src/database/querier')
+const Dao = require('../src/database/dao')
+const dbService = require('../src/services/database')
 
-jest.mock('../../src/database/querier.js')
-jest.mock('../../src/database/dao.js')
+jest.mock('../src/database/querier.js')
+jest.mock('../src/database/dao.js')
 
 let dao
 

@@ -1,7 +1,7 @@
 /**
- * @typedef {import(../../../common/utils/types/datatypes).Message} Message
- * @typedef {import(../../../common/utils/types/datatypes).Chat} Chat
- * @typedef {import(../../../common/utils/types/datatypes).RegisteredNode} Node
+ * @typedef {import(../../../common/types/datatypes).Message} Message
+ * @typedef {import(../../../common/types/datatypes).Chat} Chat
+ * @typedef {import(../../../common/types/datatypes).RegisteredNode} RegisteredNode
  */
 
 const logger    = require('../../../common/utils/logger')
@@ -29,9 +29,9 @@ const openDatabaseConnection = async (d = new Dao(querier)) => {
 }
 
 /**
- * Adds chat with given data to the database
- * Returns promise of the chatId
- * @param {Chat} data
+ * Adds node with given data to the database
+ * Returns promise
+ * @param {RegisteredNode} node
  * @returns {Promise<*>}
  */
 const addNodeToDatabase = async (node) => {

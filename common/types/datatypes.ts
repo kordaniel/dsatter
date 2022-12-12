@@ -22,23 +22,11 @@ type Chat = {
 }
 
 /**
- * Message from client to server
- */
-type ClientMessage = {
-  type: string,
-  messagetext: string,
-  sender: string,
-  chatId: number
-}
-
-/**
  * Data between servers
  */
 type SyncMessage = {
-  type: string,
-  messages: Message[],
-  chats: Chat[],
-  timestamp: string
+  name: string,
+  payload: any
 }
 
 /**

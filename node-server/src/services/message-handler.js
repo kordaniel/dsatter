@@ -1,3 +1,8 @@
+/**
+ * Handles synchronization messages recieved from clients and other servers
+ * @typedef {import(../../../common/types/datatypes).SyncMessage} SyncMessage
+ */
+
 const logger    = require('../../../common/utils/logger')
 const db = require('./database')
 
@@ -20,33 +25,41 @@ const handle = async (address, object) => {
   }
 
   if (object.charAt(0) === '{') {
+    /** @type  */
     const message = JSON.parse(object)
     switch (message.name) {
       case 'syncRequest':
         const diff = await synchronizer.getMessageDiff(message.payload)
         logger.info(`Sync request received from ${address}: ${message}`)
         return JSON.stringify({ name: 'syncReply', payload: diff })
+
       case 'synchReply':
         logger.info(`Sync reply received from ${address}: ${message}`)
         synchronizer.updateMessages(message.payload)
         return
+        
       case 'clientSyncRequest':
         const clientDiff = await synchronizer.getMessageDiff(message.payload)
         logger.info(`Client sync request received from ${address}: ${message}`)
         return JSON.stringify({ name: 'clientSyncReply', payload: clientDiff })
+
       case 'clientSynchReply':
         logger.info(`Client sync reply received from ${address}: ${message}`)
         return
+
       case 'newMessageFromClient':
         logger.info(`Message from a client received from ${address}: ${message}`)
         const added = await addMessageToDatabase(message.payload)
         return JSON.stringify({ name: 'clientMessageResponse', payload: added })
+
       case 'newMessagesForClient':
         logger.info(`Messages for clients received from ${address}: ${message}`)
         return
+
       case 'broadcastNewMessage':
         logger.info(`Message for broadcasting received from ${address}: ${message}`)
         return
+        
       default:
         logger.info(`RECEIVED message from ${address}: ${message}`)
     }

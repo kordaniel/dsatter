@@ -1,6 +1,11 @@
+/**
+ * @typedef {import(../../common/types/datatypes).Chat} Chat
+ * @typedef {import(../../common/types/datatypes).Message} Message
+ * @typedef {import(../../common/types/datatypes).RegisteredNode} RegisteredNode
+ */
 const current = new Date()
 
-/**@type {import('../../../common/utils/types/datatypes).Chat[]}} */
+/**@type {Chat[]} */
 const chats = [
   {
     nodeId: 1,
@@ -17,7 +22,7 @@ const chats = [
 ]
 
 
-/**@type {import('../../../common/utils/types/datatypes).Message[]} */
+/**@type {Message[]} */
 const messages = [
   {
     nodeId: 1,
@@ -57,6 +62,7 @@ const messages = [
   }
 ]
 
+/**@type {RegisteredNode[]} */
 const nodes = [
   {
     id: 1,
