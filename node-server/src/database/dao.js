@@ -79,6 +79,7 @@ class Dao {
     return this.db.executeQuery('all', `SELECT node_id AS 'nodeId',
       id AS 'id',
       chat_id AS 'chatId',
+      messageId AS 'messageId',
       messageText AS 'text',
       messageDateTime AS 'dateTime',
       messageSender AS 'sender' FROM messages`)

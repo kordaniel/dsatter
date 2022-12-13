@@ -11,7 +11,7 @@ const {
 } = require('../../common/types/messages')
 
 const {
-  generateRandomString
+  generateRandomString, getRandomElementFromArr
 } = require('../../common/utils/helpers')
 
 const handleRegistration = async () => {
@@ -74,9 +74,9 @@ const initialize = async (parsedArgs) => {
 }
 
 const pushRandomMessages = () => {
-  //pushTestMessage()
+  pushTestMessage()
   const randomInt = require('../../common/utils/helpers.js').randomInt
-  //setTimeout(pushRandomMessages, randomInt(5000, 50000))
+  setTimeout(pushRandomMessages, randomInt(5000, 50000))
 }
 
 const pushTestMessage = async () => {
@@ -105,6 +105,13 @@ const pushTestMessage = async () => {
   //  MessagesToClient([message])
   //)
   //logger.debug('Message in DB:[[', await db.getMessagesWithNodeId(message.id) , ']]')
+}
+
+const pushToClient = async () => {
+  const msgArr = await db.getAllMessages()
+
+  const msg = MessagesToClient(getRandomElementFromArr(msgArr))
+  broadcastToClients(msg)
 }
 
 const broadcastToNodeServers = (message) => {
@@ -153,6 +160,7 @@ const terminate = async () => {
 }
 
 module.exports = {
+  pushToClient,
   initialize,
   broadcastToNodeServers,
   broadcastToClients,

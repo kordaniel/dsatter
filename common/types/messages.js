@@ -42,12 +42,12 @@ const ClientSync = () => {
  * @returns
  */
 const ClientSyncReply = (messagesArr) => {
-  return JSON.stringify({
+  return {
     name: 'clientSyncReply',
     payload: Array.isArray(messagesArr) // [] Array containing all the newest messages with a maxlength to be defined
       ? messagesArr
       : [ messagesArr ]
-  })
+  }
 }
 
 /**
@@ -61,14 +61,16 @@ const ClientMessage = (messageObj) => {
   }
 }
 
+/** THIS IS NOT NEEDED (?), USE MessgesToClient instead...
 const ClientMessageResponse = (messagesArr) => {
-  return JSON.stringify({
+  return {
     name: 'clientMessageResponse',
     payload: Array.isArray(messagesArr)
       ? messagesArr
       : [ messagesArr ]
-  })
+  }
 }
+*/
 
 /**
  * A list with all the new messages for the client (node-server receices message(s) from other node-servers)
@@ -76,12 +78,12 @@ const ClientMessageResponse = (messagesArr) => {
  * @returns
  */
 const MessagesToClient = (messagesArr) => {
-  return JSON.stringify({
+  return {
     name: 'newMessagesForClient',
     payload: Array.isArray(messagesArr) // Array containing all the new messages that the client does not have
       ? messagesArr
       : [ messagesArr ]
-  })
+  }
 }
 
 /**
@@ -89,15 +91,20 @@ const MessagesToClient = (messagesArr) => {
  * @returns
  */
 const ShoutBroadcast = (messageObj) => {
-  return JSON.stringify({
+  if (Array.isArray(messageObj)) {
+    logger.error('ShoutBroadcast() got an Array as argument for payload to broadcastNewMessage')
+    return undefined
+  }
+
+  return {
     name: 'broadcastNewMessage',
     payload: messageObj // One single message
-  })
+  }
 }
 
 module.exports = {
   ClientSyncReply,
-  ClientMessageResponse,
+  ClientMessage,
   MessagesToClient,
   ShoutBroadcast
 }

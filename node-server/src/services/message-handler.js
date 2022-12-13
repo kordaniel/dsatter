@@ -30,7 +30,7 @@ const installCallbacks = (
 
 /**
  * Makes database querys and returns promises
- * @param {*} object
+ * @param {string} object (message, json formatted string)
  * @returns {Promise<*>}
  * @private
  */

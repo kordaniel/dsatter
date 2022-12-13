@@ -99,7 +99,7 @@ const openConnections = () =>
 const broadcastToAll = (message) => {
   getConnections().forEach(conn => {
     //if (conn.readyState === WebSocket.OPEN) {}
-    connections[conn].send(message)
+    connections[conn].send(JSON.stringify(message))
   })
 }
 
