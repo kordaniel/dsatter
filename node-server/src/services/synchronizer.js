@@ -10,7 +10,7 @@ class Synchronizer {
   sync = async () => {
     const latestMessages = await this.db.getLastMessageIds()
     let latestByNodeId = {}
-    latestMessages.forEach(obj => { latestByNodeId[obj.node_id] = obj['MAX(id)'] })
+    latestMessages.forEach(obj => {latestByNodeId[obj.nodeId] = obj.id })
     logger.info(`Synchronizing... Last message ids: ${JSON.stringify(latestByNodeId)}`)
     this.connService.broadcastToNodeServers(JSON.stringify({ name: 'syncRequest', payload: latestByNodeId }))
   }

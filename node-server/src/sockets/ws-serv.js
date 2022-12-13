@@ -109,10 +109,12 @@ const WsServer = () => {
   }
 
   const broadcastToAll = (message) => {
-    wss.clients.forEach(client => {
-      //if (client.readyState === WebSocket.OPEN) {}
-      client.send(JSON.stringify(message))
-    })
+    if (wss.clients) {
+      wss.clients.forEach(client => {
+        //if (client.readyState === WebSocket.OPEN) {}
+        client.send(JSON.stringify(message))
+      })
+    }
   }
 
   const listeningAddress = () => wss.address()

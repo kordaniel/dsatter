@@ -74,20 +74,18 @@ const initialize = async (parsedArgs) => {
 }
 
 const pushRandomMessages = () => {
-  //pushTestMessage()
+  pushTestMessage()
   const randomInt = require('../../common/utils/helpers.js').randomInt
-  //setTimeout(pushRandomMessages, randomInt(5000, 50000))
+  setTimeout(pushRandomMessages, randomInt(5000, 50000))
 }
 
 const pushTestMessage = async () => {
   const { randomInt, concateIntegers, getRandomElementFromArr } = require('../../common/utils/helpers.js')
   const nodeId = nodeState.getNodeId()
-
   if (!nodeId) {
     logger.error('NODEID undefined')
     return
   }
-
   const id = randomInt(100, 10000)
   const message = {
     nodeId: nodeId,
@@ -101,10 +99,10 @@ const pushTestMessage = async () => {
   }
   logger.debug('Adding new test message...')
   await db.addMessageToDatabase(message)
-  //websocketService.broadcastToClients(
-  //  MessagesToClient([message])
-  //)
-  //logger.debug('Message in DB:[[', await db.getMessagesWithNodeId(message.id) , ']]')
+  websocketService.broadcastToClients(
+    MessagesToClient([message])
+  )
+  logger.debug('Message in DB:[[', await db.getMessagesWithNodeId(message.id) , ']]')
 }
 
 const broadcastToNodeServers = (message) => {
