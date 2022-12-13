@@ -3,16 +3,30 @@
  * @typedef {import(../../../common/types/datatypes).SyncMessage} SyncMessage
  */
 
-const logger    = require('../../../common/utils/logger')
-const db = require('./database')
+const logger       = require('../../../common/utils/logger')
+const db           = require('./database')
+const messageTypes = require('../../../common/types/messages')
 const {
   getNodeId
 } = require('../state/node')
-let synchronizer = null
+const {
+  shallowEqual
+} = require('../../../common/utils/helpers')
 
-const installSynchronizer = (synchronizerObj) => {
+let synchronizer = null
+let broadCastToClients = null
+let broadCastToNodeServers = null
+
+const installCallbacks = (
+  synchronizerObj,
+  broadCastToClientsCallback,
+  broadCastToNodeServersCallback
+) => {
   synchronizer = synchronizerObj
+  broadCastToClients = broadCastToClientsCallback
+  broadCastToNodeServers = broadCastToNodeServersCallback
 }
+
 
 /**
  * Makes database querys and returns promises
@@ -22,8 +36,8 @@ const installSynchronizer = (synchronizerObj) => {
  */
 /* eslint-disable no-case-declarations */
 const handle = async (address, object) => {
-  if (!synchronizer) {
-    logger.error('SYNCHRONIZER not installed')
+  if (!(synchronizer && broadCastToClients && broadCastToNodeServers)) {
+    logger.error('SYNCHRONIZER or broadcast callbacks not installed')
   }
 
   if (object.charAt(0) === '{') {
@@ -49,7 +63,7 @@ const handle = async (address, object) => {
         logger.info(`Client sync reply received from ${address}: ${message}`)
         return
 
-      case 'newMessageFromClient':
+      case 'newMessageFromClient': {
         logger.info(`Message from a client received from ${address}:`, message)
 
         const nodeId = getNodeId()
@@ -57,6 +71,7 @@ const handle = async (address, object) => {
           logger.error('handling message from client, nodeId is undefined')
           return null
         }
+
         const msg = {
           //id DATABASE creates id, message_id
           nodeId,
@@ -65,20 +80,44 @@ const handle = async (address, object) => {
         }
 
         const added = await addMessageToDatabase(msg)
-        if (added) {
-          return JSON.stringify({ name: 'clientMessageResponse', payload: added })
-        } else {
-          return
+
+        if (!shallowEqual(msg, added)) {
+          logger.error('---------------------------------')
+          logger.error('Saved object differs from created')
+          logger.error('---------------------------------')
         }
 
+        if (added) {
+          logger.debug('ADDED:', added)
+          const clientMsg = messageTypes.MessagesToClient(added)
+          const serverMsg = messageTypes.ShoutBroadcast(added)
+          logger.debug('CLIENT MSG:', clientMsg)
+          logger.debug('SERVER MSG:', serverMsg)
+          broadCastToClients(clientMsg)
+          broadCastToNodeServers(serverMsg) // must be a single message
+          return // messageTypes.ClientMessageResponse(added)
+        } else {
+          //return JSON.stringify({ name: 'clientMessageResponse', payload: null })
+          return
+        }
+      }
       case 'newMessagesForClient':
-        logger.info(`Messages for clients received from ${address}: ${message}`)
+        logger.info(`Messages for clients received from ${address}:`, message)
         return
 
-      case 'broadcastNewMessage':
-        logger.info(`Message for broadcasting received from ${address}: ${message}`)
-        return
+      case 'broadcastNewMessage': {
+        logger.info(`Message for broadcasting received from ${address}:`, message)
+        const added = await addMessageToDatabase(message.payload)
 
+        if (!shallowEqual(added, message.payload)) {
+          logger.error('---------------------------------')
+          logger.error('Saved object differs from created')
+          logger.error('---------------------------------')
+        }
+        logger.debug('MESSAGE FROM OTHER SERVERS SAVED:', added)
+        broadCastToClients(messageTypes.MessagesToClient(added))
+        return
+      }
       default:
         logger.info(`RECEIVED message from ${address}: ${message}`)
     }
@@ -102,6 +141,6 @@ const addMessageToDatabase = async (message) => {
 }
 
 module.exports = {
-  installSynchronizer,
+  installCallbacks,
   handle
 }
