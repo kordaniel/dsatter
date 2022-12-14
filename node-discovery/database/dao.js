@@ -1,8 +1,8 @@
 /**
  * Makes querys to dsatter discovery database
  *
- * @typedef {import('../../common/utils/types/datatypes).Node} Node
- * @typedef {import('../../common/utils/types/datatypes).ActiveNode} ActiveNode
+ * @typedef {import(../../common/types/datatypes).RegisteredNode} RegisteredNode
+ * @typedef {import(../../common/types/datatypes).ActiveNode} ActiveNode
  */
 class Dao {
 
@@ -79,7 +79,7 @@ class Dao {
 
   /**
    * Adds new node to table nodes
-   * @param {Node} node
+   * @param {RegisteredNode} node
    * @returns {Promise}
    */
   addNewNode(node) {
@@ -101,7 +101,7 @@ class Dao {
 
   /**
    * Removes node by id from table activeNodes
-   * @param {Number} id
+   * @param {number} id
    * @returns {Promise}
    */
   removeActiveNode(id) {

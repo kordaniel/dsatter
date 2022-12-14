@@ -1,14 +1,12 @@
+/**
+* @typedef {import(../../common/utils/types/datatypes).RegisteredNode} Node
+* @typedef {import(../../common/utils/types/datatypes).ActiveNode} ActiveNode
+*/
 const logger   = require('../../common/utils/logger')
 const querier  = require('./querier')
 const Dao      = require('./dao')
 
 let dao = null
-
-///**
-// * @typedef {import('../../../common/utils/types/datatypes).Node} Node
-// * @typedef {import('../../../common/utils/types/datatypes).ActiveNode} ActiveNode
-// */
-
 
 /**
  * Initiates database

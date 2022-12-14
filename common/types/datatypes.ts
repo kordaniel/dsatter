@@ -4,11 +4,11 @@
 type Message = {
   nodeId: number, // given by discovery node
   id: number, // given by the node, manual autoincrement
-  messageId: string, //node_id + id
+  messageId: number, // nodeId + id
   text: string,
   datetime: string,
   sender: string,
-  chatId: string //node_id + id of the chat
+  chatId: number // nodeId + id of the chat
 }
 
 /**
@@ -17,35 +17,23 @@ type Message = {
 type Chat = {
   nodeId: number, // given by discovery node
   id: number, // given by the node, manual autoincrement
-  chatId: string, //node_id + id
+  chatId: number, // nodeId + id
   name: string
-}
-
-/**
- * Message from client to server
- */
-type ClientMessage = {
-  type: string,
-  messagetext: string,
-  sender: string,
-  chatId: number
 }
 
 /**
  * Data between servers
  */
 type SyncMessage = {
-  type: string,
-  messages: Message[],
-  chats: Chat[],
-  timestamp: string
+  name: string,
+  payload: any
 }
 
 /**
  * Registered nodes in discovery database
  */
 type RegisteredNode = {
-  id: number, // node_id
+  id: number, // nodeId
   password: any
 }
 
@@ -58,9 +46,3 @@ type ActiveNode = {
   clientport: number,
   address: string
 }
-
-// ENDPOINTS:
-// /api/nodes/register POST {} => {id: number | token}
-// /api/nodes/login POST {id: number, password, clientport, syncport} => {successful: boolean, active: node[]}
-// /api/nodes/logout POST {id: number, password} => {successful: boolean}
-// /api/clients GET => {active: node[]}
