@@ -10,6 +10,7 @@ const NODE_DISCOVERY_URL  = process.env.NODE_ENV === 'development'
   ? 'http://localhost'
   : 'http://dsatter-discovery'
 const NODE_DISCOVERY_PORT = 8080
+const NODE_DISCOVERY_PATH_CLIENT = 'api/clients'
 
 const NODE_DEFAULT_SERV_WS_PORT = 49152
 const NODE_DEFAULT_CLIENT_WS_PORT = 55000

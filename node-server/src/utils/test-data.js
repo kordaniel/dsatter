@@ -29,7 +29,7 @@ const messages = [
     id: 1,
     messageId: 11,
     text: 'this is the first message to the first chat',
-    dateTime: current.toLocaleString([], { hour12: false }),
+    dateTime: current.toJSON(),
     sender: 'Julia',
     chatId: 11
   },
@@ -38,7 +38,7 @@ const messages = [
     id: 2,
     messageId: 12,
     text: 'this is the first message to another chat',
-    dateTime: current.toLocaleString([], { hour12: false }),
+    dateTime: current.toJSON(),
     sender: 'Julia',
     chatId: 21
   },
@@ -47,7 +47,7 @@ const messages = [
     id: 1,
     messageId: 21,
     text: 'this message is from another node to the first chat',
-    dateTime: current.toLocaleString([], { hour12: false }),
+    dateTime: current.toJSON(),
     sender: 'Jaana',
     chatId: 11
   },
@@ -56,7 +56,7 @@ const messages = [
     id: 2,
     messageId: 22,
     text: 'this message is from another node to the second chat',
-    dateTime: current.toLocaleString([], { hour12: false }),
+    dateTime: current.toJSON(),
     sender: 'Jaana',
     chatId: 21
   }

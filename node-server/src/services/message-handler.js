@@ -3,87 +3,129 @@
  * @typedef {import(../../../common/types/datatypes).SyncMessage} SyncMessage
  */
 
-const logger    = require('../../../common/utils/logger')
-const db = require('./database')
+const logger       = require('../../../common/utils/logger')
+const db           = require('./database')
+const messageTypes = require('../../../common/types/messages')
 const {
   getNodeId
 } = require('../state/node')
-let synchronizer = null
 
-const installSynchronizer = (synchronizerObj) => {
+let synchronizer = null
+let broadCastToClients = null
+let broadCastToNodeServers = null
+
+const installCallbacks = (
+  synchronizerObj,
+  broadCastToClientsCallback,
+  broadCastToNodeServersCallback
+) => {
   synchronizer = synchronizerObj
+  broadCastToClients = broadCastToClientsCallback
+  broadCastToNodeServers = broadCastToNodeServersCallback
 }
 
-/**
- * Makes database querys and returns promises
- * @param {*} object
- * @returns {Promise<*>}
- * @private
- */
-/* eslint-disable no-case-declarations */
-const handle = async (address, object) => {
-  if (!synchronizer) {
-    logger.error('SYNCHRONIZER not installed')
+
+const handleNewClientMessage = async (message) => {
+  const nodeId = getNodeId()
+  if (!nodeId) {
+    logger.error('handling message from client, nodeId is undefined')
+    return null
   }
 
-  if (object.charAt(0) === '{') {
-    /** @type {SyncMessage} */
-    const message = JSON.parse(object)
-    switch (message.name) {
-      case 'syncRequest':
-        const diff = await synchronizer.getMessageDiff(message.payload)
-        logger.info(`Sync request received from ${address}: ${message}`)
-        return JSON.stringify({ name: 'syncReply', payload: diff })
+  const msg = {
+    //id DATABASE creates id, message_id
+    nodeId,
+    ...message, //text, sender, chatId
+    dateTime: new Date().toJSON()
+  }
 
-      case 'syncReply':
-        logger.info(`Sync reply received from ${address}: ${message}`)
-        synchronizer.updateMessages(message.payload)
-        return
+  const added = await addMessageToDatabase(msg)
 
-      case 'clientSyncRequest':
-        const clientDiff = await synchronizer.getMessageDiff(message.payload)
-        logger.info(`Client sync request received from ${address}: ${message}`)
-        return JSON.stringify({ name: 'clientSyncReply', payload: clientDiff })
-
-      case 'clientSyncReply':
-        logger.info(`Client sync reply received from ${address}: ${message}`)
-        return
-
-      case 'newMessageFromClient':
-        logger.info(`Message from a client received from ${address}:`, message)
-
-        const nodeId = getNodeId()
-        if (!nodeId) {
-          logger.error('handling message from client, nodeId is undefined')
-          return null
-        }
-        const msg = {
-          //id DATABASE creates id, message_id
-          nodeId,
-          ...message.payload, //text, sender, chatId
-          dateTime: new Date().toJSON()
-        }
-
-        const added = await addMessageToDatabase(msg)
-        if (added) {
-          return JSON.stringify({ name: 'clientMessageResponse', payload: added })
-        } else {
-          return
-        }
-
-      case 'newMessagesForClient':
-        logger.info(`Messages for clients received from ${address}: ${message}`)
-        return
-
-      case 'broadcastNewMessage':
-        logger.info(`Message for broadcasting received from ${address}: ${message}`)
-        return
-
-      default:
-        logger.info(`RECEIVED message from ${address}: ${message}`)
-    }
+  if (added) {
+    const clientMsg = messageTypes.MessagesToClient(added)
+    const serverMsg = messageTypes.ShoutBroadcast(added)
+    broadCastToClients(clientMsg)
+    broadCastToNodeServers(serverMsg)
   } else {
+    logger.error('New client message discarded')
+    //return JSON.stringify({ name: 'clientMessageResponse', payload: null })
+  }
+}
+
+
+/**
+ * Handles all incoming messages. Messages must be JSON formatted strings and
+ * contain the fields: name (type) and payload.
+ * @param {string} object (message, json formatted string).
+ * @returns {*} null/undefined or an JSON formatted string to return to the sender.
+ */
+const handle = async (address, object) => {
+  if (!(synchronizer && broadCastToClients && broadCastToNodeServers)) {
+    logger.error('SYNCHRONIZER or broadcast callbacks not installed')
+  }
+
+  if (object.charAt(0) !== '{') {
     logger.info(`RECEIVED message from ${address} -> [[${object}]]`)
+    return
+  }
+
+  logger.debug('JOOOOOOOOOOOOOOOOOOOOO')
+
+  /** @type {SyncMessage} */
+  const message = JSON.parse(object)
+  logger.infoPrettyPrintObj(`RECEIVED message from ${address}:`, message)
+
+  if (!Object.hasOwn(message, 'name')) {
+    logger.error('The type of the message is missing (name property). Ignoring!')
+    return
+  }
+  if (!Object.hasOwn(message, 'payload') ||
+      typeof message.payload === 'undefined' ||
+      message.payload === null) {
+    logger.error('Message payload is not defined. Ignoring!')
+    return
+  }
+
+  switch (message.name) {
+    case 'syncRequest': {
+      const diff = await synchronizer.getMessageDiff(message.payload)
+      return JSON.stringify({ name: 'syncReply', payload: diff })
+    }
+
+    case 'syncReply': {
+      synchronizer.updateMessages(message.payload)
+      return
+    }
+
+    case 'clientSyncRequest': {
+      const clientDiff = await synchronizer.getMessageDiff(message.payload)
+      return JSON.stringify({ name: 'clientSyncReply', payload: clientDiff })
+    }
+
+    case 'clientSyncReply': {
+      logger.info('Message is of type: clientSyncReply. And I am a SERVER! Ignoring!')
+      return
+    }
+
+    case 'newMessageFromClient': {
+      await handleNewClientMessage(message.payload) // TODO: Refactor to return response to client, if message was saved to DB or not
+      return // TODO: return response to client
+    }
+
+    case 'newMessagesForClient': {
+      logger.error('Message is of type: newMessagesForClient. And I am a SERVER! Ignoring!')
+      return
+    }
+
+    case 'broadcastNewMessage': {
+      const added = await addMessageToDatabase(message.payload)
+      broadCastToClients(messageTypes.MessagesToClient(added))
+      return
+    }
+
+    default: {
+      logger.error('Message name (type) not recognized. Ignoring!')
+    }
   }
 
 }
@@ -102,6 +144,6 @@ const addMessageToDatabase = async (message) => {
 }
 
 module.exports = {
-  installSynchronizer,
+  installCallbacks,
   handle
 }

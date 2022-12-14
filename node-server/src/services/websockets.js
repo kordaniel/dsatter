@@ -1,6 +1,6 @@
 const WsServer = require('../sockets/ws-serv')
-const { installSynchronizer, handle } = require('./message-handler')
 
+const msgHandler     = require('./message-handler')
 const wsNodeServer   = WsServer()
 const wsClientServer = WsServer()
 const wsClient       = require('../sockets/ws-client')
@@ -14,10 +14,10 @@ const wsClient       = require('../sockets/ws-client')
  * @param {Object[]} remoteEndpoints Array containing all remote endpoints.
  */
 const initialize = (listenWsServerPort, listenWsClientPort, synchronizer, remoteEndpoints = []) => {
-  installSynchronizer(synchronizer)
-  wsClientServer.init(listenWsClientPort, handle) // Serves as endpoint for clients to connect to
-  wsNodeServer.init(listenWsServerPort, handle)   // Serves as endpoint for other node-server instances to connect to
-  wsClient.connectToAll(remoteEndpoints, handle)  // Forms WS connection to all other running node-server instances
+  msgHandler.installCallbacks(synchronizer, broadcastToClients, broadcastToNodeServers)
+  wsClientServer.init(listenWsClientPort, msgHandler.handle) // Serves as endpoint for clients to connect to
+  wsNodeServer.init(listenWsServerPort, msgHandler.handle)   // Serves as endpoint for other node-server instances to connect to
+  wsClient.connectToAll(remoteEndpoints, msgHandler.handle)  // Forms WS connection to all other running node-server instances
 }
 
 /**

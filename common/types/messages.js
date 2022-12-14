@@ -2,7 +2,6 @@
  * Module that holds constructor function for different message types (work-in-progress)
  */
 
-
 /**
  * Node-server requests syncing of messages
  * @param {*} payload
@@ -45,7 +44,9 @@ const ClientSync = () => {
 const ClientSyncReply = (messagesArr) => {
   return {
     name: 'clientSyncReply',
-    payload: messagesArr // [] Array containing all the newest messages with a maxlength to be defined
+    payload: Array.isArray(messagesArr) // [] Array containing all the newest messages with a maxlength to be defined
+      ? messagesArr
+      : [ messagesArr ]
   }
 }
 
@@ -60,6 +61,17 @@ const ClientMessage = (messageObj) => {
   }
 }
 
+/** THIS IS NOT NEEDED (?), USE MessgesToClient instead...
+const ClientMessageResponse = (messagesArr) => {
+  return {
+    name: 'clientMessageResponse',
+    payload: Array.isArray(messagesArr)
+      ? messagesArr
+      : [ messagesArr ]
+  }
+}
+*/
+
 /**
  * A list with all the new messages for the client (node-server receices message(s) from other node-servers)
  * @param {*} payload
@@ -68,7 +80,9 @@ const ClientMessage = (messageObj) => {
 const MessagesToClient = (messagesArr) => {
   return {
     name: 'newMessagesForClient',
-    payload: messagesArr // Array containing all the new messages that the client does not have
+    payload: Array.isArray(messagesArr) // Array containing all the new messages that the client does not have
+      ? messagesArr
+      : [ messagesArr ]
   }
 }
 
@@ -77,6 +91,11 @@ const MessagesToClient = (messagesArr) => {
  * @returns
  */
 const ShoutBroadcast = (messageObj) => {
+  if (Array.isArray(messageObj)) {
+    logger.error('ShoutBroadcast() got an Array as argument for payload to broadcastNewMessage')
+    return undefined
+  }
+
   return {
     name: 'broadcastNewMessage',
     payload: messageObj // One single message
@@ -84,8 +103,8 @@ const ShoutBroadcast = (messageObj) => {
 }
 
 module.exports = {
-  ClientSync,
   ClientSyncReply,
   ClientMessage,
-  MessagesToClient
+  MessagesToClient,
+  ShoutBroadcast
 }

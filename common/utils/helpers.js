@@ -119,18 +119,18 @@ const generateRandomString = (length = 8) => {
   return Math.random().toString(36).slice(-length)
 }
 
-const concateIntegers = (a, b) => {
+const concatenateIntegers = (a, b) => {
   if (a < 0 || b < 0) {
     return undefined
   }
 
-  let pow = 10
+  let shiftLeft = 10
 
-  while (b >= pow) {
-    pow *= 10
+  while (b >= shiftLeft) {
+    shiftLeft *= 10
   }
 
-  return a * pow + b
+  return a * shiftLeft + b
 }
 
 module.exports = {
@@ -145,5 +145,5 @@ module.exports = {
   parseSocket,
   parseArgs,
   generateRandomString,
-  concateIntegers
+  concatenateIntegers
 }

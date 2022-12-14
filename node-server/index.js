@@ -100,6 +100,10 @@ const run = () => {
         logger.info('Dumping DB:', await app.dumpDatabase())
         run()
         break
+      case 'pc':
+        app.pushToClient()
+        run()
+        break
       default:
         run()
         break

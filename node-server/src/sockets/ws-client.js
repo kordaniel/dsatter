@@ -51,7 +51,7 @@ const connect = (socket, handle) => {
   ws.on('message', async (data, isBinary) => {
     const message = isBinary ? data : data.toString()
     if (isBinary) {
-      logger.info(`RECEIVED message from ${getRemoteAddress(ws)} -> [[BINARY data not printed]]`)
+      logger.info(`RECEIVED message from ${getRemoteAddress(ws)} -> [[BINARY data not printed or handled]]`)
     } else {
       const response = await handle(getRemoteAddress(ws), message)
       if (response)
@@ -99,7 +99,7 @@ const openConnections = () =>
 const broadcastToAll = (message) => {
   getConnections().forEach(conn => {
     //if (conn.readyState === WebSocket.OPEN) {}
-    connections[conn].send(message)
+    connections[conn].send(JSON.stringify(message))
   })
 }
 
