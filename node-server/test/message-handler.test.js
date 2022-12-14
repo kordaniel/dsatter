@@ -33,7 +33,7 @@ const generateSavedMessageObj = async (nodeId, chatId = 11, sender = undefined, 
   const newId = id
     ? id
     : await dbService.createNewMessageId(nodeId)
-  const messageId = helpers.concateIntegers(nodeId, newId)
+  const messageId = helpers.concatenateIntegers(nodeId, newId)
 
   return {
     id: newId,

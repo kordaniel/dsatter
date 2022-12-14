@@ -8,7 +8,7 @@ const logger    = require('../../../common/utils/logger')
 const querier = require('../database/querier')
 const Dao = require('../database/dao')
 const {
-  concateIntegers
+  concatenateIntegers
 } = require('../../../common/utils/helpers')
 
 
@@ -64,9 +64,9 @@ const addMessageToDatabase = async (data) => {
   if (!msgObj.id) {
     const id = await createNewMessageId(msgObj.nodeId)
     msgObj.id = id
-    msgObj.messageId = concateIntegers(msgObj.nodeId, msgObj.id)
+    msgObj.messageId = concatenateIntegers(msgObj.nodeId, msgObj.id)
   } else if (!msgObj.messageId) {
-    msgObj.messageId = concateIntegers(msgObj.nodeId, msgObj.id)
+    msgObj.messageId = concatenateIntegers(msgObj.nodeId, msgObj.id)
   }
 
   return dao.addNewMessage(msgObj)
