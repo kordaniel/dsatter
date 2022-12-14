@@ -14,9 +14,26 @@ const debug = (...params) => {
   }
 }
 
+const debugPrettyPrintObj = (prefix, obj, ...params) => {
+  debug(prefix, `\n${JSON.stringify(obj, null, 2)}`)
+
+  if (params.length > 0 && process.env.NODE_ENV === 'development') {
+    console.log(...params)
+  }
+}
+
 const info = (...params) => {
-  if (process.env.NODE_ENV !== 'test') {
-    console.log(`${getFormattedTime()}:`, ...params)
+  if (process.env.NODE_ENV === 'test') {
+    return
+  }
+  console.log(`${getFormattedTime()}:`, ...params)
+}
+
+const infoPrettyPrintObj = (prefix, obj, ...params) => {
+  info(prefix, `\n${JSON.stringify(obj, null, 2)}`)
+
+  if (params.length > 0 && process.env.NODE_ENV !== 'test') {
+    console.log(...params)
   }
 }
 
@@ -29,6 +46,8 @@ const error = (...params) => {
 module.exports = {
   test,
   debug,
+  debugPrettyPrintObj,
   info,
+  infoPrettyPrintObj,
   error
 }
