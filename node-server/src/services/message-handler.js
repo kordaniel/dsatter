@@ -95,7 +95,7 @@ const handle = async (address, object) => {
   switch (message.type) {
     case 'syncRequest': {
       const diff = await synchronizer.getMessageDiff(message.payload)
-      return JSON.stringify({ type: 'syncReply', payload: diff })
+      return messageTypes.SyncReply(nodeId, diff)
     }
 
     case 'syncReply': {
@@ -105,7 +105,7 @@ const handle = async (address, object) => {
 
     case 'clientSyncRequest': {
       const clientDiff = await synchronizer.getMessageDiff(message.payload)
-      return JSON.stringify({ type: 'clientSyncReply', payload: clientDiff })
+      return messageTypes.ClientSyncReply(nodeId, clientDiff)
     }
 
     case 'clientSyncReply': {
