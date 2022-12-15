@@ -107,7 +107,7 @@ type: newMessageFromClient)
  * @param {*} messageObj
  * @returns {type: string, sender: number, payload: *}
  */
-const ShoutBroadcast = (messageObj) => {
+const ShoutBroadcast = (id, messageObj) => {
   if (Array.isArray(messageObj)) {
     logger.error('ShoutBroadcast() got an Array as argument for payload to broadcastNewMessage')
     return undefined
