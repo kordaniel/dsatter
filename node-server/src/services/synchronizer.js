@@ -1,4 +1,4 @@
-const logger    = require('../../../common/utils/logger')
+const logger = require('../../../common/utils/logger')
 
 class Synchronizer {
   constructor(interval, db, connService) {
@@ -18,7 +18,7 @@ class Synchronizer {
       'sending syncRequest to all node servers'
     )
 
-    this.connService.broadcastToNodeServers({ name: 'syncRequest', payload: latestByNodeId })
+    this.connService.broadcastToNodeServers({ type: 'syncRequest', payload: latestByNodeId })
   }
 
   start = () => {
@@ -57,7 +57,7 @@ class Synchronizer {
   }
 
   stop = () => {
-    if(this.timer) {
+    if (this.timer) {
       clearInterval(this.timer)
     }
   }
