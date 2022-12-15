@@ -119,6 +119,20 @@ const generateRandomString = (length = 8) => {
   return Math.random().toString(36).slice(-length)
 }
 
+const concatenateIntegers = (a, b) => {
+  if (a < 0 || b < 0) {
+    return undefined
+  }
+
+  let shiftLeft = 10
+
+  while (b >= shiftLeft) {
+    shiftLeft *= 10
+  }
+
+  return a * shiftLeft + b
+}
+
 module.exports = {
   isEmptyArray,
   isNonEmptyArray,
@@ -130,5 +144,6 @@ module.exports = {
   isIPv6,
   parseSocket,
   parseArgs,
-  generateRandomString
+  generateRandomString,
+  concatenateIntegers
 }

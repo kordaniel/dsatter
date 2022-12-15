@@ -1,18 +1,18 @@
-const DatabaseService = require('./services/database')
-
+const db = require('./services/database')
 const config    = require('./utils/config')
 const logger    = require('../../common/utils/logger')
-
 const nodeState = require('./state/node')
-const Synchronizer = require('./services/synchronizer.js')
+const Synchronizer = require('./services/synchronizer')
 const websocketService = require('./services/websockets')
 const discoveryService = require('./services/discovery')
 
 const {
-  generateRandomString
-} = require('../../common/utils/helpers')
+  MessagesToClient
+} = require('../../common/types/messages')
 
-let db
+const {
+  generateRandomString, getRandomElementFromArr
+} = require('../../common/utils/helpers')
 
 const handleRegistration = async () => {
   const nodeServerObj = await db.getNode()
@@ -40,8 +40,6 @@ const initialize = async (parsedArgs) => {
   const dbpath = Object.hasOwn(parsedArgs, 'dbpath')
     ? parsedArgs['dbpath']
     : config.DB_PATH
-
-  db = new DatabaseService()
   await db.initiateDatabase(dbpath)
   await db.openDatabaseConnection()
   const nodeServObj = await handleRegistration()
@@ -82,7 +80,7 @@ const pushRandomMessages = () => {
 }
 
 const pushTestMessage = async () => {
-  const randomInt = require('../../common/utils/helpers.js').randomInt
+  const { randomInt, concatenateIntegers, getRandomElementFromArr } = require('../../common/utils/helpers.js')
   const nodeId = nodeState.getNodeId()
 
   if (!nodeId) {
@@ -94,15 +92,26 @@ const pushTestMessage = async () => {
   const message = {
     nodeId: nodeId,
     id: id,
-    messageId: `${nodeId}${id}`,
+    messageId: concatenateIntegers(nodeId, id),
     text: `this is a message that contains number ${randomInt(50, 839)}. The end.`,
-    dateTime: new Date().toLocaleString([], { hour12: false }),
-    sender: 'Julia',
+    //dateTime: new Date().toLocaleString([], { hour12: false }),
+    dateTime: new Date().toJSON(),
+    sender: getRandomElementFromArr(['Julia', 'Jaana', 'Daniel', 'Joosua']),
     chatId: 11
   }
   logger.debug('Adding new test message...')
   await db.addMessageToDatabase(message)
+  //websocketService.broadcastToClients(
+  //  MessagesToClient([message])
+  //)
   //logger.debug('Message in DB:[[', await db.getMessagesWithNodeId(message.id) , ']]')
+}
+
+const pushToClient = async () => {
+  const msgArr = await db.getAllMessages()
+
+  const msg = MessagesToClient(getRandomElementFromArr(msgArr))
+  broadcastToClients(msg)
 }
 
 const broadcastToNodeServers = (message) => {
@@ -130,34 +139,6 @@ const dumpDatabase = async () => {
   return messages
 }
 
-
-
-/**
- * Listen to Websocket messages and react
- */
-const run = () => {
-
-}
-
-/**
- * Makes database querys and returns promises
- * @param {ClientMessage} message
- * @returns {Promise<*>}
- * @private
- */
-const makeDatabaseQuery = async (message) => {
-  switch (message.query) {
-    case 'addMessage':
-      return db.addMessageToDatabase(message.data)
-    case 'addChat':
-      return db.addChatToDatabase(message.data)
-    case 'searchMessages':
-      return db.searchMessageDatabase(message.data)
-    case 'searchChats':
-      return db.searchChatDatabase(message.data)
-  }
-}
-
 const terminate = async () => {
   const nodeServerObj = await db.getNode()
 
@@ -179,8 +160,8 @@ const terminate = async () => {
 }
 
 module.exports = {
+  pushToClient,
   initialize,
-  run,
   broadcastToNodeServers,
   broadcastToClients,
   openOutboundConnections,
