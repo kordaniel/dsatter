@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
-
 const testData = require('../../utils/test-data')
+const logger = require('../../../../common/utils/logger')
 
 class Dao {
   chats
@@ -8,7 +8,7 @@ class Dao {
 
   // eslint-disable-next-line no-unused-vars
   constructor(querier) {
-    console.log('Mock database created')
+    logger.test('Mock database created')
   }
 
   createTableChats = () => {

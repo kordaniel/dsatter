@@ -15,7 +15,7 @@ jest.mock('../src/database/dao.js')
 jest.mock('../src/state/node.js')
 
 
-const clientMessage = messageTypes.ClientMessage({
+const clientMessage = messageTypes.ClientMessage(nodeState.getNodeId(), {
   text: 'Test message',
   sender: 'Test user',
   chatId: 11

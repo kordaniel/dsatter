@@ -75,8 +75,6 @@ const handle = async (address, object) => {
     return
   }
 
-  logger.debug('JOOOOOOOOOOOOOOOOOOOOO')
-
   /** @type {SyncMessage} */
   const message = JSON.parse(object)
   logger.infoPrettyPrintObj(`RECEIVED message from ${address}:`, message)
@@ -86,8 +84,7 @@ const handle = async (address, object) => {
     return
   }
   if (!Object.hasOwn(message, 'payload') ||
-    typeof message.payload === 'undefined' ||
-    message.payload === null) {
+    typeof message.payload === 'undefined' || message.payload === null) {
     logger.error('Message payload is not defined. Ignoring!')
     return
   }
