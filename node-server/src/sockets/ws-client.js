@@ -55,7 +55,7 @@ const connect = (socket, handle) => {
     } else {
       const response = await handle(getRemoteAddress(ws), message)
       if (response)
-        ws.send(response)
+        ws.send(JSON.stringify(response))
     }
   })
 

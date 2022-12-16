@@ -3,8 +3,8 @@
  * @typedef {import(../../../common/types/datatypes).SyncMessage} SyncMessage
  */
 
-const logger       = require('../../../common/utils/logger')
-const db           = require('./database')
+const logger = require('../../../common/utils/logger')
+const db = require('./database')
 const messageTypes = require('../../../common/types/messages')
 const {
   getNodeId
@@ -25,8 +25,7 @@ const installCallbacks = (
 }
 
 
-const handleNewClientMessage = async (message) => {
-  const nodeId = getNodeId()
+const handleNewClientMessage = async (nodeId, message) => {
   if (!nodeId) {
     logger.error('handling message from client, nodeId is undefined')
     return null
@@ -42,24 +41,30 @@ const handleNewClientMessage = async (message) => {
   const added = await addMessageToDatabase(msg)
 
   if (added) {
-    const clientMsg = messageTypes.MessagesToClient(added)
-    const serverMsg = messageTypes.ShoutBroadcast(added)
+    const clientMsg = messageTypes.MessagesToClient(nodeId, added)
+    const serverMsg = messageTypes.ShoutBroadcast(nodeId, added)
     broadCastToClients(clientMsg)
     broadCastToNodeServers(serverMsg)
   } else {
     logger.error('New client message discarded')
-    //return JSON.stringify({ name: 'clientMessageResponse', payload: null })
+    //return JSON.stringify({ type: 'clientMessageResponse', payload: null })
   }
 }
 
 
 /**
  * Handles all incoming messages. Messages must be JSON formatted strings and
- * contain the fields: name (type) and payload.
+ * contain the fields: type (type), id (sender's id) and payload.
  * @param {string} object (message, json formatted string).
  * @returns {*} null/undefined or an JSON formatted string to return to the sender.
  */
 const handle = async (address, object) => {
+  const nodeId = getNodeId()
+  if (!nodeId) {
+    logger.error('handling message, nodeId is undefined')
+    return null
+  }
+
   if (!(synchronizer && broadCastToClients && broadCastToNodeServers)) {
     logger.error('SYNCHRONIZER or broadcast callbacks not installed')
   }
@@ -69,27 +74,25 @@ const handle = async (address, object) => {
     return
   }
 
-  logger.debug('JOOOOOOOOOOOOOOOOOOOOO')
-
   /** @type {SyncMessage} */
   const message = JSON.parse(object)
   logger.infoPrettyPrintObj(`RECEIVED message from ${address}:`, message)
 
-  if (!Object.hasOwn(message, 'name')) {
-    logger.error('The type of the message is missing (name property). Ignoring!')
+  if (!Object.hasOwn(message, 'type')) {
+    logger.error('Message type is missing. Ignoring!')
     return
   }
   if (!Object.hasOwn(message, 'payload') ||
-      typeof message.payload === 'undefined' ||
-      message.payload === null) {
+    typeof message.payload === 'undefined' || message.payload === null
+  ) {
     logger.error('Message payload is not defined. Ignoring!')
     return
   }
 
-  switch (message.name) {
+  switch (message.type) {
     case 'syncRequest': {
       const diff = await synchronizer.getMessageDiff(message.payload)
-      return JSON.stringify({ name: 'syncReply', payload: diff })
+      return messageTypes.SyncReply(nodeId, diff)
     }
 
     case 'syncReply': {
@@ -99,7 +102,7 @@ const handle = async (address, object) => {
 
     case 'clientSyncRequest': {
       const clientDiff = await synchronizer.getMessageDiff(message.payload)
-      return JSON.stringify({ name: 'clientSyncReply', payload: clientDiff })
+      return messageTypes.ClientSyncReply(nodeId, clientDiff)
     }
 
     case 'clientSyncReply': {
@@ -108,7 +111,7 @@ const handle = async (address, object) => {
     }
 
     case 'newMessageFromClient': {
-      await handleNewClientMessage(message.payload) // TODO: Refactor to return response to client, if message was saved to DB or not
+      await handleNewClientMessage(nodeId, message.payload) // TODO: Refactor to return response to client, if message was saved to DB or not
       return // TODO: return response to client
     }
 
@@ -119,12 +122,12 @@ const handle = async (address, object) => {
 
     case 'broadcastNewMessage': {
       const added = await addMessageToDatabase(message.payload)
-      broadCastToClients(messageTypes.MessagesToClient(added))
+      broadCastToClients(messageTypes.MessagesToClient(nodeId, added))
       return
     }
 
     default: {
-      logger.error('Message name (type) not recognized. Ignoring!')
+      logger.error('Message type not recognized. Ignoring!')
     }
   }
 

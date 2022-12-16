@@ -72,7 +72,7 @@ const WsServer = () => {
         } else {
           const response = await handle(getRemoteAddress(req), message)
           if (response)
-            ws.send(response)
+            ws.send(JSON.stringify(response))
         }
       })
 
