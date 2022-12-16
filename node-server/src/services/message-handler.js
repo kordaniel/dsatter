@@ -25,8 +25,7 @@ const installCallbacks = (
 }
 
 
-const handleNewClientMessage = async (message) => {
-  const nodeId = getNodeId()
+const handleNewClientMessage = async (nodeId, message) => {
   if (!nodeId) {
     logger.error('handling message from client, nodeId is undefined')
     return null
@@ -80,11 +79,12 @@ const handle = async (address, object) => {
   logger.infoPrettyPrintObj(`RECEIVED message from ${address}:`, message)
 
   if (!Object.hasOwn(message, 'type')) {
-    logger.error('The type of the message is missing (type property). Ignoring!')
+    logger.error('Message type is missing. Ignoring!')
     return
   }
   if (!Object.hasOwn(message, 'payload') ||
-    typeof message.payload === 'undefined' || message.payload === null) {
+    typeof message.payload === 'undefined' || message.payload === null
+  ) {
     logger.error('Message payload is not defined. Ignoring!')
     return
   }
@@ -111,7 +111,7 @@ const handle = async (address, object) => {
     }
 
     case 'newMessageFromClient': {
-      await handleNewClientMessage(message.payload) // TODO: Refactor to return response to client, if message was saved to DB or not
+      await handleNewClientMessage(nodeId, message.payload) // TODO: Refactor to return response to client, if message was saved to DB or not
       return // TODO: return response to client
     }
 
@@ -127,7 +127,7 @@ const handle = async (address, object) => {
     }
 
     default: {
-      logger.error('Message type (type) not recognized. Ignoring!')
+      logger.error('Message type not recognized. Ignoring!')
     }
   }
 
