@@ -27,7 +27,7 @@ const openDatabaseConnection = async (d = new Dao(querier)) => {
 
 /**
  * Adds a new node to the database
- * Returns promise of the nodeId
+ * Returns automatically created nodeId
  * @param {Node} node
  * @returns {Node.id}
  */
@@ -35,8 +35,9 @@ const addNodeToDatabase = async (node) => {
   if (node.id)
     return
   else {
-    logger.debug('Adding node to DB:', node)
-    return await dao.addNewNode(node)
+    const newNode = await dao.addNewNode(node)
+    logger.debug('Adding node to DB:', newNode)
+    return newNode
   }
 }
 

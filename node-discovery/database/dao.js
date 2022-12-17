@@ -19,12 +19,15 @@ class Dao {
    * Creates table Nodes if that does not exist.
    * @returns {Promise}
    */
-  createTableNodes() {
+  createTableNodes = async () => {
     await this.db.executeQuery('run', `CREATE TABLE IF NOT EXISTS nodes (
-      id INTEGER AUTOINCREMENT PRIMARY KEY NOT NULL,
-      password TEXT)`)
-    return this.db.executeQuery('run', `UPDATE sqlite_sequence 
-      SET seq = 1000 WHERE name = nodes)`)
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      password TEXT NOT NULL)`)
+    const id = await this.getLastNodeId()
+    if (id.maxId === null) {
+      await this.db.executeQuery('run', `INSERT INTO nodes
+        (id, password) VALUES (?, ?)`, [1000, "12345"])
+    } 
   }
 
   /**
@@ -44,7 +47,8 @@ class Dao {
    * @returns {Promise}
    */
   getAllNodes() {
-    return this.db.executeQuery('all', 'SELECT id AS \'id\', password AS \'password\' FROM nodes')
+    return this.db.executeQuery('all', `SELECT id AS 'id',
+     password AS 'password' FROM nodes`)
   }
 
   /**
@@ -64,7 +68,7 @@ class Dao {
    * @returns {Promise}
    */
   getNode(id) {
-    return this.db.executeQuery('get', 'SELECT * FROM nodes WHERE id = :id', [id])
+    return this.db.executeQuery('get', `SELECT * FROM nodes WHERE id = :id`, [id])
   }
 
   /**
@@ -85,9 +89,8 @@ class Dao {
    * @returns {Promise}
    */
   addNewNode(node) {
-    return this.db.executeQuery('run', `INSERT INTO nodes
-      (password) VALUES (?) RETURNING id`,
-    [node.password])
+    return this.db.executeQuery('get', `INSERT INTO nodes
+      (password) VALUES (?) RETURNING *`, [node.password])
   }
 
   /**
@@ -102,6 +105,15 @@ class Dao {
   }
 
   /**
+   * Removes node by id from table nodes
+   * @param {number} id
+   * @returns {Promise}
+   */
+   deleteRegisteredNode(id) {
+    return this.db.executeQuery( 'run', `DELETE FROM nodes WHERE id = :id`, [id])
+  }
+
+  /**
    * Removes node by id from table activeNodes
    * @param {number} id
    * @returns {Promise}
@@ -109,8 +121,7 @@ class Dao {
   removeActiveNode(id) {
     return this.db.executeQuery(
       'run',
-      'DELETE FROM activeNodes WHERE id = :id', [id]
-    )
+      `DELETE FROM activeNodes WHERE id = :id`, [id])
   }
 
   /**
@@ -118,10 +129,7 @@ class Dao {
    * @returns {Promise}
    */
   clearActiveNode() {
-    return this.db.executeQuery(
-      'run',
-      'DELETE FROM activeNodes'
-    )
+    return this.db.executeQuery('run', `DELETE FROM activeNodes`)
   }
 
   /**
@@ -129,7 +137,7 @@ class Dao {
    * @returns {Promise}
    */
   getLastNodeId() {
-    return this.db.executeQuery('get', 'SELECT MAX(id) maxId FROM nodes')
+    return this.db.executeQuery('get', `SELECT MAX(id) maxId FROM nodes`)
   }
 }
 
