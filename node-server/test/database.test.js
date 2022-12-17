@@ -1,17 +1,24 @@
 /* eslint-disable no-undef */
 
 const querier = require('../src/database/querier')
-const Dao = require('../src/database/dao')
+const NodeDao = require('../src/database/node-dao')
+const MessageDao = require('../src/database/message-dao')
+const ChatDao = require('../src/database/chat-dao')
 const dbService = require('../src/services/database')
 
 jest.mock('../src/database/querier.js')
-jest.mock('../src/database/dao.js')
+jest.mock('../src/database/message-dao.js')
+jest.mock('../src/database/node-dao.js')
+jest.mock('../src/database/chat-dao.js')
 
-let dao
+let nodeDao
+let messageDao
 
 beforeAll(() => {
-  dao = new Dao(querier)
-  dbService.openDatabaseConnection(dao)
+  nodeDao = new NodeDao(querier)
+  messageDao = new MessageDao(querier)
+  chatDao = new ChatDao(querier)
+  dbService.openDatabaseConnection(nodeDao, messageDao, chatDao)
 })
 
 describe('Database service works correctly', () => {

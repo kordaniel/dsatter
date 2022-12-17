@@ -19,7 +19,7 @@ class MessageDao {
    * Creates table OwnMessages if that does not exist.
    * @returns {Promise}
    */
-   createTableOwnMessages() {
+  createTableOwnMessages() {
     return this.db.executeQuery('run', `CREATE TABLE IF NOT EXISTS ownMessages (
       node_id INTEGER NOT NULL,
       id INTEGER PRIMARY KEY,
@@ -83,7 +83,7 @@ class MessageDao {
       messageDateTime AS 'dateTime',
       messageSender AS 'sender'
       FROM ownMessages
-      UNION ALL
+      UNION
       SELECT node_id AS 'nodeId',
       id AS 'id',
       node_id || id AS 'messageId',
@@ -105,7 +105,7 @@ class MessageDao {
       messageDateTime AS 'dateTime',
       messageSender AS 'sender'
       FROM ownMessages
-      UNION ALL
+      UNION
       messageText AS 'text',
       messageDateTime AS 'dateTime',
       messageSender AS 'sender'
@@ -127,7 +127,7 @@ class MessageDao {
       messageDateTime AS 'dateTime',
       messageSender AS 'sender'
       FROM ownMessages
-      UNION ALL
+      UNION
       SELECT node_id AS 'nodeId',
       id as 'id',  
       node_id || id AS messageId,
@@ -137,17 +137,6 @@ class MessageDao {
       messageSender AS 'sender'
       FROM outsideMessages
       WHERE node_id = :nodeId`, [nodeId])
-  }
-
-  /**
-   * Adds new node to table nodes
-   * @param {Node} node
-   * @returns {Promise}
-   */
-  addNewNode(node) {
-    return this.db.executeQuery('run', `INSERT INTO node
-      (id, password) VALUES (?, ?)`,
-    [node.id, node.password])
   }
 
   /**
@@ -161,7 +150,7 @@ class MessageDao {
       (node_id, messageText, messageDateTime, messageSender, chat_id)
       VALUES (?, ?, ?, ?, ?) 
       RETURNING (node_id || id) AS messageId`,
-    [message.nodeId, message.text, message.dateTime, message.sender, message.chatId])
+      [message.nodeId, message.text, message.dateTime, message.sender, message.chatId])
   }
 
   /**
@@ -169,7 +158,7 @@ class MessageDao {
    * @param {Message} message
    * @returns {Promise}
    */
-   addOutsideMessage(message) {
+  addOutsideMessage(message) {
     return this.db.executeQuery('get', `INSERT OR IGNORE
       INTO outsideMessages
       (node_id, id, messageText, messageDateTime, messageSender, chat_id)
@@ -186,7 +175,7 @@ class MessageDao {
   getLastMessageId(nodeId) {
     return this.db.executeQuery('get',`SELECT MAX(id) AS 'maxId'
       FROM ownMessages
-      UNION ALL
+      UNION
       SELECT MAX(id) AS 'maxId'
       FROM outsideMessages 
       WHERE node_id = :nodeId`, [nodeId])
@@ -223,8 +212,17 @@ class MessageDao {
    * @param {number} id
    * @returns {Promise}
    */
-  getOutsideMessagesAfter(nodeId, id) {
+  getMessagesAfter(nodeId, id) {
     return this.db.executeQuery('all', `SELECT node_id AS 'nodeId',
+      id as 'id',  
+      node_id || id AS messageId,
+      chat_id as 'chatId',
+      messageText AS 'text',
+      messageDateTime AS 'dateTime',
+      messageSender AS 'sender'
+      FROM ownMessages
+      UNION
+      SELECT node_id AS 'nodeId',
       id as 'id',  
       node_id || id AS messageId,
       chat_id as 'chatId',
@@ -239,7 +237,7 @@ class MessageDao {
     return this.db.executeQuery('all',
       `SELECT DISTINCT node_id AS 'nodeId'
       FROM outsideMessages
-      UNION ALL
+      UNION
       SELECT id AS 'nodeId'
       FROM node`)
   }

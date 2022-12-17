@@ -26,8 +26,9 @@ class Dao {
     const id = await this.getLastNodeId()
     if (id.maxId === null) {
       await this.db.executeQuery('run', `INSERT INTO nodes
-        (id, password) VALUES (?, ?)`, [1000, "12345"])
-    } 
+        (id, password) VALUES (?, ?)`, [1000, '12345'])
+      await this.deleteRegisteredNode(1000)
+    }
   }
 
   /**
@@ -68,7 +69,7 @@ class Dao {
    * @returns {Promise}
    */
   getNode(id) {
-    return this.db.executeQuery('get', `SELECT * FROM nodes WHERE id = :id`, [id])
+    return this.db.executeQuery('get', 'SELECT * FROM nodes WHERE id = :id', [id])
   }
 
   /**
@@ -109,8 +110,8 @@ class Dao {
    * @param {number} id
    * @returns {Promise}
    */
-   deleteRegisteredNode(id) {
-    return this.db.executeQuery( 'run', `DELETE FROM nodes WHERE id = :id`, [id])
+  deleteRegisteredNode(id) {
+    return this.db.executeQuery( 'run', 'DELETE FROM nodes WHERE id = :id', [id])
   }
 
   /**
@@ -121,7 +122,7 @@ class Dao {
   removeActiveNode(id) {
     return this.db.executeQuery(
       'run',
-      `DELETE FROM activeNodes WHERE id = :id`, [id])
+      'DELETE FROM activeNodes WHERE id = :id', [id])
   }
 
   /**
@@ -129,7 +130,7 @@ class Dao {
    * @returns {Promise}
    */
   clearActiveNode() {
-    return this.db.executeQuery('run', `DELETE FROM activeNodes`)
+    return this.db.executeQuery('run', 'DELETE FROM activeNodes')
   }
 
   /**
@@ -137,7 +138,7 @@ class Dao {
    * @returns {Promise}
    */
   getLastNodeId() {
-    return this.db.executeQuery('get', `SELECT MAX(id) maxId FROM nodes`)
+    return this.db.executeQuery('get', 'SELECT MAX(id) maxId FROM nodes')
   }
 }
 

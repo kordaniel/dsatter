@@ -30,7 +30,7 @@ class ChatDao {
    * Creates table OutsideChats if that does not exist.
    * @returns {Promise}
    */
-   createTableOutsideChats() {
+  createTableOutsideChats() {
     return this.db.executeQuery('run', `CREATE TABLE IF NOT EXISTS ownChats (
       node_id INTEGER NOT NULL,
       id INTEGER NOT NULL,
@@ -74,7 +74,7 @@ class ChatDao {
    * @param {Chat} chat
    * @returns {Promise}
    */
-   addOutsideChat(chat) {
+  addOutsideChat(chat) {
     return this.db.executeQuery('get', `INSERT INTO OutsideChats
       (node_id, id, chatId, chatName) VALUES (?, ?, ?, ?) 
       RETURNING  node_id || ' ' || id AS 'chatId'`,

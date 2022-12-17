@@ -3,7 +3,9 @@
 
 const nodeState = require('../src/state/node')
 const querier = require('../src/database/querier')
-const Dao = require('../src/database/dao')
+const NodeDao = require('../src/database/node-dao')
+const MessageDao = require('../src/database/message-dao')
+const ChatDao = require('../src/database/chat-dao')
 const Synchronizer = require('../src/services/synchronizer')
 const messageTypes = require('../../common/types/messages')
 const msgHandler = require('../src/services/message-handler')
@@ -11,7 +13,9 @@ const dbService = require('../src/services/database')
 const helpers = require('../../common/utils/helpers')
 
 jest.mock('../src/database/querier.js')
-jest.mock('../src/database/dao.js')
+jest.mock('../src/database/message-dao.js')
+jest.mock('../src/database/node-dao.js')
+jest.mock('../src/database/chat-dao.js')
 jest.mock('../src/state/node.js')
 
 
@@ -29,10 +33,14 @@ const clientMessageProcessed = {
   // dateTime: undefined   // message-handler sets time when handling msg
 }
 
+const createNewMessageId = async () => {
+  return Math.floor(Math.random() * 101);
+}
+
 const generateSavedMessageObj = async (nodeId, chatId = 11, sender = undefined, id = undefined) => {
   const newId = id
     ? id
-    : await dbService.createNewMessageId(nodeId)
+    : this.createNewMessageId
   const messageId = helpers.concatenateIntegers(nodeId, newId)
 
   return {
@@ -55,7 +63,8 @@ const synchronizer = new Synchronizer()
 
 
 describe('Message handler', () => {
-  let dao = null
+  let nodeDao = null
+  let messageDao = null
 
   let broadcastedToClients = null
   let broadCastedToNodeServers = null
@@ -64,8 +73,10 @@ describe('Message handler', () => {
   let mockBroadCastToNodeServers = null
 
   beforeEach(() => {
-    dao = new Dao(querier)
-    dbService.openDatabaseConnection(dao)
+    nodeDao = new NodeDao(querier)
+    messageDao = new MessageDao(querier)
+    chatDao = new ChatDao(querier)
+    dbService.openDatabaseConnection(nodeDao, messageDao, chatDao)
 
     broadcastedToClients = null
     broadCastedToNodeServers = null

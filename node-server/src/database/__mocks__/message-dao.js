@@ -2,52 +2,30 @@
 
 const testData = require('../../utils/test-data')
 
-class Dao {
+class MessageDao {
   chats
   messages
 
   // eslint-disable-next-line no-unused-vars
   constructor(querier) {
-    console.log('Mock database created')
+    console.log('Mock database table Messages created')
   }
 
-  createTableChats = () => {
-    this.chats = testData.chats
-  }
-
-  createTableMessages = () => {
+  createTableOwnMessages = () => {
     this.messages = testData.messages
   }
 
-  createTableNode = () => {
-    this.nodes = testData.nodes
+  createTableOutsideMessages = () => {
+    this.messages = testData.messages
   }
 
-  /*
-  getNode = () => {
-    //return Promise.resolve(this.nodes[0])
-  }
-
-  getAllChats = () => {
-
-  }
-  */
   getAllMessages = () => {
     return Promise.resolve(this.messages)
   }
-  /*
+
   getMessagesWithNodeId = (nodeId) => {
 
   }
-
-  addNewNode = (node) => {
-
-  }
-
-  getLastChatId = (nodeId) => {
-
-  }
-  */
 
   getLastMessageId = (nodeId) => {
     const nodeMessages = this.messages
@@ -64,10 +42,6 @@ class Dao {
     return Promise.resolve({ maxId: maxIdMsg.id })
   }
 
-  getChat = (chatId) => {
-    return Promise.resolve(this.chats.filter((c) => c.chatId === chatId)[0])
-  }
-
   getMessage = (messageId) => {
     return Promise.resolve(this.messages.filter((m) => m.messageId === messageId)[0])
   }
@@ -76,17 +50,17 @@ class Dao {
     return Promise.resolve(this.messages.filter((m) => m.chatId === chatId))
   }
 
-  addNewChat = (chat) => {
-    const newChats = [...this.chats, chat]
-    this.chats = newChats
-    return Promise.resolve(this.chats)
+  addOwnMessage = (message) => {
+    const newMessages = [...this.messages, message]
+    this.messages = newMessages
+    return Promise.resolve(this.messages)
   }
 
-  addNewMessage = (message) => {
+  addOutsideMessage = (message) => {
     const newMessages = [...this.messages, message]
     this.messages = newMessages
     return Promise.resolve(this.messages)
   }
 }
 
-module.exports = Dao
+module.exports = MessageDao

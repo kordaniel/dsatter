@@ -28,7 +28,7 @@ class NodeDao {
    * Returns the node
    * @returns {Promise}
    */
-   getNode() {
+  getNode() {
     return this.db.executeQuery('all', `SELECT id AS 'id',
       password AS 'password' FROM node`)
   }
@@ -42,6 +42,14 @@ class NodeDao {
     return this.db.executeQuery('run', `INSERT INTO node
       (id, password) VALUES (?, ?)`,
     [node.id, node.password])
+  }
+
+  /**
+   * Removes nodes from table node
+   * @returns {Promise}
+   */
+  removeNodes() {
+    return this.db.executeQuery( 'run', 'DELETE FROM node')
   }
 }
 

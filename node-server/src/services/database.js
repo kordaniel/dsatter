@@ -6,9 +6,9 @@
 
 const logger    = require('../../../common/utils/logger')
 const querier = require('../database/querier')
-const NodeDao = require('../database/node_dao')
-const MessageDao = require('../database/message_dao')
-const ChatDao = require('../database/chat_dao')
+const NodeDao = require('../database/node-dao')
+const MessageDao = require('../database/message-dao')
+const ChatDao = require('../database/chat-dao')
 
 let nodeDao
 let messageDao
@@ -28,9 +28,9 @@ const initiateDatabase = async (dbpath) => {
  * @param {ChatDao} chatD
  */
 const openDatabaseConnection = async (
-    nodeD = new NodeDao(querier),
-    messageD = new MessageDao(querier),
-    chatD = new ChatDao(querier)) => {
+  nodeD = new NodeDao(querier),
+  messageD = new MessageDao(querier),
+  chatD = new ChatDao(querier)) => {
   nodeDao = nodeD
   messageDao = messageD
   chatDao = chatD
@@ -52,7 +52,10 @@ const addNodeToDatabase = async (node) => {
     logger.error('Attempted to add a node without id or passwd to DB')
     return null
   }
-  // TODO: Handle case when id is already in the DB. (empty array always evaluates to true)
+  const existingNode = await nodeDao.getNode()
+  if (existingNode) {
+    await nodeDao.removeNodes()
+  }
   return nodeDao.addNewNode(node)
 }
 
@@ -70,7 +73,7 @@ const addMessageToDatabase = async (data) => {
   }
   if (!msgObj.id) {
     return messageDao.addOwnMessage(msgObj)
-  } 
+  }
   return messageDao.addOutsideMessage(msgObj)
 }
 
@@ -133,13 +136,13 @@ const getLastMessageIds = async () => {
 }
 
 const getMessagesAfter = async (nodeId, id) => {
-  console.log("OWN ID", await nodeDao.getNode().id)
-  const ownId = await nodeDao.getNode().id
-  let messages
-  if (nodeId === ownId)
-    messages = await messageDao.getOwnMessagesAfter(id)
-  const outsideM = await messageDao.getOutsideMessagesAfter(nodeId, id)
-  return messages.concat(outsideM)
+  // const ownId = await nodeDao.getNode().id
+  // let messages
+  // if (nodeId === ownId)
+  //   messages = await messageDao.getOwnMessagesAfter(id)
+  // const outsideM = await messageDao.getOutsideMessagesAfter(nodeId, id)
+  // return messages.concat(outsideM)
+  return messageDao.getMessagesAfter(nodeId, id)
 }
 
 /**
