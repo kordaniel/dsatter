@@ -28,21 +28,15 @@ const openDatabaseConnection = async (d = new Dao(querier)) => {
 /**
  * Adds a new node to the database
  * Returns promise of the nodeId
- * @param {Node} data
- * @returns {Promise<*>}
+ * @param {Node} node
+ * @returns {Node.id}
  */
-const addNodeToDatabase = async (data) => {
-  if (data.id)
+const addNodeToDatabase = async (node) => {
+  if (node.id)
     return
   else {
-    // NOTE: Race condition might happen here..(?)
-    // -------------------------------------------
-    //       The database should probably assign a new id when
-    //       adding the new node
-    const node = { ...data, id: await createNewNodeId() }
     logger.debug('Adding node to DB:', node)
-    await dao.addNewNode(node)
-    return searchNodeDatabase(node.id)
+    return await dao.addNewNode(node)
   }
 }
 
@@ -61,7 +55,7 @@ const addActiveNodeToDatabase = async (data) => {
 
 /**
  * Removes a node from the active nodes table by id
- * @param {Number} id
+ * @param {number} id
  * @returns {Promise}
  */
 const removeActiveNodeFromDatabase = async (id) => {
@@ -113,11 +107,6 @@ const closeDataBaseConnection = () => {
   querier.closeDatabaseConnection()
 }
 
-const createNewNodeId = async () => {
-  const { maxId } = await dao.getLastNodeId()
-  return maxId === null ? 1 : maxId + 1
-}
-
 module.exports = {
   initiateDatabase,
   openDatabaseConnection,
@@ -129,6 +118,5 @@ module.exports = {
   searchNodeDatabase,
   searchActiveNodeDatabase,
   clearActiveNodeDatabase,
-  closeDataBaseConnection,
-  createNewNodeId
+  closeDataBaseConnection
 }

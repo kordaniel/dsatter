@@ -174,15 +174,6 @@ const closeDataBaseConnection = () => {
   querier.closeDatabaseConnection()
 }
 
-const createNewChatId = () => {
-  return dao.getLastChatId() + 1
-}
-
-const createNewMessageId = async (nodeId) => {
-  const { maxId } = await dao.getLastMessageId(nodeId)
-  return maxId === null ? 1 : maxId + 1
-}
-
 const getDao = () => dao
 
 
@@ -203,7 +194,5 @@ module.exports = {
   searchMessageDatabase,
   searchChatDatabase,
   closeDataBaseConnection,
-  createNewChatId,
-  createNewMessageId,
   getDao
 }

@@ -1,7 +1,7 @@
 /**
  * Makes querys to dsatter discovery database
  *
- * @typedef {import(../../common/types/datatypes).RegisteredNode} RegisteredNode
+ * @typedef {import(../../common/types/datatypes).RegisteredNode} RegisteredNode<
  * @typedef {import(../../common/types/datatypes).ActiveNode} ActiveNode
  */
 class Dao {
@@ -20,9 +20,11 @@ class Dao {
    * @returns {Promise}
    */
   createTableNodes() {
-    return this.db.executeQuery('run', `CREATE TABLE IF NOT EXISTS nodes (
-      id INTEGER PRIMARY KEY NOT NULL,
+    await this.db.executeQuery('run', `CREATE TABLE IF NOT EXISTS nodes (
+      id INTEGER AUTOINCREMENT PRIMARY KEY NOT NULL,
       password TEXT)`)
+    return this.db.executeQuery('run', `UPDATE sqlite_sequence 
+      SET seq = 1000 WHERE name = nodes)`)
   }
 
   /**
@@ -84,8 +86,8 @@ class Dao {
    */
   addNewNode(node) {
     return this.db.executeQuery('run', `INSERT INTO nodes
-      (id, password) VALUES (?, ?)`,
-    [node.id, node.password])
+      (password) VALUES (?) RETURNING id`,
+    [node.password])
   }
 
   /**

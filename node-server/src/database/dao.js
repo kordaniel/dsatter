@@ -31,14 +31,15 @@ class Dao {
    * @returns {Promise}
    */
   createTableMessages() {
-    return this.db.executeQuery('run', `CREATE TABLE IF NOT EXISTS messages (
+    await this.db.executeQuery('run', `CREATE TABLE IF NOT EXISTS messages (
       node_id INTEGER NOT NULL,
-      id INTEGER NOT NULL,
-      messageId INTEGER PRIMARY KEY NOT NULL,
+      id INTEGER AUTOINCREMENT NOT NULL,
       chat_id INTEGER,
       messageText TEXT,
       messageDateTime TEXT,
-      messageSender TEXT)`)
+      messageSender TEXT,
+      PRIMARY KEY (node_id, id)
+      RETURNING node_id || ' ' || id AS messageId)`)
   }
 
   /**
@@ -78,8 +79,8 @@ class Dao {
   getAllMessages() {
     return this.db.executeQuery('all', `SELECT node_id AS 'nodeId',
       id AS 'id',
+      node_id || ' ' || id AS messageId,
       chat_id AS 'chatId',
-      messageId AS 'messageId',
       messageText AS 'text',
       messageDateTime AS 'dateTime',
       messageSender AS 'sender' FROM messages`)
@@ -103,7 +104,7 @@ class Dao {
   getMessage(messageId) {
     return this.db.executeQuery('get', `SELECT node_id AS 'nodeId',
       id as 'id',
-      messageId as 'messageId',
+      node_id || ' ' || id AS messageId,
       chat_id as 'chatId',
       messageText AS 'text',
       messageDateTime AS 'dateTime',
@@ -131,7 +132,7 @@ class Dao {
   getMessagesWithNodeId(nodeId) {
     return this.db.executeQuery('all', `SELECT node_id AS 'nodeId',
       id as 'id',  
-      messageId as 'messageId',
+      node_id || ' ' || id AS messageId,
       chat_id as 'chatId',
       messageText AS 'text',
       messageDateTime AS 'dateTime',
@@ -157,8 +158,8 @@ class Dao {
    */
   addNewChat(chat) {
     return this.db.executeQuery('run', `INSERT INTO chats
-      (node_id, id, chatId, chatName) VALUES (?, ?, ?, ?)`,
-    [chat.nodeId, chat.id, chat.chatId, chat.name])
+      (node_id, chatId, chatName) VALUES (?, ?, ?) RETURNING id`,
+    [chat.nodeId, chat.chatId, chat.name])
   }
 
   /**
@@ -167,11 +168,11 @@ class Dao {
    * @returns {Promise}
    */
   addNewMessage(message) {
-    return this.db.executeQuery('run', `INSERT OR IGNORE INTO messages
-      (node_id, id, messageId, messageText, messageDateTime, messageSender, chat_id)
-      VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [message.nodeId, message.id, message.messageId, message.text,
-      message.dateTime, message.sender, message.chatId])
+    return this.db.executeQuery('run', `INSERT INTO messages
+      (node_id, messageText, messageDateTime, messageSender, chat_id)
+      VALUES (?, ?, ?, ?, ?) 
+      RETURNING node_id || ' ' || id AS messageId)`,
+    [message.nodeId, message.text, message.dateTime, message.sender, message.chatId])
   }
 
   /**
@@ -211,7 +212,7 @@ class Dao {
   getMessagesAfter(nodeId, id) {
     return this.db.executeQuery('all', `SELECT node_id AS 'nodeId',
       id as 'id',  
-      messageId as 'messageId',
+      node_id || ' ' || id AS messageId,
       chat_id as 'chatId',
       messageText AS 'text',
       messageDateTime AS 'dateTime',
