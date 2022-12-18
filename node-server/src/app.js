@@ -11,8 +11,11 @@ const {
 } = require('../../common/types/messages')
 
 const {
-  generateRandomString, getRandomElementFromArr
+  generateRandomString, getRandomElementFromArr, randomInt
 } = require('../../common/utils/helpers')
+
+let synchronizer = null // TODO: Refactor away..
+let pushRandMsgTimer = null
 
 const handleRegistration = async () => {
   const nodeServerObj = await db.getNode()
@@ -43,7 +46,7 @@ const initialize = async (parsedArgs) => {
   await db.initiateDatabase(dbpath)
   await db.openDatabaseConnection()
   const nodeServObj = await handleRegistration()
-  const synchronizer = new Synchronizer(20000, db, websocketService)
+  synchronizer = new Synchronizer(20000, db, websocketService)
 
 
   try {
@@ -66,17 +69,13 @@ const initialize = async (parsedArgs) => {
     logger.info('Other nodes online:', nodeState.getOtherActiveNodes())
     logger.info('----------------')
     synchronizer.start()
-    pushRandomMessages()
+
+    pushTestMessage()
+    pushRandMsgTimer = setInterval(pushTestMessage, randomInt(6000, 9000))
   } catch (err) {
     logger.error('initializing:', err)
     process.exit(70) // sysexits.h EX_SOFTWARE (internal software error)
   }
-}
-
-const pushRandomMessages = () => {
-  pushTestMessage()
-  const randomInt = require('../../common/utils/helpers.js').randomInt
-  setTimeout(pushRandomMessages, randomInt(5000, 50000))
 }
 
 const pushTestMessage = async () => {
@@ -143,6 +142,13 @@ const terminate = async () => {
     logger.error('Node credentials not found in DB')
     process.exit(70) // internal software error
   }
+
+  if (pushRandMsgTimer) {
+    clearInterval(pushRandMsgTimer)
+    pushRandMsgTimer = null
+  }
+
+  synchronizer.stop()
 
   websocketService.terminate()
   try {

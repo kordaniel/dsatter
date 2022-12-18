@@ -2,7 +2,10 @@ const assert = require('assert')
 const logger = require('../../../common/utils/logger')
 const config = require('../utils/config')
 
-const { WebSocketServer } = require('ws')
+const WebSocket = require('ws')
+const {
+  WebSocketServer
+} = require('ws')
 
 const getRemoteAddress = (req) => `${req.socket.remoteAddress}:${req.socket.remotePort}`
 
@@ -109,9 +112,17 @@ const WsServer = () => {
   }
 
   const broadcastToAll = (message) => {
+    if (!wss || !wss.clients) {
+      logger.error('Attempted to broadcast a message to all clients over a closed WebSocketServer instance')
+      return
+    }
+
     wss.clients.forEach(client => {
-      //if (client.readyState === WebSocket.OPEN) {}
-      client.send(JSON.stringify(message))
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify(message))
+      } else {
+        logger.error('Attempted to send a message over a Websocket connection that is not OPEN')
+      }
     })
   }
 
