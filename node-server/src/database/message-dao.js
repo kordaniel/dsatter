@@ -149,7 +149,14 @@ class MessageDao {
       `INSERT INTO ownMessages
       (node_id, messageText, messageDateTime, messageSender, chat_id)
       VALUES (?, ?, ?, ?, ?) 
-      RETURNING (node_id || id) AS messageId`,
+      RETURNING node_id AS 'nodeId',
+      id AS 'id',
+      (node_id || id) AS messageId,
+      node_id || id AS 'messageId',
+      chat_id AS 'chatId',
+      messageText AS 'text',
+      messageDateTime AS 'dateTime',
+      messageSender AS 'sender'`,
       [message.nodeId, message.text, message.dateTime, message.sender, message.chatId])
   }
 
