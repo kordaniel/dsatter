@@ -33,18 +33,11 @@ const clientMessageProcessed = {
   // dateTime: undefined   // message-handler sets time when handling msg
 }
 
-const createNewMessageId = async () => {
-  return Math.floor(Math.random() * 101)
-}
-
-const generateSavedMessageObj = async (nodeId, chatId = 11, sender = undefined, id = undefined) => {
-  const newId = id
-    ? id
-    : createNewMessageId()
-  const messageId = helpers.concatenateIntegers(nodeId, newId)
+const generateSavedMessageObj = (nodeId, id, chatId = 11, sender = undefined) => {
+  const messageId = helpers.concatenateIntegers(nodeId, id)
 
   return {
-    id: newId,
+    id,
     nodeId,
     messageId,
     chatId,
@@ -146,10 +139,12 @@ describe('Message handler', () => {
   })
 
   test('Saves \'broadcastNewMessage\' messages to DB', async () => {
-    const initialMessages = await dbService.getAllMessages()
-
     const nodeId = nodeState.getNodeId() + 1
-    const message = await generateSavedMessageObj(nodeId)
+
+    const initialMessages = await dbService.getAllMessages()
+    const msgObjId = await messageDao.generateMessageId(nodeId)
+
+    const message = generateSavedMessageObj(nodeId, msgObjId)
 
     const response = await msgHandler.handle(address, JSON.stringify(messageTypes.ShoutBroadcast(nodeId, message)))
     expect(response).not.toBeDefined()
@@ -163,7 +158,9 @@ describe('Message handler', () => {
 
   test('Transmits processed \'broadcastNewMessage\' messages to clients (only)', async () => {
     const nodeId = nodeState.getNodeId() + 1
-    const message = await generateSavedMessageObj(nodeId)
+
+    const msgObjId = await messageDao.generateMessageId(nodeId)
+    const message = generateSavedMessageObj(nodeId, msgObjId)
 
     await msgHandler.handle(address, JSON.stringify(messageTypes.ShoutBroadcast(nodeId, message)))
 
@@ -174,6 +171,7 @@ describe('Message handler', () => {
 
     expect(clientMsgObj.type).toBe('newMessagesForClient')
     expect(clientMsgObj.payload).toHaveLength(1)
+
     expect(clientMsgObj.payload[0]).toEqual(message)
   })
 

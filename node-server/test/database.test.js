@@ -29,14 +29,16 @@ describe('Database service works correctly', () => {
   })
 
   test('Searching messages works correctly', async () => {
-    const message = await dbService.searchMessageDatabase(21)
+    const message = await dbService.searchMessageDatabase(10021)
     expect(message.chatId).toBe(11)
     expect(message.sender).toBe('Jaana')
   })
 
   test('Searching messages with chat works correctly', async () => {
     const messages = await dbService.searchMessagesWithChat(11)
-    expect(messages[1].messageId).toBe(21)
+    expect(messages[1].id).toBe(1)
+    expect(messages[1].nodeId).toBe(1002)
+    expect(messages[1].messageId).toBe(10021)
     expect(messages[1].sender).toBe('Jaana')
   })
 })

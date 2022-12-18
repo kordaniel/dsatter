@@ -10,6 +10,11 @@ const NodeDao = require('../database/node-dao')
 const MessageDao = require('../database/message-dao')
 const ChatDao = require('../database/chat-dao')
 
+const {
+  intIsDigitsLong
+} = require('../../../common/utils/helpers')
+
+
 let nodeDao
 let messageDao
 let chatDao
@@ -30,7 +35,8 @@ const initiateDatabase = async (dbpath) => {
 const openDatabaseConnection = async (
   nodeD = new NodeDao(querier),
   messageD = new MessageDao(querier),
-  chatD = new ChatDao(querier)) => {
+  chatD = new ChatDao(querier)
+) => {
   nodeDao = nodeD
   messageDao = messageD
   chatDao = chatD
@@ -68,9 +74,13 @@ const addNodeToDatabase = async (node) => {
 const addMessageToDatabase = async (data) => {
   const msgObj = data
   if (!msgObj.nodeId) {
-    logger.error('attempted to add a message without nodeId field')
+    logger.error('Attempted to add a message without nodeId field')
+    return null
+  } else if (!intIsDigitsLong(msgObj.nodeId, 4)) {
+    logger.error('Attempted to add a message whose nodeId didnt consist of a 4-digit long integer')
     return null
   }
+
   if (!msgObj.id) {
     return messageDao.addOwnMessage(msgObj)
   }

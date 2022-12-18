@@ -133,6 +133,16 @@ const concatenateIntegers = (a, b) => {
   return a * shiftLeft + b
 }
 
+/**
+ * Tests whether the argument val has the "length" of the argument digits.
+ * @param {int} val The value to test.
+ * @param {int} digits The amount of digits to compare against.
+ * @returns {bool} Comparison result.
+ */
+const intIsDigitsLong = (val, digits) => {
+  return (Math.log10((val ^ (val >> 31)) - (val >> 31)) | 0) + 1 === digits
+}
+
 module.exports = {
   isEmptyArray,
   isNonEmptyArray,
@@ -145,5 +155,6 @@ module.exports = {
   parseSocket,
   parseArgs,
   generateRandomString,
-  concatenateIntegers
+  concatenateIntegers,
+  intIsDigitsLong
 }

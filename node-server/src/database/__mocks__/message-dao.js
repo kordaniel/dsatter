@@ -1,13 +1,16 @@
 /* eslint-disable no-console */
 
 const testData = require('../../utils/test-data')
+const {
+  concatenateIntegers
+} = require('../../../../common/utils/helpers')
 
 class MessageDao {
-  chats
-  messages
 
   // eslint-disable-next-line no-unused-vars
   constructor(querier) {
+    this.chats = null
+    this.messages = null
     console.log('Mock database table Messages created')
   }
 
@@ -31,7 +34,7 @@ class MessageDao {
 
   getLastMessageId = (nodeId) => {
     const nodeMessages = this.messages
-      .filter(m => m.nodeId === nodeId && maxIdMsg())
+      .filter(m => m.nodeId === nodeId)
 
     if (nodeMessages.length === 0) {
       return Promise.resolve(null)
@@ -50,16 +53,26 @@ class MessageDao {
     return Promise.resolve(this.messages.filter((m) => m.chatId === chatId))
   }
 
-  addOwnMessage = (message) => {
+  addOwnMessage = async (message) => {
+    message.id = await this.generateMessageId()
+    message.messageId = concatenateIntegers(message.nodeId, message.id)
     const newMessages = [...this.messages, message]
     this.messages = newMessages
-    return Promise.resolve(this.messages)
+    return Promise.resolve(message)
   }
 
   addOutsideMessage = (message) => {
     const newMessages = [...this.messages, message]
     this.messages = newMessages
-    return Promise.resolve(this.messages)
+    return Promise.resolve(message)
+  }
+
+  generateMessageId = async (nodeId) => {
+    const prevMax = await this.getLastMessageId(nodeId)
+
+    return prevMax === null
+      ? 1
+      : 1 + (prevMax.maxId ? prevMax.maxId : 0)
   }
 }
 

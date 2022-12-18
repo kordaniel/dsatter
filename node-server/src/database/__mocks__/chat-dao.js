@@ -3,10 +3,10 @@
 const testData = require('../../utils/test-data')
 
 class ChatDao {
-  chats
 
   // eslint-disable-next-line no-unused-vars
   constructor(querier) {
+    this.chats = null
     console.log('Mock database table Chats created')
   }
 
