@@ -24,21 +24,21 @@ class MessageDao {
   }
 
   getMessagesWithNodeId = (nodeId) => {
+    return Promise.resolve(this.messages
+      .filter(m => m.nodeId === nodeId))
 
   }
 
   getLastMessageId = (nodeId) => {
     const nodeMessages = this.messages
-      .filter(m => m.nodeId === nodeId)
+      .filter(m => m.nodeId === nodeId && maxIdMsg())
 
     if (nodeMessages.length === 0) {
       return Promise.resolve(null)
     }
-
     const maxIdMsg = nodeMessages.reduce((prev, cur) => {
       return prev.id > cur.id ? prev : cur
     })
-
     return Promise.resolve({ maxId: maxIdMsg.id })
   }
 

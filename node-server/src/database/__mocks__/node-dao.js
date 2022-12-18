@@ -3,8 +3,7 @@
 const testData = require('../../utils/test-data')
 
 class NodeDao {
-  chats
-  messages
+  nodes
 
   // eslint-disable-next-line no-unused-vars
   constructor(querier) {
@@ -16,11 +15,11 @@ class NodeDao {
   }
 
   getNode = () => {
-    //return Promise.resolve(this.nodes[0])
+    return Promise.resolve(this.nodes[0])
   }
 
   addNewNode = (node) => {
-
+    this.nodes = [node]
   }
 
 }

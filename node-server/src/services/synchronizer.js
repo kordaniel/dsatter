@@ -10,8 +10,8 @@ class Synchronizer {
   sync = async () => {
     const latestMessages = await this.db.getLastMessageIds()
     let latestByNodeId = {}
-    latestMessages.forEach(obj => { latestByNodeId[obj.nodeId] = obj.id })
-
+    latestMessages.forEach((obj) => {
+      latestByNodeId[obj.nodeId] = obj.maxId })
     logger.debugPrettyPrintObj(
       'Synchronizing... Last message ids:',
       latestByNodeId,
@@ -30,10 +30,8 @@ class Synchronizer {
   getMessageDiff = async (latestIds) => {
     logger.debug('Synchronizer: procesing sync request...')
     const diff = {}
-    let knownIds = await this.db.getNodeIds()
-    logger.debugPrettyPrintObj('Known nodeId:s in DB:', knownIds)
-    const sentIds = Object.keys(latestIds)
-
+    const knownIds = await this.db.getNodeIds()
+    const sentIds = Object.keys(latestIds).map(key => Number(key))
     await Promise.all(knownIds.map(async ({ nodeId }) => {
       diff[nodeId] = await this.db.getMessagesAfter(nodeId,
         sentIds.includes(nodeId) ? latestIds[nodeId] : 0)

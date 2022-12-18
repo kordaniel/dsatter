@@ -56,7 +56,7 @@ const addNodeToDatabase = async (node) => {
   if (existingNode) {
     await nodeDao.removeNodes()
   }
-  return nodeDao.addNewNode(node)
+  return await nodeDao.addNewNode(node)
 }
 
 /**
@@ -136,13 +136,14 @@ const getLastMessageIds = async () => {
 }
 
 const getMessagesAfter = async (nodeId, id) => {
-  // const ownId = await nodeDao.getNode().id
-  // let messages
-  // if (nodeId === ownId)
-  //   messages = await messageDao.getOwnMessagesAfter(id)
-  // const outsideM = await messageDao.getOutsideMessagesAfter(nodeId, id)
-  // return messages.concat(outsideM)
-  return messageDao.getMessagesAfter(nodeId, id)
+  const thisNode = await getNode()
+  let messages = null
+  if (nodeId === thisNode.id) {
+    messages = await messageDao.getOwnMessagesAfter(id)
+  } else {
+    messages = await messageDao.getOutsideMessagesAfter(nodeId, id)
+  }
+  return messages
 }
 
 /**

@@ -80,7 +80,7 @@ const pushRandomMessages = () => {
 }
 
 const pushTestMessage = async () => {
-  const { randomInt, concatenateIntegers, getRandomElementFromArr } = require('../../common/utils/helpers.js')
+  const { randomInt, getRandomElementFromArr } = require('../../common/utils/helpers.js')
   const nodeId = nodeState.getNodeId()
 
   if (!nodeId) {
@@ -88,11 +88,8 @@ const pushTestMessage = async () => {
     return
   }
 
-  const id = randomInt(100, 10000)
   const message = {
     nodeId: nodeId,
-    id: id,
-    messageId: concatenateIntegers(nodeId, id),
     text: `this is a message that contains number ${randomInt(50, 839)}. The end.`,
     //dateTime: new Date().toLocaleString([], { hour12: false }),
     dateTime: new Date().toJSON(),

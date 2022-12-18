@@ -34,13 +34,13 @@ const clientMessageProcessed = {
 }
 
 const createNewMessageId = async () => {
-  return Math.floor(Math.random() * 101);
+  return Math.floor(Math.random() * 101)
 }
 
 const generateSavedMessageObj = async (nodeId, chatId = 11, sender = undefined, id = undefined) => {
   const newId = id
     ? id
-    : this.createNewMessageId
+    : createNewMessageId()
   const messageId = helpers.concatenateIntegers(nodeId, newId)
 
   return {

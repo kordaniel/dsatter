@@ -32,7 +32,6 @@ const handleNewClientMessage = async (nodeId, message) => {
   }
 
   const msg = {
-    //id DATABASE creates id, message_id
     nodeId,
     ...message, //text, sender, chatId
     dateTime: new Date().toJSON()
@@ -139,11 +138,8 @@ const handle = async (address, object) => {
  * @returns {boolean}
  */
 const addMessageToDatabase = async (message) => {
-  await db.addMessageToDatabase(message)
-  // db mutates message object, adds id and messageId
-  return Object.hasOwn(message, 'id') && Object.hasOwn(message, 'messageId')
-    ? message
-    : undefined
+  const added = await db.addMessageToDatabase(message)
+  return Object.hasOwn(added, 'messageId') ? added : undefined
 }
 
 module.exports = {

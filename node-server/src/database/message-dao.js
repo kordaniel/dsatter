@@ -183,6 +183,10 @@ class MessageDao {
 
   getLastMessageIds() {
     return this.db.executeQuery('all', `SELECT node_id AS 'nodeId',
+      MAX(id) AS 'maxId'
+      FROM ownMessages
+      UNION
+      SELECT node_id AS 'nodeId',
       MAX(id) AS 'id'
       FROM outsideMessages
       GROUP BY node_id`)
@@ -202,7 +206,7 @@ class MessageDao {
       messageDateTime AS 'dateTime',
       messageSender AS 'sender'
       FROM ownMessages
-      WHERE (id > :id)`, [id])
+      WHERE id > :id`, [id])
   }
 
   /**
@@ -212,7 +216,7 @@ class MessageDao {
    * @param {number} id
    * @returns {Promise}
    */
-  getMessagesAfter(nodeId, id) {
+  getOutsideMessagesAfter(nodeId, id) {
     return this.db.executeQuery('all', `SELECT node_id AS 'nodeId',
       id as 'id',  
       node_id || id AS messageId,
@@ -220,17 +224,8 @@ class MessageDao {
       messageText AS 'text',
       messageDateTime AS 'dateTime',
       messageSender AS 'sender'
-      FROM ownMessages
-      UNION
-      SELECT node_id AS 'nodeId',
-      id as 'id',  
-      node_id || id AS messageId,
-      chat_id as 'chatId',
-      messageText AS 'text',
-      messageDateTime AS 'dateTime',
-      messageSender AS 'sender'
       FROM outsideMessages
-      WHERE (node_id = :nodeId) AND (id > :id)`, [nodeId, id])
+      WHERE node_id = :nodeId AND id > :id`, [nodeId, id])
   }
 
   getNodeIds() {
