@@ -2,7 +2,10 @@ const assert = require('assert')
 const logger = require('../../../common/utils/logger')
 const config = require('../utils/config')
 
-const { WebSocketServer } = require('ws')
+const WebSocket = require('ws')
+const {
+  WebSocketServer
+} = require('ws')
 
 const getRemoteAddress = (req) => `${req.socket.remoteAddress}:${req.socket.remotePort}`
 
@@ -27,7 +30,6 @@ const WsServer = () => {
     interval = setInterval(() => {
       wss.clients.forEach(ws => {
         if (ws.isAlive === false) {
-          // TODO: Update otheractive nodes, report to discovery service
           return ws.terminate()
         }
 
@@ -49,7 +51,6 @@ const WsServer = () => {
 
       } else {
         logger.error('Websocket server:', ws)
-        //logger.info(`RECEIVED message from ${getRemoteAddress(req)} -> [[${message}]]`)
       }
     })
 
@@ -102,16 +103,23 @@ const WsServer = () => {
   }
 
   const openConnections = () => {
-    // TODO: Read ws API docs to get rid of this hack
     return wss === null
       ? []
       : [ ...wss.clients ].map(ws => `${ws._socket.remoteAddress}:${ws._socket.remotePort}`)
   }
 
   const broadcastToAll = (message) => {
+    if (!wss || !wss.clients) {
+      logger.error('Attempted to broadcast a message to all clients over a closed WebSocketServer instance')
+      return
+    }
+
     wss.clients.forEach(client => {
-      //if (client.readyState === WebSocket.OPEN) {}
-      client.send(JSON.stringify(message))
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify(message))
+      } else {
+        logger.error('Attempted to send a message over a Websocket connection that is not OPEN')
+      }
     })
   }
 

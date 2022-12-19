@@ -50,7 +50,6 @@ const setNodeId = (id) => {
 
 const removeFromOtherActiveNodes = (socket) => {
   otherNodes = otherNodes.filter(node => !shallowEqual(node, socket))
-  // TODO: Inform discovery service node that 'node' is unreachable
 }
 
 const initialize = async (listenWsServerPort, listenWsClientPort, nodeServObj) => {
@@ -89,7 +88,6 @@ const initialize = async (listenWsServerPort, listenWsClientPort, nodeServObj) =
 }
 
 const close = async (nodeServObj) => {
-  // TODO: Add error handling. Discovery is unreachable, unregistration failed etc
   assert(getNodeId() === nodeServObj.id)
 
   try {

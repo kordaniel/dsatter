@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 
-let nodeId = 1
+let nodeId = 1001
 
 const getNodeId = () => {
   return nodeId === -1 ? undefined : nodeId

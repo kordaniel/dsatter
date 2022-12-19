@@ -3,7 +3,9 @@
 
 const nodeState = require('../src/state/node')
 const querier = require('../src/database/querier')
-const Dao = require('../src/database/dao')
+const NodeDao = require('../src/database/node-dao')
+const MessageDao = require('../src/database/message-dao')
+const ChatDao = require('../src/database/chat-dao')
 const Synchronizer = require('../src/services/synchronizer')
 const messageTypes = require('../../common/types/messages')
 const msgHandler = require('../src/services/message-handler')
@@ -11,7 +13,9 @@ const dbService = require('../src/services/database')
 const helpers = require('../../common/utils/helpers')
 
 jest.mock('../src/database/querier.js')
-jest.mock('../src/database/dao.js')
+jest.mock('../src/database/message-dao.js')
+jest.mock('../src/database/node-dao.js')
+jest.mock('../src/database/chat-dao.js')
 jest.mock('../src/state/node.js')
 
 
@@ -29,14 +33,11 @@ const clientMessageProcessed = {
   // dateTime: undefined   // message-handler sets time when handling msg
 }
 
-const generateSavedMessageObj = async (nodeId, chatId = 11, sender = undefined, id = undefined) => {
-  const newId = id
-    ? id
-    : await dbService.createNewMessageId(nodeId)
-  const messageId = helpers.concatenateIntegers(nodeId, newId)
+const generateSavedMessageObj = (nodeId, id, chatId = 11, sender = undefined) => {
+  const messageId = helpers.concatenateIntegers(nodeId, id)
 
   return {
-    id: newId,
+    id,
     nodeId,
     messageId,
     chatId,
@@ -55,7 +56,8 @@ const synchronizer = new Synchronizer()
 
 
 describe('Message handler', () => {
-  let dao = null
+  let nodeDao = null
+  let messageDao = null
 
   let broadcastedToClients = null
   let broadCastedToNodeServers = null
@@ -64,8 +66,10 @@ describe('Message handler', () => {
   let mockBroadCastToNodeServers = null
 
   beforeEach(() => {
-    dao = new Dao(querier)
-    dbService.openDatabaseConnection(dao)
+    nodeDao = new NodeDao(querier)
+    messageDao = new MessageDao(querier)
+    chatDao = new ChatDao(querier)
+    dbService.openDatabaseConnection(nodeDao, messageDao, chatDao)
 
     broadcastedToClients = null
     broadCastedToNodeServers = null
@@ -135,10 +139,12 @@ describe('Message handler', () => {
   })
 
   test('Saves \'broadcastNewMessage\' messages to DB', async () => {
-    const initialMessages = await dbService.getAllMessages()
-
     const nodeId = nodeState.getNodeId() + 1
-    const message = await generateSavedMessageObj(nodeId)
+
+    const initialMessages = await dbService.getAllMessages()
+    const msgObjId = await messageDao.generateMessageId(nodeId)
+
+    const message = generateSavedMessageObj(nodeId, msgObjId)
 
     const response = await msgHandler.handle(address, JSON.stringify(messageTypes.ShoutBroadcast(nodeId, message)))
     expect(response).not.toBeDefined()
@@ -152,7 +158,9 @@ describe('Message handler', () => {
 
   test('Transmits processed \'broadcastNewMessage\' messages to clients (only)', async () => {
     const nodeId = nodeState.getNodeId() + 1
-    const message = await generateSavedMessageObj(nodeId)
+
+    const msgObjId = await messageDao.generateMessageId(nodeId)
+    const message = generateSavedMessageObj(nodeId, msgObjId)
 
     await msgHandler.handle(address, JSON.stringify(messageTypes.ShoutBroadcast(nodeId, message)))
 
@@ -163,6 +171,7 @@ describe('Message handler', () => {
 
     expect(clientMsgObj.type).toBe('newMessagesForClient')
     expect(clientMsgObj.payload).toHaveLength(1)
+
     expect(clientMsgObj.payload[0]).toEqual(message)
   })
 

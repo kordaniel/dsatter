@@ -1,5 +1,5 @@
 /**
- * Module that holds constructor function for different message types (work-in-progress)
+ * Module that holds constructor functions for different message types
  */
 
 /**
@@ -12,7 +12,7 @@ const SyncRequest = (id, payload) => {
   return {
     type: 'syncRequest',
     source: id,
-    payload // {} Object wtth several node_ids as keys which maps to every nodes message that has the largest id
+    payload // {} Object with several nodeIds as keys, which maps for every node the message that has the largest id
   }
 }
 
@@ -26,7 +26,7 @@ const SyncReply = (id, payload) => {
   return {
     type: 'syncReply',
     source: id,
-    payload // {} Object with node_ids that maps to arrays containing the full messages that has larger ids than the max node_id in syncRequest
+    payload // {} Object with nodeIds, which maps to arrays containing the full messages that have larger ids than the max nodeId in syncRequest
   }
 }
 
@@ -60,7 +60,7 @@ const ClientSyncReply = (id, messagesArr) => {
 }
 
 /**
- * A new message from the client (user typed message)
+ * A new message from the client (user-typed message)
  * @param {number} id source's id
  * @param {*} messageObj
  * @returns {type: string, source: number, payload: *}
@@ -72,17 +72,6 @@ const ClientMessage = (id, messageObj) => {
     payload: messageObj // {} Object of some sort to be defined
   }
 }
-
-/** THIS IS NOT NEEDED (?), USE MessgesToClient instead...
-const ClientMessageResponse = (messagesArr) => {
-  return {
-    type: 'clientMessageResponse',
-    payload: Array.isArray(messagesArr)
-      ? messagesArr
-      : [ messagesArr ]
-  }
-}
-*/
 
 /**
  * A list with all the new messages for the client (node-server receices message(s) from other node-servers)

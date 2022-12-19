@@ -31,7 +31,6 @@ const registerAsActive = async (nodeId, password, syncport, clientport) => {
 }
 
 const unregisterAsActive = async (nodeId, password) => {
-  // TODO: Use token/credentials to identify node instead of port
   try {
     const res = await axios.post(`${baseUrl}/active/logout`, {
       'id': nodeId,
@@ -54,18 +53,6 @@ const registerNode = async (password) => {
     throw Error(err)
   }
 }
-
-/*
-const reportUnreachable = async (port) => {
-  try {
-    const res = await axios.post(`${baseUrl}/reportUnreachable`, { 'port': port })
-    return res.data
-  } catch (err) {
-    logger.error('performing POST reportUnreachable', err.cause)
-    throw Error(err)
-  }
-}
-*/
 
 module.exports = {
   getActiveNodes,

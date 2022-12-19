@@ -13,7 +13,6 @@ const connections = {}
 const heartbeat = (ws) => {
   clearTimeout(ws.pingTimeout)
   ws.pingTimeout = setTimeout(() => {
-    // TODO: Update otheractive nodes, report to discovery service
     ws.terminate()
   }, config.WS_PING_INTERVAL + config.MAX_EXPECTED_LATENCY)
 }
@@ -98,7 +97,6 @@ const openConnections = () =>
 
 const broadcastToAll = (message) => {
   getConnections().forEach(conn => {
-    //if (conn.readyState === WebSocket.OPEN) {}
     connections[conn].send(JSON.stringify(message))
   })
 }

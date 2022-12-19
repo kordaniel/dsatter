@@ -17,7 +17,6 @@ clientsRouter.get('/', async (req, res) => {
     }
   })
 
-  // TODO: Sort the list based on... "some meaningful criteria, load, distance whatever"
   shuffleArray(responseNodes)
 
   res.json({ 'activeNodes': responseNodes })

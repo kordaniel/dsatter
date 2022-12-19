@@ -36,7 +36,3 @@ initialize()
     logger.error('Init failed')
   })
 
-// TODO: Add signal handler to capture closing events?
-//  .finally(() => {
-//    dbService.closeDataBaseConnection()
-//  })

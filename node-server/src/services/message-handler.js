@@ -32,7 +32,6 @@ const handleNewClientMessage = async (nodeId, message) => {
   }
 
   const msg = {
-    //id DATABASE creates id, message_id
     nodeId,
     ...message, //text, sender, chatId
     dateTime: new Date().toJSON()
@@ -47,7 +46,6 @@ const handleNewClientMessage = async (nodeId, message) => {
     broadCastToNodeServers(serverMsg)
   } else {
     logger.error('New client message discarded')
-    //return JSON.stringify({ type: 'clientMessageResponse', payload: null })
   }
 }
 
@@ -55,8 +53,8 @@ const handleNewClientMessage = async (nodeId, message) => {
 /**
  * Handles all incoming messages. Messages must be JSON formatted strings and
  * contain the fields: type (type), id (sender's id) and payload.
- * @param {string} object (message, json formatted string).
- * @returns {*} null/undefined or an JSON formatted string to return to the sender.
+ * @param {JSON} object (message, json formatted string).
+ * @returns {JSON | null | 'undefined'} null/undefined or an JSON formatted string to return to the sender.
  */
 const handle = async (address, object) => {
   const nodeId = getNodeId()
@@ -111,8 +109,8 @@ const handle = async (address, object) => {
     }
 
     case 'newMessageFromClient': {
-      await handleNewClientMessage(nodeId, message.payload) // TODO: Refactor to return response to client, if message was saved to DB or not
-      return // TODO: return response to client
+      await handleNewClientMessage(nodeId, message.payload)
+      return
     }
 
     case 'newMessagesForClient': {
@@ -139,11 +137,8 @@ const handle = async (address, object) => {
  * @returns {boolean}
  */
 const addMessageToDatabase = async (message) => {
-  await db.addMessageToDatabase(message)
-  // db mutates message object, adds id and messageId
-  return Object.hasOwn(message, 'id') && Object.hasOwn(message, 'messageId')
-    ? message
-    : undefined
+  const added = await db.addMessageToDatabase(message)
+  return Object.hasOwn(added, 'messageId') ? added : undefined
 }
 
 module.exports = {

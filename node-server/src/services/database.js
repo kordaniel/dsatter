@@ -6,13 +6,18 @@
 
 const logger    = require('../../../common/utils/logger')
 const querier = require('../database/querier')
-const Dao = require('../database/dao')
+const NodeDao = require('../database/node-dao')
+const MessageDao = require('../database/message-dao')
+const ChatDao = require('../database/chat-dao')
+
 const {
-  concatenateIntegers
+  intIsDigitsLong
 } = require('../../../common/utils/helpers')
 
 
-let dao
+let nodeDao
+let messageDao
+let chatDao
 
 /**
  * Initiates database
@@ -23,13 +28,23 @@ const initiateDatabase = async (dbpath) => {
 
 /**
  * Opens connection and initiates tables
- * @param {Dao} d
+ * @param {NodeDao} nodeD
+ * @param {MessageDao} messageD
+ * @param {ChatDao} chatD
  */
-const openDatabaseConnection = async (d = new Dao(querier)) => {
-  dao = d
-  await dao.createTableChats()
-  await dao.createTableMessages()
-  await dao.createTableNode()
+const openDatabaseConnection = async (
+  nodeD = new NodeDao(querier),
+  messageD = new MessageDao(querier),
+  chatD = new ChatDao(querier)
+) => {
+  nodeDao = nodeD
+  messageDao = messageD
+  chatDao = chatD
+  await nodeDao.createTableNode()
+  await messageDao.createTableOwnMessages()
+  await messageDao.createTableOutsideMessages()
+  await chatDao.createTableOwnChats()
+  await chatDao.createTableOutsideChats()
 }
 
 /**
@@ -43,8 +58,11 @@ const addNodeToDatabase = async (node) => {
     logger.error('Attempted to add a node without id or passwd to DB')
     return null
   }
-  // TODO: Handle case when id is already in the DB. (empty array always evaluates to true)
-  return dao.addNewNode(node)
+  const existingNode = await nodeDao.getNode()
+  if (existingNode) {
+    await nodeDao.removeNodes()
+  }
+  return await nodeDao.addNewNode(node)
 }
 
 /**
@@ -55,21 +73,18 @@ const addNodeToDatabase = async (node) => {
  */
 const addMessageToDatabase = async (data) => {
   const msgObj = data
-
   if (!msgObj.nodeId) {
-    logger.error('attempted to add a message without nodeId field')
+    logger.error('Attempted to add a message without nodeId field')
+    return null
+  } else if (!intIsDigitsLong(msgObj.nodeId, 4)) {
+    logger.error('Attempted to add a message whose nodeId didnt consist of a 4-digit long integer')
     return null
   }
 
   if (!msgObj.id) {
-    const id = await createNewMessageId(msgObj.nodeId)
-    msgObj.id = id
-    msgObj.messageId = concatenateIntegers(msgObj.nodeId, msgObj.id)
-  } else if (!msgObj.messageId) {
-    msgObj.messageId = concatenateIntegers(msgObj.nodeId, msgObj.id)
+    return messageDao.addOwnMessage(msgObj)
   }
-
-  return dao.addNewMessage(msgObj)
+  return messageDao.addOutsideMessage(msgObj)
 }
 
 /**
@@ -79,12 +94,9 @@ const addMessageToDatabase = async (data) => {
  * @returns {Promise<*>}
  */
 const addChatToDatabase = async (data) => {
-  if (data.id)
-    return dao.addNewChat(data)
-  else {
-    const chat = { ...data, id: this.createNewChatId() }
-    return dao.addNewChat(chat)
-  }
+  if (!data.id)
+    return chatDao.addOwnChat(data)
+  return chatDao.addOutsideChat(data)
 }
 
 /**
@@ -93,7 +105,7 @@ const addChatToDatabase = async (data) => {
  * @returns {Promise<*>}
  */
 const getNode = async () => {
-  const allNodes = await dao.getNode()
+  const allNodes = await nodeDao.getNode()
   if (allNodes.length > 1) {
     logger.error('Several node objects in DB')
   }
@@ -105,7 +117,7 @@ const getNode = async () => {
  * @returns {Promise<*>}
  */
 const getAllMessages = async () => {
-  return dao.getAllMessages()
+  return messageDao.getAllMessages()
 }
 
 /**
@@ -114,7 +126,7 @@ const getAllMessages = async () => {
  * @returns {Promise<*>}
  */
 const getMessagesWithNodeId = async (nodeId) => {
-  return dao.getMessagesWithNodeId(nodeId)
+  return messageDao.getMessagesWithNodeId(nodeId)
 }
 
 /**
@@ -122,19 +134,26 @@ const getMessagesWithNodeId = async (nodeId) => {
  * @returns {Promise<*>}
  */
 const getAllChats = async () => {
-  return dao.getAllChats()
+  return chatDao.getAllChats()
 }
 
 const getNodeIds = async () => {
-  return await dao.getNodeIds()
+  return await messageDao.getNodeIds()
 }
 
 const getLastMessageIds = async () => {
-  return await dao.getLastMessageIds()
+  return await messageDao.getLastMessageIds()
 }
 
 const getMessagesAfter = async (nodeId, id) => {
-  return await dao.getMessagesAfter(nodeId, id)
+  const thisNode = await getNode()
+  let messages = null
+  if (nodeId === thisNode.id) {
+    messages = await messageDao.getOwnMessagesAfter(id)
+  } else {
+    messages = await messageDao.getOutsideMessagesAfter(nodeId, id)
+  }
+  return messages
 }
 
 /**
@@ -144,7 +163,7 @@ const getMessagesAfter = async (nodeId, id) => {
  * @returns {Promise<*>}
  */
 const searchMessagesWithChat = async (chatId) => {
-  return await dao.getMessages(chatId)
+  return await messageDao.getMessages(chatId)
 }
 
 /**
@@ -154,7 +173,7 @@ const searchMessagesWithChat = async (chatId) => {
  * @returns {Promise<*>}
  */
 const searchMessageDatabase = async (messageId) => {
-  return await dao.getMessage(messageId)
+  return await messageDao.getMessage(messageId)
 }
 
 /**
@@ -164,7 +183,7 @@ const searchMessageDatabase = async (messageId) => {
  * @returns {Promise<*>}
  */
 const searchChatDatabase = async (chatId) => {
-  return await dao.getChat(chatId)
+  return await chatDao.getChat(chatId)
 }
 
 /**
@@ -174,16 +193,9 @@ const closeDataBaseConnection = () => {
   querier.closeDatabaseConnection()
 }
 
-const createNewChatId = () => {
-  return dao.getLastChatId() + 1
-}
-
-const createNewMessageId = async (nodeId) => {
-  const { maxId } = await dao.getLastMessageId(nodeId)
-  return maxId === null ? 1 : maxId + 1
-}
-
-const getDao = () => dao
+const getNodeDao = () => nodeDao
+const getMessageDao = () => messageDao
+const getChatDao = () => chatDao
 
 
 module.exports = {
@@ -203,7 +215,7 @@ module.exports = {
   searchMessageDatabase,
   searchChatDatabase,
   closeDataBaseConnection,
-  createNewChatId,
-  createNewMessageId,
-  getDao
+  getNodeDao,
+  getMessageDao,
+  getChatDao
 }

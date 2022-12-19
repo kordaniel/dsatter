@@ -8,13 +8,13 @@ const current = new Date()
 /**@type {Chat[]} */
 const chats = [
   {
-    nodeId: 1,
+    nodeId: 1001,
     id: 1,
     chatId: 11,
     name: 'important chat'
   },
   {
-    nodeId: 2,
+    nodeId: 1002,
     id: 1,
     chatId: 21,
     name: 'less important chat'
@@ -25,36 +25,36 @@ const chats = [
 /**@type {Message[]} */
 const messages = [
   {
-    nodeId: 1,
+    nodeId: 1001,
     id: 1,
-    messageId: 11,
+    messageId: 10011,
     text: 'this is the first message to the first chat',
     dateTime: current.toJSON(),
     sender: 'Julia',
     chatId: 11
   },
   {
-    nodeId: 1,
+    nodeId: 1001,
     id: 2,
-    messageId: 12,
+    messageId: 10012,
     text: 'this is the first message to another chat',
     dateTime: current.toJSON(),
     sender: 'Julia',
     chatId: 21
   },
   {
-    nodeId: 2,
+    nodeId: 1002,
     id: 1,
-    messageId: 21,
+    messageId: 10021,
     text: 'this message is from another node to the first chat',
     dateTime: current.toJSON(),
     sender: 'Jaana',
     chatId: 11
   },
   {
-    nodeId: 2,
+    nodeId: 1002,
     id: 2,
-    messageId: 22,
+    messageId: 10022,
     text: 'this message is from another node to the second chat',
     dateTime: current.toJSON(),
     sender: 'Jaana',
@@ -65,11 +65,11 @@ const messages = [
 /**@type {RegisteredNode[]} */
 const nodes = [
   {
-    id: 1,
+    id: 1001,
     password: 'veryS1krit'
   },
   {
-    id: 2,
+    id: 1002,
     password: 'birthdayIsPasswd'
   }
 ]
