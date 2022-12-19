@@ -1,5 +1,25 @@
 # Dsatter node discovery service
-Provides a REST api for both chatserver nodes and the client applications
+Provides a REST api for both chat server nodes and the client applications.
+
+## Environment setup
+```
+npm install
+```
+## Configured commands
+### Development environment
+```
+npm run dev
+npm run lint
+```
+### Test environment
+```
+npm run test
+```
+### Production environment
+```
+npm run start
+```
+
 
 ## Chatserver nodes
 ### Register a new node
@@ -15,6 +35,7 @@ Returns:
   "password": "abcd"
 } or { "error": "explanatory string" }
 ```
+
 ### Active online nodes
 Query for a list of active nodes. Login and logout running node-servers.
 ```json
@@ -76,7 +97,7 @@ Returns all other active nodes:
 ```
 
 ## Client applications
-Query for a list of active chatserver nodes. The returned list is sorted (randomly for now) so that the client should always prefer the first chatserver node in the list that accepts the connection.
+Query for a list of active chat server nodes. The returned list is sorted (randomly for now) so that the client should always prefer the first server node in the list that accepts the connection.
 ```
 GET localhost:8080/api/clients
 ```
@@ -90,22 +111,4 @@ Returns:
       ..
     ]
 }
-```
-## Environment setup
-```
-npm install
-```
-## Configured commands
-### Development environment
-```
-npm run dev
-npm run lint
-```
-### Test environment
-```
-npm run test
-```
-### Production environment
-```
-npm run start
 ```

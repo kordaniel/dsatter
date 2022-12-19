@@ -61,17 +61,13 @@ const rl = readline.createInterface({
 const run = () => {
   rl.question('input: ', async (input) => {
     switch (input) {
-      case 'quit':
-        rl.close()
-        await app.terminate()
-        break
-      case 'broadcasts':
+      case 'bs':
         app.broadcastToNodeServers(
           `MESSAGE to all nodes: I'm listening on port: ${nodeState.getListenPortWsServers()}`
         )
         run()
         break
-      case 'broadcastc':
+      case 'bc':
         app.broadcastToClients(
           `MESSAGE to all clients: I'm listening on port: ${nodeState.getListenPortWsClients()}`
         )
@@ -87,24 +83,24 @@ const run = () => {
         logger.info('\tClients:', app.openClientConnections())
         run()
         break
-      case 'nodes':
-        // The ones that were running when this node instance registered
-        logger.info('nodes online:', nodeState.getOtherActiveNodes())
-        run()
-        break
-      case 'pushTestMessage':
-        app.pushTestMessage()
-        run()
-        break
       case 'dump':
         logger.info('Dumping DB:', await app.dumpDatabase())
+        run()
+        break
+      case 'pm':
+        app.pushTestMessage()
         run()
         break
       case 'pc':
         app.pushToClient()
         run()
         break
+      case 'quit':
+        rl.close()
+        await app.terminate()
+        break
       default:
+        logger.info('Invalid command')
         run()
         break
     }
