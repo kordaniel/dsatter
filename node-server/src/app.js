@@ -14,7 +14,7 @@ const {
   generateRandomString, getRandomElementFromArr, randomInt
 } = require('../../common/utils/helpers')
 
-let synchronizer = null // TODO: Refactor away..
+let synchronizer = null
 let pushRandMsgTimer = null
 
 const handleRegistration = async () => {
@@ -70,8 +70,8 @@ const initialize = async (parsedArgs) => {
     logger.info('----------------')
     synchronizer.start()
 
-    //pushTestMessage()
-    //pushRandMsgTimer = setInterval(pushTestMessage, randomInt(6000, 9000))
+    pushTestMessage()
+    pushRandMsgTimer = setInterval(pushTestMessage, randomInt(6000, 9000))
   } catch (err) {
     logger.error('initializing:', err)
     process.exit(70) // sysexits.h EX_SOFTWARE (internal software error)

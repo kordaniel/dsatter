@@ -18,8 +18,6 @@ nodeDiscRouter.post('/register', async (req, res) => {
     })
   }
 
-  // TODO: validate password
-
   const newNode = await dbService.addNodeToDatabase({ password })
 
   if (!newNode) {

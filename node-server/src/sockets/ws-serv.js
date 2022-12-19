@@ -30,7 +30,6 @@ const WsServer = () => {
     interval = setInterval(() => {
       wss.clients.forEach(ws => {
         if (ws.isAlive === false) {
-          // TODO: Update otheractive nodes, report to discovery service
           return ws.terminate()
         }
 
@@ -52,7 +51,6 @@ const WsServer = () => {
 
       } else {
         logger.error('Websocket server:', ws)
-        //logger.info(`RECEIVED message from ${getRemoteAddress(req)} -> [[${message}]]`)
       }
     })
 
@@ -105,7 +103,6 @@ const WsServer = () => {
   }
 
   const openConnections = () => {
-    // TODO: Read ws API docs to get rid of this hack
     return wss === null
       ? []
       : [ ...wss.clients ].map(ws => `${ws._socket.remoteAddress}:${ws._socket.remotePort}`)

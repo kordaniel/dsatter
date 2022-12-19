@@ -81,9 +81,6 @@ const addMessageToDatabase = async (data) => {
     return null
   }
 
-  // NOTE: This simple check might introduce duplicates / other problems at some point (?)
-  // TODO: Implement diff functions to insert own / outside message and call the correct function
-  //       from app logic (?)
   if (!msgObj.id) {
     return messageDao.addOwnMessage(msgObj)
   }

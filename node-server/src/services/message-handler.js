@@ -46,7 +46,6 @@ const handleNewClientMessage = async (nodeId, message) => {
     broadCastToNodeServers(serverMsg)
   } else {
     logger.error('New client message discarded')
-    //return JSON.stringify({ type: 'clientMessageResponse', payload: null })
   }
 }
 
@@ -110,8 +109,8 @@ const handle = async (address, object) => {
     }
 
     case 'newMessageFromClient': {
-      await handleNewClientMessage(nodeId, message.payload) // TODO: Refactor to return response to client, if message was saved to DB or not
-      return // TODO: return response to client
+      await handleNewClientMessage(nodeId, message.payload)
+      return
     }
 
     case 'newMessagesForClient': {
