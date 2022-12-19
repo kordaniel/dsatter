@@ -1,21 +1,20 @@
-/* eslint-disable no-console */
-
 const testData = require('../../utils/test-data')
+const logger = require('../../../../common/utils/logger')
 
 class NodeDao {
-  nodes
+  node
 
   // eslint-disable-next-line no-unused-vars
   constructor(querier) {
-    console.log('Mock database table Node created')
+    logger.test('Mock database table Chats created')
   }
 
   createTableNode = () => {
-    this.nodes = testData.nodes
+    this.node = [testData.nodes[0]]
   }
 
   getNode = () => {
-    return Promise.resolve(this.nodes[0])
+    return Promise.resolve(this.node[0])
   }
 
   addNewNode = (node) => {

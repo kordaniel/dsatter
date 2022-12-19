@@ -54,8 +54,8 @@ const handleNewClientMessage = async (nodeId, message) => {
 /**
  * Handles all incoming messages. Messages must be JSON formatted strings and
  * contain the fields: type (type), id (sender's id) and payload.
- * @param {string} object (message, json formatted string).
- * @returns {*} null/undefined or an JSON formatted string to return to the sender.
+ * @param {JSON} object (message, json formatted string).
+ * @returns {JSON | null | 'undefined'} null/undefined or an JSON formatted string to return to the sender.
  */
 const handle = async (address, object) => {
   const nodeId = getNodeId()

@@ -49,7 +49,7 @@ class NodeDao {
    * @returns {Promise}
    */
   removeNodes() {
-    return this.db.executeQuery( 'run', 'DELETE FROM node')
+    return this.db.executeQuery('run', 'DELETE FROM node')
   }
 }
 
