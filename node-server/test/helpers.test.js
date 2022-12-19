@@ -91,7 +91,7 @@ describe('Helper functions work correctly', () => {
       test('Single digit', () => {
         expect(intIsDigitsLong(-1, 1)).toBe(true)
         for (let d = 2; d <= 10; d++) {
-          expect(intIsDigitsLong(1, d)).toBe(false)
+          expect(intIsDigitsLong(-1, d)).toBe(false)
         }
       })
 

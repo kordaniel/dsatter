@@ -13,6 +13,7 @@ jest.mock('../src/database/chat-dao.js')
 
 let nodeDao
 let messageDao
+let chatDao
 
 beforeAll(() => {
   nodeDao = new NodeDao(querier)
