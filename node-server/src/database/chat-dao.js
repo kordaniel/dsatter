@@ -65,7 +65,7 @@ class ChatDao {
   addOwnChat(chat) {
     return this.db.executeQuery('get', `INSERT INTO chats
       (node_id, chatId, chatName) VALUES (?, ?, ?)
-      RETURNING node_id || ' ' || id AS 'chatId'`,
+      RETURNING node_id || id AS 'chatId'`,
     [chat.nodeId, chat.chatId, chat.name])
   }
 
@@ -77,7 +77,7 @@ class ChatDao {
   addOutsideChat(chat) {
     return this.db.executeQuery('get', `INSERT INTO OutsideChats
       (node_id, id, chatId, chatName) VALUES (?, ?, ?, ?) 
-      RETURNING  node_id || ' ' || id AS 'chatId'`,
+      RETURNING  node_id || id AS 'chatId'`,
     [chat.nodeId, chat.id, chat.chatId, chat.name])
   }
 
@@ -87,7 +87,12 @@ class ChatDao {
    */
   getLastChatId(nodeId) {
     return this.db.executeQuery('get', `SELECT MAX(id) AS 'id'
-      FROM ownChats, outsideChats WHERE node_id = :nodeId`, [nodeId])
+      FROM ownChats
+      WHERE node_id = :nodeId
+      UNION
+      SELECT MAX(id) AS 'id'
+      FROM outsideChats
+      WHERE node_id = :nodeId`, [nodeId])
   }
 
 }

@@ -3,7 +3,7 @@
 const testData = require('../../utils/test-data')
 
 class NodeDao {
-  nodes
+  node
 
   // eslint-disable-next-line no-unused-vars
   constructor(querier) {
@@ -11,11 +11,11 @@ class NodeDao {
   }
 
   createTableNode = () => {
-    this.nodes = testData.nodes
+    this.node = [testData.nodes[0]]
   }
 
   getNode = () => {
-    return Promise.resolve(this.nodes[0])
+    return Promise.resolve(this.node[0])
   }
 
   addNewNode = (node) => {

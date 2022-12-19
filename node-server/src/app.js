@@ -90,17 +90,12 @@ const pushTestMessage = async () => {
   const message = {
     nodeId: nodeId,
     text: `this is a message that contains number ${randomInt(50, 839)}. The end.`,
-    //dateTime: new Date().toLocaleString([], { hour12: false }),
     dateTime: new Date().toJSON(),
     sender: getRandomElementFromArr(['Julia', 'Jaana', 'Daniel', 'Joosua']),
     chatId: 11
   }
   logger.debug('Adding new test message...')
   await db.addMessageToDatabase(message)
-  //websocketService.broadcastToClients(
-  //  MessagesToClient([message])
-  //)
-  //logger.debug('Message in DB:[[', await db.getMessagesWithNodeId(message.id) , ']]')
 }
 
 const pushToClient = async () => {
