@@ -1,13 +1,12 @@
-/* eslint-disable no-console */
-
 const testData = require('../../utils/test-data')
+const logger = require('../../../../common/utils/logger')
 
 class ChatDao {
 
   // eslint-disable-next-line no-unused-vars
   constructor(querier) {
     this.chats = null
-    console.log('Mock database table Chats created')
+    logger.test('Mock database table Chats created')
   }
 
   createTableOwnChats = () => {

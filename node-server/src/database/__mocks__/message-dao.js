@@ -1,6 +1,5 @@
-/* eslint-disable no-console */
-
 const testData = require('../../utils/test-data')
+const logger = require('../../../../common/utils/logger')
 const {
   concatenateIntegers
 } = require('../../../../common/utils/helpers')
@@ -11,7 +10,7 @@ class MessageDao {
   constructor(querier) {
     this.chats = null
     this.messages = null
-    console.log('Mock database table Messages created')
+    logger.test('Mock database table Chats created')
   }
 
   createTableOwnMessages = () => {
