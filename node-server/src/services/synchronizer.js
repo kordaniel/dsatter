@@ -36,7 +36,11 @@ class Synchronizer {
       diff[nodeId] = await this.db.getMessagesAfter(nodeId,
         sentIds.includes(nodeId) ? latestIds[nodeId] : 0)
     }))
-    logger.debugPrettyPrintObj('Sync diff generated, diff:', diff)
+    const list = {}
+    Object.keys(diff).forEach(key => {
+      list[key] = diff[key].map(m => m.id)
+    })
+    logger.debugPrettyPrintObj('Sync diff generated, diff:', list)
     return diff
   }
 
