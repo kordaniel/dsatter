@@ -181,7 +181,7 @@ class MessageDao {
    */
   getLastMessageId(nodeId) {
     return this.db.executeQuery('get',`SELECT MAX(id) AS 'maxId'
-      FROM ownMessages
+      FROM ownMessages WHERE node_id = :nodeId
       UNION
       SELECT MAX(id) AS 'maxId'
       FROM outsideMessages 
@@ -189,14 +189,17 @@ class MessageDao {
   }
 
   getLastMessageIds() {
-    return this.db.executeQuery('all', `SELECT node_id AS 'nodeId',
-      MAX(id) AS 'maxId'
-      FROM ownMessages
-      UNION
-      SELECT node_id AS 'nodeId',
-      MAX(id) AS 'id'
-      FROM outsideMessages
-      GROUP BY node_id`)
+    return this.db.executeQuery('all',
+      `
+SELECT node_id as 'nodeId', MAX(maxId) as 'maxId' FROM
+  (
+      SELECT node_id, MAX(id) as maxId FROM outsideMessages GROUP BY node_id
+    UNION
+      SELECT node_id, MAX(id) as maxId FROM ownMessages GROUP BY node_id
+  )
+GROUP by node_id
+      `
+    )
   }
 
   /**
