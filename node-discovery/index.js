@@ -23,6 +23,10 @@ app.use(middleware.requestLogger)
 app.use('/api/nodes', nodeDiscoveryRouter)
 app.use('/api/clients', clientsRouter)
 
+app.get('/api/health', (req, res) => {
+  return res.status(200).json({ status: 'OK' })
+})
+
 app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
 
