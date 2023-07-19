@@ -58,8 +58,8 @@ const initialize = async (listenWsServerPort, listenWsClientPort, nodeServObj) =
 
   setNodeId(nodeServObj.id)
 
-  const sleepTimeMaxMs = 4 * 1000
-  let sleepTimeMs = 500
+  const sleepTimeMaxMs = 24 * 60 * 60 * 1000
+  let sleepTimeMs = 10 * 1000
   let wasRegistered = false
 
   let serverWsPort = getPortCandidate(listenWsServerPort, 1000)
@@ -79,9 +79,9 @@ const initialize = async (listenWsServerPort, listenWsClientPort, nodeServObj) =
 
     } catch (err) {
       logger.error('state/node initialize():', err)
-      logger.info(`Registration failed with error, sleeping for ${sleepTimeMs}ms before trying again`)
+      logger.info(`Server-node was unable to join the Dsatter network. Sleeping for ${sleepTimeMs/1000} seconds before trying again`)
       await sleep(sleepTimeMs)
-      sleepTimeMs = Math.min(sleepTimeMs + sleepTimeMs, sleepTimeMaxMs)
+      sleepTimeMs = Math.min(2 * sleepTimeMs, sleepTimeMaxMs)
     }
 
   } while (!wasRegistered)

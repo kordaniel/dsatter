@@ -62,7 +62,8 @@ const addNodeToDatabase = async (node) => {
   if (existingNode) {
     await nodeDao.removeNodes()
   }
-  return await nodeDao.addNewNode(node)
+  await nodeDao.addNewNode(node)
+  return await nodeDao.getNode()
 }
 
 /**
