@@ -1,6 +1,6 @@
 const commonConfig = require('../../common/utils/config')
 
-const NODE_DISCOVERY_PORT = commonConfig.NODE_DISCOVERY_PORT
+const NODE_DISCOVERY_PORT = process.env.PORT || commonConfig.NODE_DISCOVERY_PORT
 const DB_PATH_DISCOVERY   = commonConfig.DB_PATH_DISCOVERY
 
 

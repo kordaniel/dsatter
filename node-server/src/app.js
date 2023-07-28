@@ -1,6 +1,7 @@
 const db = require('./services/database')
 const config    = require('./utils/config')
 const logger    = require('../../common/utils/logger')
+const { sleep } = require('../../common/utils/helpers')
 const nodeState = require('./state/node')
 const Synchronizer = require('./services/synchronizer')
 const websocketService = require('./services/websockets')
@@ -24,10 +25,24 @@ const handleRegistration = async () => {
     return nodeServerObj
   }
 
-  const newNodeServObj = await discoveryService.registerNode(generateRandomString(12))
-  const result = await db.addNodeToDatabase(newNodeServObj)
+  let registrationSuccess = false
+  let result = undefined
+  let sleepTimeSecs = 10
+  const maxSleepTime = 24 * 60 * 60
 
-  if (result === null) {
+  do {
+    try {
+      const newNodeServObj = await discoveryService.registerNode(generateRandomString(12))
+      result = await db.addNodeToDatabase(newNodeServObj)
+      registrationSuccess = true
+    } catch (err) {
+      logger.info(`Unable to register new node-server account. Sleeping for ${sleepTimeSecs} seconds before trying again`)
+      await sleep(sleepTimeSecs * 1000)
+      sleepTimeSecs = 2*sleepTimeSecs < maxSleepTime ? 2*sleepTimeSecs : maxSleepTime
+    }
+  } while (!registrationSuccess)
+
+  if (!result) {
     process.exit(70) // internal software error
   }
 
@@ -45,7 +60,9 @@ const initialize = async (parsedArgs) => {
     : config.DB_PATH
   await db.initiateDatabase(dbpath)
   await db.openDatabaseConnection()
+
   const nodeServObj = await handleRegistration()
+
   synchronizer = new Synchronizer(20000, db, websocketService)
 
 
@@ -70,8 +87,10 @@ const initialize = async (parsedArgs) => {
     logger.info('----------------')
     synchronizer.start()
 
-    pushTestMessage()
-    pushRandMsgTimer = setInterval(pushTestMessage, randomInt(6000, 9000))
+    if (process.env.NODE_ENV === 'development') {
+      pushTestMessage()
+      pushRandMsgTimer = setInterval(pushTestMessage, randomInt(6000, 9000))
+    }
   } catch (err) {
     logger.error('initializing:', err)
     process.exit(70) // sysexits.h EX_SOFTWARE (internal software error)
